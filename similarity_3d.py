@@ -110,7 +110,8 @@ def moment3(distribution, mean, variance):
     if variance == 0:
         skewness = 0
     else:
-        skewness = sum([(x - mean)**3 for x in distribution])/len(distribution)/variance**1.5
+        #skewness = sum([(x - mean)**3 for x in distribution])/len(distribution)/variance**1.5
+        skewness = sum([((x - mean)/variance)**3 for x in distribution])/len(distribution)
     return skewness
 
 def calculate_usr_moments(coordinates: list, reference_points):
@@ -185,7 +186,6 @@ def calculate_coefficients(mol):
 
 ################### Functions for calculating the similarity score ###################
 
-
 def calculate_partial_score(moments1: list, moments2: list):
     """Calculate the partial score between two molecules. """
     partial_score = 0
@@ -203,7 +203,6 @@ def calculate_dummy_partial_score(moments):
         partial_score += abs(moments[i])
     return partial_score/12
 
-
 def get_keys_to_iterate_on(fingerprint_1, fingerprint_2):
     """Get the keys to iterate on."""
     # Find the atoms shared between the two molecules
@@ -219,7 +218,7 @@ def get_keys_to_iterate_on(fingerprint_1, fingerprint_2):
 
 def compute_USRE_similarity(fingerprint_target, fingerprint_query, coefficients):
     """
-    Compute the USRE similarity between two molecules.
+    Compute the USRE similarity between two molecules with tha same formula as in the USRCAT implemenatation.
     """
     elements_to_iterate_on, intersection, diff1 = get_keys_to_iterate_on(fingerprint_target, fingerprint_query)
     score = 0
