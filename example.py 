@@ -11,18 +11,15 @@ mol1 = molecules[0]
 mol2 = molecules[0]
 fingerprint1 = sim3d.generate_usre_fingerprint(mol1)
 fingerprint2 = sim3d.generate_usre_fingerprint(mol2)
-coefficients = sim3d.calculate_coefficients(mol1)
-similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, coefficients)
+similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, mol1, mol2)
 print('Similarity between two identical molecules: {}'.format(similarity))
-
 
 # Select two different molecules from the list with the same elements
 mol1 = molecules[0]
 mol2 = molecules[4]
 fingerprint1 = sim3d.generate_usre_fingerprint(mol1)
 fingerprint2 = sim3d.generate_usre_fingerprint(mol2)
-coefficients = sim3d.calculate_coefficients(mol1)
-similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, coefficients)
+similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, mol1, mol2)
 print('Similarity between two different molecules with the same elements: {}'.format(similarity))
 
 
@@ -31,8 +28,7 @@ mol1 = molecules[3]
 mol2 = molecules[0]
 fingerprint1 = sim3d.generate_usre_fingerprint(mol1)
 fingerprint2 = sim3d.generate_usre_fingerprint(mol2)
-coefficients = sim3d.calculate_coefficients(mol1)
-similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, coefficients)
+similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, mol1, mol2)
 print('Similarity between two different molecules with different elements (1): {}'.format(similarity))
 
 
@@ -41,8 +37,7 @@ mol1 = molecules[0]
 mol2 = molecules[6]
 fingerprint1 = sim3d.generate_usre_fingerprint(mol1)
 fingerprint2 = sim3d.generate_usre_fingerprint(mol2)
-coefficients = sim3d.calculate_coefficients(mol1)
-similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, coefficients)
+similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, mol1, mol2)
 print('Similarity between two different molecules with different elements (2): {}'.format(similarity))
 
 
@@ -51,8 +46,7 @@ mol1 = molecules[3]
 mol2 = molecules[6]
 fingerprint1 = sim3d.generate_usre_fingerprint(mol1)
 fingerprint2 = sim3d.generate_usre_fingerprint(mol2)
-coefficients = sim3d.calculate_coefficients(mol1)
-similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, coefficients)
+similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, mol1, mol2)
 print('Similarity between two different molecules with different elements (3): {}'.format(similarity))
 
 
@@ -61,7 +55,6 @@ mol1 = molecules[0]
 mol2 = molecules_2[0]
 fingerprint1 = sim3d.generate_usre_fingerprint(mol1)
 fingerprint2 = sim3d.generate_usre_fingerprint(mol2)
-coefficients = sim3d.calculate_coefficients(mol1)
-similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, coefficients)
+similarity = sim3d.compute_USRE_similarity(fingerprint1, fingerprint2, mol1, mol2)
 print('Similarity between two identical molecules with oxygens and sulphurs switched: {}'.format(similarity))
 
