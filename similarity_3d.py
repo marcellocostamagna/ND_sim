@@ -15,7 +15,6 @@ def get_number_of_atoms_of_element(element: str, mol):
             counter += 1
     return counter
 
-
 ########### Functions to generate the USRE fingerprint of a molecule ###########
 
 def calculate_centroid(molecule):
@@ -161,6 +160,9 @@ def generate_usre_fingerprint(mol):
     fingerprint = {}
     # Calculate the fixed points
     reference_points = calculate_fixed_points(mol)
+    #(Alternative)
+    #reference_points = get_alternative_fix_points_1(fix_points)
+    #reference_points = get_alternative_fix_points_2(fix_points)
     # Calculate the standard USR moments for the entire molecule
     coords = get_all_coordinates(mol)
     moments = calculate_usr_moments(coords, reference_points)
@@ -177,6 +179,42 @@ def generate_usre_fingerprint(mol):
         # Add the moments to the fingerprint
         fingerprint[element] = moments
     return fingerprint
+
+################### Isomers Discrimination ###################
+
+def get_alternative_fix_points_1(fix_points):
+    """
+    Cross product of the vectors between the ctd, the ctc and the fct
+    """
+    v_1 = fix_points[1] - fix_points[0]
+    v_2 = fix_points[2] - fix_points[0]
+    # Cross product
+    v_3 = v_1.CrossProduct(v_2)
+    # TODO: normalize v_3 based on the similarity of the two molecules
+    #(If the molecules have exatcly the same shape, what is the minimum value of v3)
+    #Normalize v_3
+    v_3.Normalize()
+    # Calculate the new fix point
+    new_fix_point = fix_points[0] + v_3
+
+    return [fix_points[0], fix_points[1], fix_points[2], new_fix_point]
+
+def get_alternative_fix_points_2(fix_points):
+    """
+    Cross product of the vectors between the ctd, the fct and the ftf
+    (As in ElctroShape)
+    """
+    v_1 = fix_points[2] - fix_points[0]
+    v_2 = fix_points[3] - fix_points[0]
+    # Cross product
+    v_3 = v_1.CrossProduct(v_2)
+    # TODO: normalize v_3 based on the similarity of the two molecules
+    # Normalize v_3
+    v_3.Normalize()
+    # Calculate the new fix point
+    new_fix_point = fix_points[0] + v_3
+
+    return [fix_points[0], fix_points[2], fix_points[3], new_fix_point]
 
 
 ################### Functions for calculating the similarity score ###################
