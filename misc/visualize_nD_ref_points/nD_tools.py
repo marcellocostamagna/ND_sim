@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 float_formatter = "{:.2f}".format
 np.set_printoptions(formatter={'float_kind':float_formatter})
 
-def diagonalize_covariance_matrix(data):
+POINTTRANSPARENCY = 0.5
+POINTSIZE = 50
+
+def plot_data_and_ref_points(data):
     covariance_matrix = np.cov(data, ddof = 0, rowvar = False)
     print('Data covariance matrix:')
     print(covariance_matrix)
@@ -27,7 +30,7 @@ def diagonalize_covariance_matrix(data):
                 m_coord = data[:, [3]]
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
-    ax.scatter(x_coord, y_coord, z_coord, c=m_coord, alpha=1)
+    ax.scatter(x_coord, y_coord, z_coord, s=POINTSIZE, c=m_coord, alpha=POINTTRANSPARENCY)
     centroid = data.mean(axis = 0)
     x_centroid = centroid[0]
     y_centroid = np.zeros(x_centroid.shape)
@@ -36,9 +39,17 @@ def diagonalize_covariance_matrix(data):
         y_centroid = centroid[1]
         if num_dimensions > 2:
             z_centroid = centroid[2]
-    ax.scatter(x_centroid, y_centroid, z_centroid, 
-               c='red', marker='*')
+    ax.scatter(x_centroid, y_centroid, z_centroid, s = POINTSIZE,
+               c='red', marker='*', alpha=POINTTRANSPARENCY)
+    
     reference_points = centroid + eigenvectors*(data.max(axis=0)-centroid)
+    
+    distances = np.linalg.norm(data - centroid, axis = 1)
+    print(f'Distances to cen0',distances)
+    for i in range(data.shape[1]):
+        distances = np.linalg.norm(data - reference_points[i], axis = 1)
+        print(f'Distances to cen{(i+1)}',distances)
+    
     x_coord_refs = reference_points[:, [0]]
     y_coord_refs = np.zeros(x_coord_refs.shape)
     z_coord_refs = np.zeros(x_coord_refs.shape)
@@ -46,17 +57,10 @@ def diagonalize_covariance_matrix(data):
         y_coord_refs = reference_points[:, [1]]
         if num_dimensions > 2:
             z_coord_refs = reference_points[:, [2]]
-    ax.scatter(x_coord_refs, y_coord_refs, z_coord_refs, 
+    ax.scatter(x_coord_refs, y_coord_refs, z_coord_refs, s = POINTSIZE,
                c='green', marker='+', alpha=1)
     for x,y,z,i in zip(x_coord_refs,y_coord_refs,z_coord_refs,range(
         len(x_coord_refs))):
         ax.text(x[0],y[0],z[0],i)
     plt.show()
 
-data = np.array([
-    [  1,  0, -1/math.sqrt(2),  0, 0],
-    [ -1,  0, -1/math.sqrt(2),  1, 0],
-    [  0,  1,  1/math.sqrt(2),  2, 0],
-    [  0, -1,  1/math.sqrt(2),  3, 0]
-])
-diagonalize_covariance_matrix(data)
