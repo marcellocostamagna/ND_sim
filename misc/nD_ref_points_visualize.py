@@ -53,7 +53,6 @@ def diagonalize_covariance_matrix(data):
         ax.text(x[0],y[0],z[0],i)
     plt.show()
 
-
 data = np.array([
     [  1,  0, -1/math.sqrt(2),  0, 0],
     [ -1,  0, -1/math.sqrt(2),  1, 0],
