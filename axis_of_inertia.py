@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import math
 
 # Sample input data
-#points = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20, 21], [22, 23, 24]])
+#points = np.array([[1, 1, 3], [4, 1, 3] , [2.5 , 2 , 3]]) #, [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20, 21], [22, 23 , 24]])
 points = np.array([
      [  1,  0, -1/math.sqrt(2)],
      [ -1,  0, -1/math.sqrt(2)],
@@ -12,10 +12,14 @@ points = np.array([
      [  0, -1,  1/math.sqrt(2)]
  ])
 
-masses = [1, 2, 3, 4] #, 5, 6, 7, 8]
+masses = [1, 2, 4, 3 ] #, 3, 4 , 5, 6, 7, 8]
 
 def compute_center_of_mass(points, masses):
     return np.average(points, axis=0, weights=masses)
+
+def max_distance_from_center_of_mass(points, center_of_mass):
+    distances = np.linalg.norm(points - center_of_mass, axis=1)
+    return np.max(distances)
 
 def compute_inertia_tensor(points, masses, center_of_mass):
     inertia_tensor = np.zeros((3, 3))
@@ -29,7 +33,7 @@ def compute_principal_axes(inertia_tensor):
     principal_axes = eigenvectors.T
     return principal_axes, eigenvalues
 
-def visualize(points, masses, center_of_mass, principal_axes, eigenvalues):
+def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
@@ -38,8 +42,9 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues):
 
     # Visualize eigenvectors with colors based on eigenvalues
     colors = ['r', 'g', 'k']
+    max_eigenvalue = np.max(np.abs(eigenvalues))
     for axis, eigenvalue, color in zip(principal_axes, eigenvalues, colors):
-        scaled_axis = axis * np.sqrt(eigenvalue)
+        scaled_axis = axis * (eigenvalue / max_eigenvalue) * scale # Adjust this factor to change the length of the eigenvectors
         ax.quiver(center_of_mass[0], center_of_mass[1], center_of_mass[2],
                   scaled_axis[0], scaled_axis[1], scaled_axis[2],
                   color=color, lw=2, arrow_length_ratio=0.1)
@@ -57,8 +62,16 @@ def main():
     print("Center of mass:", center_of_mass)
     print("Inertia tensor:", inertia_tensor)
     print("Principal axes:", principal_axes)
+    print("Eigenvalues:", eigenvalues)
 
-    visualize(points, masses, center_of_mass, principal_axes, eigenvalues)
+    # If the third eigenvalue less than 0.001, we still need to visulaize the third axis
+    if np.abs(eigenvalues[2]) < 0.001:
+        eigenvalues[2] = 0.5 * eigenvalues[1]
+
+
+    max_distance = max_distance_from_center_of_mass(points, center_of_mass)
+
+    visualize(points, masses, center_of_mass, principal_axes, eigenvalues, max_distance)
 
 if __name__ == "__main__":
     main()
