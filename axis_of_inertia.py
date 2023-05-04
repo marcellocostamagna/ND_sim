@@ -64,10 +64,34 @@ def compute_distances(points, center_of_mass, principal_axes):
         
         for j, axis in enumerate(principal_axes):
             point_rel = point - center_of_mass
-            projection = np.dot(point_rel, axis) * axis
-            distances[j + 1, i] = np.linalg.norm(point_rel - projection)
+            # Adds discrimination between positive and negative distances
+            projection_length = np.dot(point_rel, axis)
+            projection = projection_length * axis
+            signed_distance = np.linalg.norm(point_rel - projection)
+            if projection_length < 0:
+                signed_distance *= -1
+            distances[j + 1, i] = signed_distance
             
     return distances  
+
+def compute_weighted_distances(points, masses, center_of_mass, principal_axes):
+    num_points = points.shape[0]
+    weighted_distances = np.zeros((4, num_points))
+    
+    for i, (point, mass) in enumerate(zip(points, masses)):
+        weighted_distances[0, i] = mass * np.linalg.norm(point - center_of_mass)
+        
+        for j, axis in enumerate(principal_axes):
+            point_rel = point - center_of_mass
+            # Adds discrimination between positive and negative distances
+            projection_length = np.dot(point_rel, axis)
+            projection = projection_length * axis
+            signed_distance = mass * np.linalg.norm(point_rel - projection)
+            if projection_length < 0:
+                signed_distance *= -1
+            weighted_distances[j + 1, i] = mass * signed_distance
+            
+    return weighted_distances
 
 def compute_statistics(distances):
     means = np.mean(distances, axis=1)
@@ -85,14 +109,20 @@ def main():
     principal_axes, eigenvalues = compute_principal_axes(inertia_tensor)
     # compute distances
     distances = compute_distances(points, center_of_mass, principal_axes)
-    statistics_matrix, fingerprint = compute_statistics(distances)
+    # compute weighted distances
+    weighted_distances = compute_weighted_distances(points, masses, center_of_mass, principal_axes)
+    # compute statistics
+    statistics_matrix, fingerprint_1 = compute_statistics(distances)
+    statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
+
 
     print("Center of mass:", center_of_mass)
     print("Inertia tensor:", inertia_tensor)
     print("Principal axes:", principal_axes)
     print("Eigenvalues:", eigenvalues)
     print("Distances:", distances)
-    print("Fingerprint:", fingerprint)
+    print("Fingerprint of regular distances:", fingerprint_1)
+    print("Fingerprint of weighted distances:", fingerprint_2)
 
 
     # If the third eigenvalue less than 0.001, we still need to visulaize the third axis
