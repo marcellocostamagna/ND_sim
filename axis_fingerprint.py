@@ -40,6 +40,19 @@ def compute_handedness(principal_axes):
         return "right-handed"
     else:
         return "left-handed"
+    
+def set_axes_equal(ax):
+    limits = np.array([
+        ax.get_xlim3d(),
+        ax.get_ylim3d(),
+        ax.get_zlim3d()
+    ])
+
+    origin = np.mean(limits, axis=1)
+    radius = 0.5 * np.max(np.abs(limits[:, 1] - limits[:, 0]))
+    ax.set_xlim3d([origin[0] - radius, origin[0] + radius])
+    ax.set_ylim3d([origin[1] - radius, origin[1] + radius])
+    ax.set_zlim3d([origin[2] - radius, origin[2] + radius])    
 
 def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale):
     fig = plt.figure()
@@ -63,11 +76,13 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale
     scaled_axes = np.array(scaled_axes)
     min_values = np.min(points[:, None, :] - scaled_axes, axis=(0, 1))
     max_values = np.max(points[:, None, :] + scaled_axes, axis=(0, 1))
-    padding = 0  # Increase or decrease this value to change the padding around the axes
+    padding = -1  # Increase or decrease this value to change the padding around the axes
 
     ax.set_xlim(min_values[0] - padding, max_values[0] + padding)
     ax.set_ylim(min_values[1] - padding, max_values[1] + padding)
     ax.set_zlim(min_values[2] - padding, max_values[2] + padding)
+
+    set_axes_equal(ax)
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
