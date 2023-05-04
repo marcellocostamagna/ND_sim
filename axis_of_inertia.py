@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import math
 
+
 # Sample input data
 #points = np.array([[1, 1, 3], [4, 1, 3] , [2.5 , 2 , 3]]) #, [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20, 21], [22, 23 , 24]])
 points = np.array([
@@ -54,15 +55,32 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale
     ax.set_zlabel('Z')
     plt.show()
 
+def compute_distances(points, center_of_mass, principal_axes):
+    num_points = points.shape[0]
+    distances = np.zeros((4, num_points))
+    
+    for i, point in enumerate(points):
+        distances[0, i] = np.linalg.norm(point - center_of_mass)
+        
+        for j, axis in enumerate(principal_axes):
+            point_rel = point - center_of_mass
+            projection = np.dot(point_rel, axis) * axis
+            distances[j + 1, i] = np.linalg.norm(point_rel - projection)
+            
+    return distances    
+
 def main():
     center_of_mass = compute_center_of_mass(points, masses)
     inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
     principal_axes, eigenvalues = compute_principal_axes(inertia_tensor)
+    # compute distances
+    distances = compute_distances(points, center_of_mass, principal_axes)
 
     print("Center of mass:", center_of_mass)
     print("Inertia tensor:", inertia_tensor)
     print("Principal axes:", principal_axes)
     print("Eigenvalues:", eigenvalues)
+    print("Distances:", distances)
 
     # If the third eigenvalue less than 0.001, we still need to visulaize the third axis
     if np.abs(eigenvalues[2]) < 0.001:
