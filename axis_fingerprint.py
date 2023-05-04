@@ -27,7 +27,8 @@ def compute_inertia_tensor(points, masses, center_of_mass):
     for point, mass in zip(points, masses):
         r = point - center_of_mass
         inertia_tensor += mass * (np.outer(r, r) - np.eye(3) * np.dot(r, r))
-    return inertia_tensor
+
+    return inertia_tensor * -1
 
 def compute_principal_axes(inertia_tensor):
     eigenvalues, eigenvectors = np.linalg.eigh(inertia_tensor)
@@ -63,10 +64,10 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale
 
     # Visualize eigenvectors with colors based on eigenvalues
     colors = ['r', 'g', 'k']
-    max_eigenvalue = np.max(np.abs(eigenvalues))
+    min_eigenvalue = np.min(eigenvalues)
     scaled_axes = []
     for axis, eigenvalue, color in zip(principal_axes, eigenvalues, colors):
-        scaled_axis = axis * (eigenvalue / max_eigenvalue) * scale # Adjust this factor to change the length of the eigenvectors
+        scaled_axis = axis *  (eigenvalue / min_eigenvalue) * scale # Adjust this factor to change the length of the eigenvectors
         scaled_axes.append(scaled_axis)
         ax.quiver(center_of_mass[0], center_of_mass[1], center_of_mass[2],
                   scaled_axis[0], scaled_axis[1], scaled_axis[2],
@@ -76,7 +77,7 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale
     scaled_axes = np.array(scaled_axes)
     min_values = np.min(points[:, None, :] - scaled_axes, axis=(0, 1))
     max_values = np.max(points[:, None, :] + scaled_axes, axis=(0, 1))
-    padding = -1  # Increase or decrease this value to change the padding around the axes
+    padding = 0.1  # Increase or decrease this value to change the padding around the axes
 
     ax.set_xlim(min_values[0] - padding, max_values[0] + padding)
     ax.set_ylim(min_values[1] - padding, max_values[1] + padding)
@@ -149,7 +150,7 @@ def compute_fingerprint(points, masses):
     # print("Center of mass:", center_of_mass)
     # print("Inertia tensor:", inertia_tensor)
     print("Principal axes:", principal_axes)
-    # print("Eigenvalues:", eigenvalues)
+    print("Eigenvalues:", eigenvalues)
     # print("Distances:", distances)
     # print("Fingerprint of regular distances:", fingerprint_1)
     # print("Fingerprint of weighted distances:", fingerprint_2)
