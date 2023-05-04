@@ -53,7 +53,8 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-    plt.show()
+    plt.show(block=False)
+    plt.pause(0.001)
 
 def compute_distances(points, center_of_mass, principal_axes):
     num_points = points.shape[0]
