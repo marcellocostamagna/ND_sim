@@ -51,15 +51,28 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale
     # Visualize eigenvectors with colors based on eigenvalues
     colors = ['r', 'g', 'k']
     max_eigenvalue = np.max(np.abs(eigenvalues))
+    scaled_axes = []
     for axis, eigenvalue, color in zip(principal_axes, eigenvalues, colors):
         scaled_axis = axis * (eigenvalue / max_eigenvalue) * scale # Adjust this factor to change the length of the eigenvectors
+        scaled_axes.append(scaled_axis)
         ax.quiver(center_of_mass[0], center_of_mass[1], center_of_mass[2],
                   scaled_axis[0], scaled_axis[1], scaled_axis[2],
                   color=color, lw=2, arrow_length_ratio=0.1)
 
+    # Adjust axes to fit all points
+    scaled_axes = np.array(scaled_axes)
+    min_values = np.min(points[:, None, :] - scaled_axes, axis=(0, 1))
+    max_values = np.max(points[:, None, :] + scaled_axes, axis=(0, 1))
+    padding = 0  # Increase or decrease this value to change the padding around the axes
+
+    ax.set_xlim(min_values[0] - padding, max_values[0] + padding)
+    ax.set_ylim(min_values[1] - padding, max_values[1] + padding)
+    ax.set_zlim(min_values[2] - padding, max_values[2] + padding)
+
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
+
     plt.show(block=False)
     plt.pause(0.001)
 
