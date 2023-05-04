@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import math
-
+from scipy.stats import skew
 
 # Sample input data
 #points = np.array([[1, 1, 3], [4, 1, 3] , [2.5 , 2 , 3]]) #, [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20, 21], [22, 23 , 24]])
@@ -13,7 +13,7 @@ points = np.array([
      [  0, -1,  1/math.sqrt(2)]
  ])
 
-masses = [1, 2, 4, 3 ] #, 3, 4 , 5, 6, 7, 8]
+masses = [1, 3, 7, 5 ] #, 3, 4 , 5, 6, 7, 8]
 
 def compute_center_of_mass(points, masses):
     return np.average(points, axis=0, weights=masses)
@@ -67,7 +67,17 @@ def compute_distances(points, center_of_mass, principal_axes):
             projection = np.dot(point_rel, axis) * axis
             distances[j + 1, i] = np.linalg.norm(point_rel - projection)
             
-    return distances    
+    return distances  
+
+def compute_statistics(distances):
+    means = np.mean(distances, axis=1)
+    std_devs = np.std(distances, axis=1)
+    skewness = skew(distances, axis=1)
+    
+    statistics_matrix = np.vstack((means, std_devs, skewness)).T
+    statistics_list = np.hstack((means, std_devs, skewness))
+    
+    return statistics_matrix, statistics_list  
 
 def main():
     center_of_mass = compute_center_of_mass(points, masses)
@@ -75,12 +85,15 @@ def main():
     principal_axes, eigenvalues = compute_principal_axes(inertia_tensor)
     # compute distances
     distances = compute_distances(points, center_of_mass, principal_axes)
+    statistics_matrix, fingerprint = compute_statistics(distances)
 
     print("Center of mass:", center_of_mass)
     print("Inertia tensor:", inertia_tensor)
     print("Principal axes:", principal_axes)
     print("Eigenvalues:", eigenvalues)
     print("Distances:", distances)
+    print("Fingerprint:", fingerprint)
+
 
     # If the third eigenvalue less than 0.001, we still need to visulaize the third axis
     if np.abs(eigenvalues[2]) < 0.001:
