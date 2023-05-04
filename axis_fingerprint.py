@@ -34,6 +34,13 @@ def compute_principal_axes(inertia_tensor):
     principal_axes = eigenvectors.T
     return principal_axes, eigenvalues
 
+def compute_handedness(principal_axes):
+    triple_scalar_product = np.dot(principal_axes[0], np.cross(principal_axes[1], principal_axes[2]))
+    if triple_scalar_product > 0:
+        return "right-handed"
+    else:
+        return "left-handed"
+
 def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -65,13 +72,9 @@ def compute_distances(points, center_of_mass, principal_axes):
         
         for j, axis in enumerate(principal_axes):
             point_rel = point - center_of_mass
-            # Adds discrimination between positive and negative distances
-            projection_length = np.dot(point_rel, axis)
-            projection = projection_length * axis
-            signed_distance = np.linalg.norm(point_rel - projection)
-            if projection_length < 0:
-                signed_distance *= -1
-            distances[j + 1, i] = signed_distance
+            projection = np.dot(point_rel, axis) * axis
+            distance = np.linalg.norm(point_rel - projection)
+            distances[j + 1, i] = distance
             
     return distances  
 
@@ -84,13 +87,9 @@ def compute_weighted_distances(points, masses, center_of_mass, principal_axes):
         
         for j, axis in enumerate(principal_axes):
             point_rel = point - center_of_mass
-            # Adds discrimination between positive and negative distances
-            projection_length = np.dot(point_rel, axis)
-            projection = projection_length * axis
-            signed_distance = mass * np.linalg.norm(point_rel - projection)
-            if projection_length < 0:
-                signed_distance *= -1
-            weighted_distances[j + 1, i] = mass * signed_distance
+            projection = np.dot(point_rel, axis) * axis
+            distance = mass * np.linalg.norm(point_rel - projection)
+            weighted_distances[j + 1, i] = mass * distance
             
     return weighted_distances
 
@@ -98,11 +97,14 @@ def compute_statistics(distances):
     means = np.mean(distances, axis=1)
     std_devs = np.std(distances, axis=1)
     skewness = skew(distances, axis=1)
+    # check if skewness is nan
+    skewness[np.isnan(skewness)] = 0
     
     statistics_matrix = np.vstack((means, std_devs, skewness)).T
     statistics_list = np.hstack((means, std_devs, skewness))
     
     return statistics_matrix, statistics_list  
+
 
 def compute_fingerprint(points, masses):
     center_of_mass = compute_center_of_mass(points, masses)
@@ -116,23 +118,20 @@ def compute_fingerprint(points, masses):
     statistics_matrix, fingerprint_1 = compute_statistics(distances)
     statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
 
-
-    print("Center of mass:", center_of_mass)
-    print("Inertia tensor:", inertia_tensor)
+    # print("Center of mass:", center_of_mass)
+    # print("Inertia tensor:", inertia_tensor)
     print("Principal axes:", principal_axes)
-    print("Eigenvalues:", eigenvalues)
-    print("Distances:", distances)
-    print("Fingerprint of regular distances:", fingerprint_1)
-    print("Fingerprint of weighted distances:", fingerprint_2)
-
+    # print("Eigenvalues:", eigenvalues)
+    # print("Distances:", distances)
+    # print("Fingerprint of regular distances:", fingerprint_1)
+    # print("Fingerprint of weighted distances:", fingerprint_2)
+    print(f'Handedness: {compute_handedness(principal_axes)}')
 
     # If the third eigenvalue less than 0.001, we still need to visulaize the third axis
     if np.abs(eigenvalues[2]) < 0.001:
         eigenvalues[2] = 0.5 * eigenvalues[1]
 
-
     max_distance = max_distance_from_center_of_mass(points, center_of_mass)
-
     visualize(points, masses, center_of_mass, principal_axes, eigenvalues, max_distance)
 
     return fingerprint_1, fingerprint_2
