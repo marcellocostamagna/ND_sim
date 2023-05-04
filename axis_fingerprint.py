@@ -103,7 +103,7 @@ def compute_statistics(distances):
     
     return statistics_matrix, statistics_list  
 
-def main():
+def compute_fingerprint(points, masses):
     center_of_mass = compute_center_of_mass(points, masses)
     inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
     principal_axes, eigenvalues = compute_principal_axes(inertia_tensor)
@@ -134,5 +134,6 @@ def main():
 
     visualize(points, masses, center_of_mass, principal_axes, eigenvalues, max_distance)
 
-if __name__ == "__main__":
-    main()
+    return fingerprint_1, fingerprint_2
+
+
