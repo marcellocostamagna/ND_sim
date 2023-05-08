@@ -107,35 +107,61 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale
     plt.show(block=False)
     plt.pause(0.001)
 
-def compute_distances(points, center_of_mass, principal_axes):
+# def compute_distances(points, center_of_mass, principal_axes):
+#     """Compute the distance of each point to the center of mass and to each of the principal axes"""
+#     num_points = points.shape[0]
+#     distances = np.zeros((4, num_points))
+    
+#     for i, point in enumerate(points):
+#         distances[0, i] = np.linalg.norm(point - center_of_mass)
+        
+#         for j, axis in enumerate(principal_axes):
+#             point_rel = point - center_of_mass
+#             projection = np.dot(point_rel, axis) * axis
+#             distance = np.linalg.norm(point_rel - projection)
+#             distances[j + 1, i] = distance
+            
+#     return distances  
+
+def compute_distances(points, reference_points):
+    """Compute the distance of each point to the 4 refernce points"""
     num_points = points.shape[0]
-    distances = np.zeros((4, num_points))
+    num_ref_points = len(reference_points)
+    distances = np.zeros((num_ref_points, num_points))
     
     for i, point in enumerate(points):
-        distances[0, i] = np.linalg.norm(point - center_of_mass)
-        
-        for j, axis in enumerate(principal_axes):
-            point_rel = point - center_of_mass
-            projection = np.dot(point_rel, axis) * axis
-            distance = np.linalg.norm(point_rel - projection)
-            distances[j + 1, i] = distance
+        for j, ref_point in enumerate(reference_points):
+            distances[j, i] = np.linalg.norm(point - ref_point)
             
     return distances  
 
-def compute_weighted_distances(points, masses, center_of_mass, principal_axes):
-    num_points = points.shape[0]
-    weighted_distances = np.zeros((4, num_points))
+# def compute_weighted_distances(points, masses, center_of_mass, principal_axes):
+#     num_points = points.shape[0]
+#     weighted_distances = np.zeros((4, num_points))
     
-    for i, (point, mass) in enumerate(zip(points, masses)):
-        weighted_distances[0, i] = mass * np.linalg.norm(point - center_of_mass)
+#     for i, (point, mass) in enumerate(zip(points, masses)):
+#         weighted_distances[0, i] = mass * np.linalg.norm(point - center_of_mass)
         
-        for j, axis in enumerate(principal_axes):
-            point_rel = point - center_of_mass
-            projection = np.dot(point_rel, axis) * axis
-            distance = mass * np.linalg.norm(point_rel - projection)
-            weighted_distances[j + 1, i] = mass * distance
+#         for j, axis in enumerate(principal_axes):
+#             point_rel = point - center_of_mass
+#             projection = np.dot(point_rel, axis) * axis
+#             distance = mass * np.linalg.norm(point_rel - projection)
+#             weighted_distances[j + 1, i] = mass * distance
             
+#     return weighted_distances
+
+def compute_weighted_distances(points, masses, reference_points):
+    """Compute the mass-weigthed distance of each point to the 4 refernce points"""
+    num_points = points.shape[0]
+    num_ref_points = len(reference_points)
+    weighted_distances = np.zeros((num_ref_points, num_points))
+
+    for i, (point, mass) in enumerate(zip(points, masses)):
+        for j, ref_point in enumerate(reference_points):
+            weighted_distances[j, i] = mass * np.linalg.norm(point - ref_point)
+
     return weighted_distances
+
 
 def compute_statistics(distances):
     means = np.mean(distances, axis=1)
@@ -156,10 +182,14 @@ def compute_fingerprint(points, masses):
     center_of_mass = compute_center_of_mass(points, masses)
     inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
     principal_axes, eigenvalues = compute_principal_axes(inertia_tensor)
+
+    max_distance = max_distance_from_center_of_mass(points, center_of_mass)
+
+    reference_points = generate_reference_points(center_of_mass, principal_axes, max_distance)
     # compute distances
-    distances = compute_distances(points, center_of_mass, principal_axes)
+    distances = compute_distances(points, reference_points )
     # compute weighted distances
-    weighted_distances = compute_weighted_distances(points, masses, center_of_mass, principal_axes)
+    weighted_distances = compute_weighted_distances(points, masses, reference_points)
     # compute statistics
     statistics_matrix, fingerprint_1 = compute_statistics(distances)
     statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
@@ -179,9 +209,7 @@ def compute_fingerprint(points, masses):
     if np.abs(eigenvalues[2]) < 0.001:
         eigenvalues[2] = 0.5 * eigenvalues[1]
 
-    max_distance = max_distance_from_center_of_mass(points, center_of_mass)
-
-    reference_points = generate_reference_points(center_of_mass, principal_axes, max_distance)
+   
 
 
     visualize(points, masses, center_of_mass, principal_axes, eigenvalues, max_distance, reference_points)
