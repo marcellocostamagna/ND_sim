@@ -22,6 +22,15 @@ def max_distance_from_center_of_mass(points, center_of_mass):
     distances = np.linalg.norm(points - center_of_mass, axis=1)
     return np.max(distances)
 
+def generate_reference_points(center_of_mass, principal_axes, max_distance):
+    points = [center_of_mass]
+    
+    for axis in principal_axes:
+        point = center_of_mass + max_distance * (axis/np.linalg.norm(axis))
+        points.append(point)
+    
+    return points
+
 def compute_inertia_tensor(points, masses, center_of_mass):
     inertia_tensor = np.zeros((3, 3))
     for point, mass in zip(points, masses):
@@ -56,12 +65,17 @@ def set_axes_equal(ax):
     ax.set_ylim3d([origin[1] - radius, origin[1] + radius])
     ax.set_zlim3d([origin[2] - radius, origin[2] + radius])    
 
-def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale):
+def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale, four_points):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
     # Visualize points with size based on mass
     ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=[mass * 20 for mass in masses], c='b', alpha=0.6)
+
+    # Visualize the four points as yellow dots
+    four_points = np.array(four_points)
+    ax.scatter(four_points[:, 0], four_points[:, 1], four_points[:, 2], c='y', marker='o', s=50)
+
 
     # Visualize eigenvectors with colors based on eigenvalues
     colors = ['r', 'g', 'k']
@@ -136,6 +150,8 @@ def compute_statistics(distances):
     return statistics_matrix, statistics_list  
 
 
+
+
 def compute_fingerprint(points, masses):
     center_of_mass = compute_center_of_mass(points, masses)
     inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
@@ -147,6 +163,8 @@ def compute_fingerprint(points, masses):
     # compute statistics
     statistics_matrix, fingerprint_1 = compute_statistics(distances)
     statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
+    
+
 
     print("Center of mass:", center_of_mass)
     # print("Inertia tensor:", inertia_tensor)
@@ -162,7 +180,11 @@ def compute_fingerprint(points, masses):
         eigenvalues[2] = 0.5 * eigenvalues[1]
 
     max_distance = max_distance_from_center_of_mass(points, center_of_mass)
-    visualize(points, masses, center_of_mass, principal_axes, eigenvalues, max_distance)
+
+    reference_points = generate_reference_points(center_of_mass, principal_axes, max_distance)
+
+
+    visualize(points, masses, center_of_mass, principal_axes, eigenvalues, max_distance, reference_points)
 
     return fingerprint_1, fingerprint_2
 
