@@ -6,14 +6,14 @@ from scipy.stats import skew
 
 # Sample input data
 #points = np.array([[1, 1, 3], [4, 1, 3] , [2.5 , 2 , 3]]) #, [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20, 21], [22, 23 , 24]])
-points = np.array([
-     [  1,  0, -1/math.sqrt(2)],
-     [ -1,  0, -1/math.sqrt(2)],
-     [  0,  1,  1/math.sqrt(2)],
-     [  0, -1,  1/math.sqrt(2)]
- ])
+# points = np.array([
+#      [  1,  0, -1/math.sqrt(2)],
+#      [ -1,  0, -1/math.sqrt(2)],
+#      [  0,  1,  1/math.sqrt(2)],
+#      [  0, -1,  1/math.sqrt(2)]
+#  ])
 
-masses = [1, 3, 7, 5 ] #, 3, 4 , 5, 6, 7, 8]
+# masses = [1, 3, 7, 5 ] #, 3, 4 , 5, 6, 7, 8]
 
 def compute_center_of_mass(points, masses):
     return np.average(points, axis=0, weights=masses)
@@ -26,9 +26,10 @@ def compute_inertia_tensor(points, masses, center_of_mass):
     inertia_tensor = np.zeros((3, 3))
     for point, mass in zip(points, masses):
         r = point - center_of_mass
-        inertia_tensor += mass * (np.outer(r, r) - np.eye(3) * np.dot(r, r))
+        inertia_tensor += mass * (np.eye(3) * np.dot(r, r) - np.outer(r, r))
+        #inertia_tensor *= -1
 
-    return inertia_tensor * -1
+    return inertia_tensor
 
 def compute_principal_axes(inertia_tensor):
     eigenvalues, eigenvectors = np.linalg.eigh(inertia_tensor)
@@ -36,7 +37,7 @@ def compute_principal_axes(inertia_tensor):
     return principal_axes, eigenvalues
 
 def compute_handedness(principal_axes):
-    triple_scalar_product = np.dot(principal_axes[0], np.cross(principal_axes[1], principal_axes[2]))
+    triple_scalar_product = np.dot(principal_axes[2], np.cross(principal_axes[0], principal_axes[1]))
     if triple_scalar_product > 0:
         return "right-handed"
     else:
@@ -147,7 +148,7 @@ def compute_fingerprint(points, masses):
     statistics_matrix, fingerprint_1 = compute_statistics(distances)
     statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
 
-    # print("Center of mass:", center_of_mass)
+    print("Center of mass:", center_of_mass)
     # print("Inertia tensor:", inertia_tensor)
     print("Principal axes:", principal_axes)
     print("Eigenvalues:", eigenvalues)
