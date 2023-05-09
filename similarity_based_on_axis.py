@@ -7,6 +7,8 @@ import axis_fingerprint as afp
 from similarity_3d import calculate_partial_score
 import matplotlib.pyplot as plt
 from perturbations import *
+from rdkit import Chem
+from utils import *
 
 
 # The properties should be:
@@ -15,38 +17,35 @@ from perturbations import *
 # 3. Number of electrons
 
 
-# TETRAHEDRONS
-# coordinates
-pc_1 = np.array([
-     [  1,  0, -1/math.sqrt(2)],
-     [ -1,  0, -1/math.sqrt(2)],
-     [  0,  1,  1/math.sqrt(2)],
-     [  0, -1,  1/math.sqrt(2)]
- ])
-# masses
-n_protons_1 = [9, 17, 35, 53 ]
-n_neutrons_1 = [9, 17, 35, 53 ]
-n_electrons_1 = [9, 17, 35, 53 ]
+# Molecules 
+suppl = Chem.SDMolSupplier('coumarins.sdf', removeHs=False)
+molecules = [mol for mol in suppl if mol is not None]
 
-# point_cloud_2:
-# coordinates
-pc_2 = np.array([
-     [  1,  0, -1/math.sqrt(2)],
-     [ -1,  0, -1/math.sqrt(2)],
-     [  0,  1,  1/math.sqrt(2)],
-     [  0, -1,  1/math.sqrt(2)]
- ])
-# masses
-n_protons_2 = [9, 17, 35, 53 ]
-n_neutrons_2 = [9, 17, 35, 53 ]
-n_electrons_2 = [9, 17, 35, 53 ]
+molecules_info = {}
 
+for i, molecule in enumerate(molecules):
+    protons, neutrons, electrons, coordinates = get_atoms_info(molecule)
+    info = {'protons': protons, 
+            'neutrons': neutrons, 
+            'electrons': electrons, 
+            'coordinates': coordinates}
+    molecules_info[f'molecule_{i}'] = info
+
+molecule_1 = molecules_info['molecule_0']
+molecule_2 = molecules_info['molecule_1']
+     
 
 # Fingerprints
 # fingerprint_1, mass_weighted_fingerprint_1 = afp.compute_fingerprint(pc_1, n_protons_1, n_neutrons_1, n_electrons_1)
 # fingerprint_2, mass_weighted_fingerprint_2 = afp.compute_fingerprint(pc_2, n_protons_2, n_neutrons_2, n_electrons_2)
-fingerprints_1= afp.compute_fingerprint(pc_1, n_protons_1, n_neutrons_1, n_electrons_1)
-fingerprints_2 = afp.compute_fingerprint(pc_2, n_protons_2, n_neutrons_2, n_electrons_2)
+fingerprints_1= afp.compute_fingerprint(molecule_1['coordinates'], 
+                                        molecule_1['protons'], 
+                                        molecule_1['neutrons'], 
+                                        molecule_1['electrons'])
+fingerprints_2 = afp.compute_fingerprint(molecule_2['coordinates'], 
+                                         molecule_2['protons'], 
+                                         molecule_2['neutrons'], 
+                                         molecule_2['electrons'])
 
 # Similarity
 # Not mass-weighted similarity
@@ -157,3 +156,29 @@ plt.show()
 #  ])
 # # masses
 # masses_2 = [1, 3, 7, 5 ] 
+
+# TETRAHEDRONS
+# # coordinates
+# pc_1 = np.array([
+#      [  1,  0, -1/math.sqrt(2)],
+#      [ -1,  0, -1/math.sqrt(2)],
+#      [  0,  1,  1/math.sqrt(2)],
+#      [  0, -1,  1/math.sqrt(2)]
+#  ])
+# # masses
+# n_protons_1 = [9, 17, 35, 53 ]
+# n_neutrons_1 = [9, 17, 35, 53 ]
+# n_electrons_1 = [9, 17, 35, 53 ]
+
+# # point_cloud_2:
+# # coordinates
+# pc_2 = np.array([
+#      [  1,  0, -1/math.sqrt(2)],
+#      [ -1,  0, -1/math.sqrt(2)],
+#      [  0,  1,  1/math.sqrt(2)],
+#      [  0, -1,  1/math.sqrt(2)]
+#  ])
+# # masses
+# n_protons_2 = [9, 17, 35, 53 ]
+# n_neutrons_2 = [9, 17, 35, 53 ]
+# n_electrons_2 = [9, 17, 35, 53 ]
