@@ -19,16 +19,16 @@ from perturbations import *
 # coordinates
 pc_1 = np.array([[ 1, 1, 1], [-1, -1, -1] ])
 # masses
-n_protons_1 = [6, 8 ]
-n_neutrons_1 = [6, 8 ]
-n_electrons_1 = [6, 8 ]
+n_protons_1 = [8, 8 ]
+n_neutrons_1 = [9, 8 ]
+n_electrons_1 = [8, 8 ]
 
 # point_cloud_2:
 # coordinates
 pc_2 = np.array([[ 1, 1, 1], [-1, -1, -1] ])
 # masses
-n_protons_2 = [9, 8]
-n_neutrons_2 = [9, 8]
+n_protons_2 = [8, 8]
+n_neutrons_2 = [8, 9]
 n_electrons_2 = [8, 8]
 
 
