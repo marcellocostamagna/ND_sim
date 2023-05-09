@@ -6,6 +6,16 @@ from scipy.stats import skew
 def compute_center_of_mass(points, masses):
     return np.average(points, axis=0, weights=masses)
 
+
+def translate_points_to_center_of_mass(points, masses):
+    # Calculate the center of mass
+    center_of_mass = np.average(points, axis=0, weights=masses)
+
+    # Translate the points so that the center of mass is at the origin
+    translated_points = points - center_of_mass
+
+    return translated_points
+
 def max_distance_from_center_of_mass(points, center_of_mass):
     distances = np.linalg.norm(points - center_of_mass, axis=1)
     return np.max(distances)
@@ -36,21 +46,23 @@ def compute_principal_axes(inertia_tensor, points, masses):
     # a vector orthogonal to the other two eigenvectors with the positive direction
     # pointing towards the more massive side of the cloud of points.
     for i, eigenvalue in enumerate(eigenvalues):
+        axis = principal_axes[i]
         if abs(eigenvalue) <= 1e-2:
             eigenvalues[i] = 1e-6
-            fake_axis = np.cross(principal_axes[(i+1)%3], principal_axes[(i+2)%3])
+            axis = np.cross(principal_axes[(i+1)%3], principal_axes[(i+2)%3])
             
-            # Project the coordinates of the cloud of points onto the fake axis
-            projections = np.dot(points, fake_axis)
-            
-            # Compute the weighted sum of projections using the masses
-            weighted_sum = np.dot(projections, masses)
-            
-            # Normalize the fake axis
-            fake_axis = fake_axis * np.sign(weighted_sum)
-            fake_axis = fake_axis / np.linalg.norm(fake_axis)
-            
-            principal_axes[i] = fake_axis
+        # Project the coordinates of the cloud of points onto the fake axis
+        # TODO: Problem with sign
+        projections = np.sign(np.dot(points, axis))
+        # Compute the weighted sum of projections using the masses
+        weighted_sum = np.dot(projections, masses)
+        # Normalize the fake axis
+        if weighted_sum == 0:
+            weighted_sum = 1
+        axis = axis * np.sign(weighted_sum)
+        #axis = axis / np.linalg.norm(axis)
+        principal_axes[i] = axis
+
     return principal_axes, eigenvalues
 
 def compute_handedness(principal_axes):
@@ -158,7 +170,8 @@ def compute_statistics(distances):
     return statistics_matrix, statistics_list  
 
 def compute_fingerprint(points, masses):
-    center_of_mass = compute_center_of_mass(points, masses)
+    points, center_of_mass = translate_points_to_center_of_mass(points, masses), [0,0,0]
+
     inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
     principal_axes, eigenvalues = compute_principal_axes(inertia_tensor, points, masses)
 
