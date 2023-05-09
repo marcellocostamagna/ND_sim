@@ -14,29 +14,39 @@ from perturbations import *
 # 2. Number of neutrons
 # 3. Number of electrons
 
-# BIATOMIC MOLECULES
-# point_cloud_1:
+
+# TETRAHEDRONS
 # coordinates
-pc_1 = np.array([[ 1, 1, 1], [-1, -1, -1] ])
+pc_1 = np.array([
+     [  1,  0, -1/math.sqrt(2)],
+     [ -1,  0, -1/math.sqrt(2)],
+     [  0,  1,  1/math.sqrt(2)],
+     [  0, -1,  1/math.sqrt(2)]
+ ])
 # masses
-n_protons_1 = [8, 8 ]
-n_neutrons_1 = [9, 8 ]
-n_electrons_1 = [8, 8 ]
+n_protons_1 = [9, 17, 35, 53 ]
+n_neutrons_1 = [9, 17, 35, 53 ]
+n_electrons_1 = [9, 17, 35, 53 ]
 
 # point_cloud_2:
 # coordinates
-pc_2 = np.array([[ 1, 1, 1], [-1, -1, -1] ])
+pc_2 = np.array([
+     [  1,  0, -1/math.sqrt(2)],
+     [ -1,  0, -1/math.sqrt(2)],
+     [  0,  1,  1/math.sqrt(2)],
+     [  0, -1,  1/math.sqrt(2)]
+ ])
 # masses
-n_protons_2 = [8, 8]
-n_neutrons_2 = [8, 9]
-n_electrons_2 = [8, 8]
+n_protons_2 = [9, 17, 35, 53 ]
+n_neutrons_2 = [9, 17, 35, 53 ]
+n_electrons_2 = [9, 17, 35, 53 ]
 
 
 # Fingerprints
 # fingerprint_1, mass_weighted_fingerprint_1 = afp.compute_fingerprint(pc_1, n_protons_1, n_neutrons_1, n_electrons_1)
 # fingerprint_2, mass_weighted_fingerprint_2 = afp.compute_fingerprint(pc_2, n_protons_2, n_neutrons_2, n_electrons_2)
-proton_fingerprint_1, neutron_fingerprint_1, electron_fingerprint_1 = afp.compute_fingerprint(pc_1, n_protons_1, n_neutrons_1, n_electrons_1)
-proton_fingerprint_2, neutron_fingerprint_2, electron_fingerprint_2 = afp.compute_fingerprint(pc_2, n_protons_2, n_neutrons_2, n_electrons_2)
+fingerprints_1= afp.compute_fingerprint(pc_1, n_protons_1, n_neutrons_1, n_electrons_1)
+fingerprints_2 = afp.compute_fingerprint(pc_2, n_protons_2, n_neutrons_2, n_electrons_2)
 
 # Similarity
 # Not mass-weighted similarity
@@ -49,16 +59,16 @@ proton_fingerprint_2, neutron_fingerprint_2, electron_fingerprint_2 = afp.comput
 
 # proton,neutron,elctron similarity
 # average implementation
-proton_similarity = 1/(1 + calculate_partial_score(proton_fingerprint_1, proton_fingerprint_2))
-neutron_similarity = 1/(1 + calculate_partial_score(neutron_fingerprint_1, neutron_fingerprint_2))
-electron_similarity = 1/(1 + calculate_partial_score(electron_fingerprint_1, electron_fingerprint_2))
+proton_similarity = 1/(1 + calculate_partial_score(fingerprints_1[0], fingerprints_2[0]))
+neutron_similarity = 1/(1 + calculate_partial_score(fingerprints_1[1], fingerprints_2[1]))
+electron_similarity = 1/(1 + calculate_partial_score(fingerprints_1[2], fingerprints_2[2]))
 similarity_mean = np.mean([proton_similarity, neutron_similarity, electron_similarity])
 print(f'Similarity as mean = {similarity_mean}')
 
 # USRCAT implementation
-ps_1 = calculate_partial_score(proton_fingerprint_1, proton_fingerprint_2)
-ps_2 = calculate_partial_score(neutron_fingerprint_1, neutron_fingerprint_2)
-ps_3 = calculate_partial_score(electron_fingerprint_1, electron_fingerprint_2)
+ps_1 = calculate_partial_score(fingerprints_1[0], fingerprints_2[0])
+ps_2 = calculate_partial_score(fingerprints_1[1], fingerprints_2[1])
+ps_3 = calculate_partial_score(fingerprints_1[2], fingerprints_2[2])
 
 similarity_USRCAT = 1/(1 + np.sum([ps_1, ps_2, ps_3]))
 print(f'Similarity as USRCAT = {similarity_USRCAT}')
@@ -81,6 +91,23 @@ plt.show()
 # pc_2 = np.array([[ 1, 1, 1], [-1, -1, -1] ])
 # # masses
 # masses_2 = [3, 1 ]
+
+# # BIATOMIC MOLECULES
+# # point_cloud_1:
+# # coordinates
+# pc_1 = np.array([[ 1, 1, 1], [-1, -1, -1] ])
+# # masses
+# n_protons_1 = [8, 8 ]
+# n_neutrons_1 = [8, 8 ]
+# n_electrons_1 = [9, 8 ]
+
+# # point_cloud_2:
+# # coordinates
+# pc_2 = np.array([[ 1, 1, 1], [-1, -1, -1] ])
+# # masses
+# n_protons_2 = [8, 8]
+# n_neutrons_2 = [8, 8]
+# n_electrons_2 = [8, 8]
 
 # # TRIATOMIC MOLECULES
 # # point_cloud_1:
