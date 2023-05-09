@@ -62,6 +62,11 @@ def compute_principal_axes(inertia_tensor, points, masses):
         axis = axis * np.sign(weighted_sum)
         #axis = axis / np.linalg.norm(axis)
         principal_axes[i] = axis
+    
+    handedness = compute_handedness(principal_axes, eigenvalues)
+
+    if handedness == "left-handed":
+        principal_axes[2] = -principal_axes[2]
 
     return principal_axes, eigenvalues
 
