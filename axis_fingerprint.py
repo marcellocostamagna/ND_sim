@@ -1,19 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import math
 from scipy.stats import skew
-
-# Sample input data
-#points = np.array([[1, 1, 3], [4, 1, 3] , [2.5 , 2 , 3]]) #, [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20, 21], [22, 23 , 24]])
-# points = np.array([
-#      [  1,  0, -1/math.sqrt(2)],
-#      [ -1,  0, -1/math.sqrt(2)],
-#      [  0,  1,  1/math.sqrt(2)],
-#      [  0, -1,  1/math.sqrt(2)]
-#  ])
-
-# masses = [1, 3, 7, 5 ] #, 3, 4 , 5, 6, 7, 8]
 
 def compute_center_of_mass(points, masses):
     return np.average(points, axis=0, weights=masses)
@@ -40,9 +28,29 @@ def compute_inertia_tensor(points, masses, center_of_mass):
 
     return inertia_tensor
 
-def compute_principal_axes(inertia_tensor):
+def compute_principal_axes(inertia_tensor, points, masses):
     eigenvalues, eigenvectors = np.linalg.eigh(inertia_tensor)
     principal_axes = eigenvectors.T
+
+    # If one of the eigenvalues is zero, the corresponding eigenvector is redefined as 
+    # a vector orthogonal to the other two eigenvectors with the positive direction
+    # pointing towards the more massive side of the cloud of points.
+    for i, eigenvalue in enumerate(eigenvalues):
+        if abs(eigenvalue) <= 1e-2:
+            eigenvalues[i] = 1e-6
+            fake_axis = np.cross(principal_axes[(i+1)%3], principal_axes[(i+2)%3])
+            
+            # Project the coordinates of the cloud of points onto the fake axis
+            projections = np.dot(points, fake_axis)
+            
+            # Compute the weighted sum of projections using the masses
+            weighted_sum = np.dot(projections, masses)
+            
+            # Normalize the fake axis
+            fake_axis = fake_axis * np.sign(weighted_sum)
+            fake_axis = fake_axis / np.linalg.norm(fake_axis)
+            
+            principal_axes[i] = fake_axis
     return principal_axes, eigenvalues
 
 def compute_handedness(principal_axes):
@@ -80,9 +88,13 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale
     # Visualize eigenvectors with colors based on eigenvalues
     colors = ['r', 'g', 'k']
     min_eigenvalue = np.min(eigenvalues)
+    if min_eigenvalue == 0:
+        min_eigenvalue = 0.001
     scaled_axes = []
     for axis, eigenvalue, color in zip(principal_axes, eigenvalues, colors):
-        scaled_axis = axis *  (eigenvalue / min_eigenvalue) * scale # Adjust this factor to change the length of the eigenvectors
+        # deal with the case one eigenvalue is zero
+        #scaled_axis = axis *  (eigenvalue / min_eigenvalue) * scale # Adjust this factor to change the length of the eigenvectors
+        scaled_axis = axis * scale
         scaled_axes.append(scaled_axis)
         ax.quiver(center_of_mass[0], center_of_mass[1], center_of_mass[2],
                   scaled_axis[0], scaled_axis[1], scaled_axis[2],
@@ -107,22 +119,6 @@ def visualize(points, masses, center_of_mass, principal_axes, eigenvalues, scale
     plt.show(block=False)
     plt.pause(0.001)
 
-# def compute_distances(points, center_of_mass, principal_axes):
-#     """Compute the distance of each point to the center of mass and to each of the principal axes"""
-#     num_points = points.shape[0]
-#     distances = np.zeros((4, num_points))
-    
-#     for i, point in enumerate(points):
-#         distances[0, i] = np.linalg.norm(point - center_of_mass)
-        
-#         for j, axis in enumerate(principal_axes):
-#             point_rel = point - center_of_mass
-#             projection = np.dot(point_rel, axis) * axis
-#             distance = np.linalg.norm(point_rel - projection)
-#             distances[j + 1, i] = distance
-            
-#     return distances  
-
 def compute_distances(points, reference_points):
     """Compute the distance of each point to the 4 refernce points"""
     num_points = points.shape[0]
@@ -135,20 +131,6 @@ def compute_distances(points, reference_points):
             
     return distances  
 
-# def compute_weighted_distances(points, masses, center_of_mass, principal_axes):
-#     num_points = points.shape[0]
-#     weighted_distances = np.zeros((4, num_points))
-    
-#     for i, (point, mass) in enumerate(zip(points, masses)):
-#         weighted_distances[0, i] = mass * np.linalg.norm(point - center_of_mass)
-        
-#         for j, axis in enumerate(principal_axes):
-#             point_rel = point - center_of_mass
-#             projection = np.dot(point_rel, axis) * axis
-#             distance = mass * np.linalg.norm(point_rel - projection)
-#             weighted_distances[j + 1, i] = mass * distance
-            
-#     return weighted_distances
 
 def compute_weighted_distances(points, masses, reference_points):
     """Compute the mass-weigthed distance of each point to the 4 refernce points"""
@@ -170,18 +152,15 @@ def compute_statistics(distances):
     # check if skewness is nan
     skewness[np.isnan(skewness)] = 0
     
-    statistics_matrix = np.vstack((means, std_devs, skewness)).T
+    statistics_matrix = np.vstack((means, std_devs, skewness)).T    
     statistics_list = np.hstack((means, std_devs, skewness))
     
     return statistics_matrix, statistics_list  
 
-
-
-
 def compute_fingerprint(points, masses):
     center_of_mass = compute_center_of_mass(points, masses)
     inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
-    principal_axes, eigenvalues = compute_principal_axes(inertia_tensor)
+    principal_axes, eigenvalues = compute_principal_axes(inertia_tensor, points, masses)
 
     max_distance = max_distance_from_center_of_mass(points, center_of_mass)
 
@@ -194,8 +173,6 @@ def compute_fingerprint(points, masses):
     statistics_matrix, fingerprint_1 = compute_statistics(distances)
     statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
     
-
-
     print("Center of mass:", center_of_mass)
     # print("Inertia tensor:", inertia_tensor)
     print("Principal axes:", principal_axes)
@@ -209,11 +186,65 @@ def compute_fingerprint(points, masses):
     if np.abs(eigenvalues[2]) < 0.001:
         eigenvalues[2] = 0.5 * eigenvalues[1]
 
-   
-
-
     visualize(points, masses, center_of_mass, principal_axes, eigenvalues, max_distance, reference_points)
 
     return fingerprint_1, fingerprint_2
 
 
+
+# VISUALIZATION OF PRINCIPAL AXES    
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # ax.set_xlabel('X')
+    # ax.set_ylabel('Y')
+    # ax.set_zlabel('Z')
+    # ax.set_xlim(-1, 1)
+    # ax.set_ylim(-1, 1)
+    # ax.set_zlim(-1, 1)
+
+    # # draw principal axes
+    # for axis in principal_axes:
+    #     x, y, z = axis
+    #     ax.quiver(0, 0, 0, x, y, z, length=1.0, color='r', lw=2, arrow_length_ratio=0.1)
+    
+    # plt.show()
+
+# ORTHOGONALITY CHECK
+    # # Check that all eigenvectors are orthogonal and print if it is or it is not 
+    # for i in range(3):
+    #     for j in range(i, 3):
+    #         # print the angle between the two vectors
+    #         print("The angle between the principal axes {} and {} is {} degrees".format(i, j, np.arccos(np.dot(principal_axes[i], principal_axes[j]))*180/np.pi))
+
+
+# def compute_distances(points, center_of_mass, principal_axes):
+#     """Compute the distance of each point to the center of mass and to each of the principal axes"""
+#     num_points = points.shape[0]
+#     distances = np.zeros((4, num_points))
+    
+#     for i, point in enumerate(points):
+#         distances[0, i] = np.linalg.norm(point - center_of_mass)
+        
+#         for j, axis in enumerate(principal_axes):
+#             point_rel = point - center_of_mass
+#             projection = np.dot(point_rel, axis) * axis
+#             distance = np.linalg.norm(point_rel - projection)
+#             distances[j + 1, i] = distance
+            
+#     return distances  
+
+
+# def compute_weighted_distances(points, masses, center_of_mass, principal_axes):
+#     num_points = points.shape[0]
+#     weighted_distances = np.zeros((4, num_points))
+    
+#     for i, (point, mass) in enumerate(zip(points, masses)):
+#         weighted_distances[0, i] = mass * np.linalg.norm(point - center_of_mass)
+        
+#         for j, axis in enumerate(principal_axes):
+#             point_rel = point - center_of_mass
+#             projection = np.dot(point_rel, axis) * axis
+#             distance = mass * np.linalg.norm(point_rel - projection)
+#             weighted_distances[j + 1, i] = mass * distance
+            
+#     return weighted_distances
