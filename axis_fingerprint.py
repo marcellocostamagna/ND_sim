@@ -65,8 +65,13 @@ def compute_principal_axes(inertia_tensor, points, masses):
 
     return principal_axes, eigenvalues
 
-def compute_handedness(principal_axes):
-    triple_scalar_product = np.dot(principal_axes[2], np.cross(principal_axes[0], principal_axes[1]))
+def compute_handedness(principal_axes, eigenvalues):
+
+    # Sort the principal axes based on their eigenvalues
+    sorted_indices = np.argsort(eigenvalues)
+    sorted_axes = principal_axes[sorted_indices]
+
+    triple_scalar_product = np.dot(principal_axes[0], np.cross(principal_axes[1], principal_axes[2]))
     if triple_scalar_product > 0:
         return "right-handed"
     else:
@@ -193,7 +198,7 @@ def compute_fingerprint(points, masses):
     # print("Distances:", distances)
     # print("Fingerprint of regular distances:", fingerprint_1)
     # print("Fingerprint of weighted distances:", fingerprint_2)
-    print(f'Handedness: {compute_handedness(principal_axes)}')
+    print(f'Handedness: {compute_handedness(principal_axes, eigenvalues)}')
 
     # If the third eigenvalue less than 0.001, we still need to visulaize the third axis
     if np.abs(eigenvalues[2]) < 0.001:
