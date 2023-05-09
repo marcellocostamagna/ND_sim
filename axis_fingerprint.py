@@ -182,26 +182,27 @@ def compute_statistics(distances):
     return statistics_list  
 
 def compute_fingerprint(points, n_prot, n_neut, n_elec):
-    points, center_of_mass = translate_points_to_center_of_mass(points, n_prot), [0,0,0]
 
-    inertia_tensor = compute_inertia_tensor(points, n_prot, center_of_mass)
-    principal_axes, eigenvalues = compute_principal_axes(inertia_tensor, points, n_prot)
+    particles = [n_prot, n_neut, n_elec]
+    fingerprints = []
 
-    max_distance = max_distance_from_center_of_mass(points, center_of_mass)
+    for particle in particles:
+        points, center_of_mass = translate_points_to_center_of_mass(points, particle), [0,0,0]
 
-    reference_points = generate_reference_points(center_of_mass, principal_axes, max_distance)
-    # compute distances
-    #distances = compute_distances(points, reference_points )
-    # compute weighted distances
-    protons_distances = compute_weighted_distances(points, n_prot, reference_points)
-    neutrons_distances = compute_weighted_distances(points, n_neut, reference_points)
-    electrons_distances = compute_weighted_distances(points, n_elec, reference_points)
-    # compute statistics
-    # statistics_matrix, fingerprint_1 = compute_statistics(distances)
-    # statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
-    proton_fingerprint = compute_statistics(protons_distances)
-    neutrons_fingerprint = compute_statistics(neutrons_distances)
-    electrons_fingerprint = compute_statistics(electrons_distances)
+        inertia_tensor = compute_inertia_tensor(points, particle, center_of_mass)
+        principal_axes, eigenvalues = compute_principal_axes(inertia_tensor, points, particle)
+
+        max_distance = max_distance_from_center_of_mass(points, center_of_mass)
+
+        reference_points = generate_reference_points(center_of_mass, principal_axes, max_distance)
+        # compute distances
+        #distances = compute_distances(points, reference_points )
+        # compute weighted distances
+        distances = compute_weighted_distances(points, particle, reference_points)
+        # compute statistics
+        # statistics_matrix, fingerprint_1 = compute_statistics(distances)
+        # statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
+        fingerprints.append(compute_statistics(distances))
     
     # print("Center of mass:", center_of_mass)
     # # print("Inertia tensor:", inertia_tensor)
@@ -218,7 +219,7 @@ def compute_fingerprint(points, n_prot, n_neut, n_elec):
 
     #visualize(points, n_prot, center_of_mass, principal_axes, eigenvalues, max_distance, reference_points)
 
-    return proton_fingerprint, neutrons_fingerprint, electrons_fingerprint
+    return fingerprints
 
 
 
