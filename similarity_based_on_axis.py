@@ -18,8 +18,9 @@ from utils import *
 
 
 # Molecules 
-suppl = Chem.SDMolSupplier('coumarins.sdf', removeHs=False)
+suppl = Chem.SDMolSupplier('sample3d_optimized_switched_(1).sdf', removeHs=False)
 molecules = [mol for mol in suppl if mol is not None]
+print(len(molecules))
 
 molecules_info = {}
 
@@ -31,8 +32,8 @@ for i, molecule in enumerate(molecules):
             'coordinates': coordinates}
     molecules_info[f'molecule_{i}'] = info
 
-molecule_1 = molecules_info['molecule_0']
-molecule_2 = molecules_info['molecule_1']
+molecule_1 = molecules_info['molecule_2']
+molecule_2 = molecules_info['molecule_0']
      
 
 # Fingerprints
