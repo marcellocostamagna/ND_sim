@@ -23,8 +23,9 @@ print(len(molecules))
 molecules_info = {}
 
 for i, molecule in enumerate(molecules):
-    protons, neutrons, electrons, coordinates = get_atoms_info(molecule)
-    info = {'protons': protons, 
+    masses, protons, neutrons, electrons, coordinates = get_atoms_info(molecule)
+    info = {'masses': masses,
+            'protons': protons, 
             'neutrons': neutrons, 
             'electrons': electrons, 
             'coordinates': coordinates}
@@ -44,10 +45,12 @@ molecule_2['coordinates'] = perturb_coordinates(molecule_2['coordinates'], 4)
 # fingerprint_1, mass_weighted_fingerprint_1 = afp.compute_fingerprint(pc_1, n_protons_1, n_neutrons_1, n_electrons_1)
 # fingerprint_2, mass_weighted_fingerprint_2 = afp.compute_fingerprint(pc_2, n_protons_2, n_neutrons_2, n_electrons_2)
 fingerprints_1= afp.compute_fingerprint(molecule_1['coordinates'], 
+                                        molecule_1['masses'],
                                         molecule_1['protons'], 
                                         molecule_1['neutrons'], 
                                         molecule_1['electrons'])
 fingerprints_2 = afp.compute_fingerprint(molecule_2['coordinates'], 
+                                         molecule_2['masses'],
                                          molecule_2['protons'], 
                                          molecule_2['neutrons'], 
                                          molecule_2['electrons'])

@@ -181,15 +181,15 @@ def compute_statistics(distances):
     
     return statistics_list  
 
-def compute_fingerprint(points, n_prot, n_neut, n_elec):
+def compute_fingerprint(points, masses, n_prot, n_neut, n_elec):
 
     #particles = [n_prot, n_neut, n_elec]
     fingerprints = []
 
-    points, center_of_mass = translate_points_to_center_of_mass(points, n_prot), [0,0,0]
+    points, center_of_mass = translate_points_to_center_of_mass(points, masses), [0,0,0]
 
-    inertia_tensor = compute_inertia_tensor(points, n_prot, center_of_mass)
-    principal_axes, eigenvalues = compute_principal_axes(inertia_tensor, points, n_prot)
+    inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
+    principal_axes, eigenvalues = compute_principal_axes(inertia_tensor, points, masses)
 
     max_distance = max_distance_from_center_of_mass(points, center_of_mass)
 
