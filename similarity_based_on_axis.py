@@ -16,7 +16,7 @@ from utils import *
 # 3. Number of electrons
 
 # Molecules 
-suppl = Chem.SDMolSupplier('coumarins_test.sdf', removeHs=False)
+suppl = Chem.SDMolSupplier('isomers.sdf', removeHs=False)
 molecules = [mol for mol in suppl if mol is not None]
 print(len(molecules))
 
@@ -31,7 +31,14 @@ for i, molecule in enumerate(molecules):
     molecules_info[f'molecule_{i}'] = info
 
 molecule_1 = molecules_info['molecule_0']
-molecule_2 = molecules_info['molecule_2']
+molecule_2 = molecules_info['molecule_1']
+
+# Rotate molecule_2
+molecule_2['coordinates'] = rotate_points(molecule_2['coordinates'], 90, 45, -35)
+
+# Perturb coordinates of molecule_2
+molecule_2['coordinates'] = perturb_coordinates(molecule_2['coordinates'], 4)
+
      
 # Fingerprints
 # fingerprint_1, mass_weighted_fingerprint_1 = afp.compute_fingerprint(pc_1, n_protons_1, n_neutrons_1, n_electrons_1)
