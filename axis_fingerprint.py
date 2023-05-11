@@ -6,18 +6,29 @@ from scipy.stats import skew
 def compute_center_of_mass(points, masses):
     return np.average(points, axis=0, weights=masses)
 
+def compute_geometrical_center(points):
+    return np.mean(points, axis=0)
 
 def translate_points_to_center_of_mass(points, masses):
     # Calculate the center of mass
     center_of_mass = np.average(points, axis=0, weights=masses)
-
     # Translate the points so that the center of mass is at the origin
     translated_points = points - center_of_mass
+    return translated_points
 
+def translate_points_to_geometrical_center(points):
+    # Calculate the geometrical center
+    geometrical_center = np.mean(points, axis=0)
+    # Translate the points so that the geometrical center is at the origin
+    translated_points = points - geometrical_center
     return translated_points
 
 def max_distance_from_center_of_mass(points, center_of_mass):
     distances = np.linalg.norm(points - center_of_mass, axis=1)
+    return np.max(distances)
+
+def max_distance_from_geometrical_center(points, geometrical_center):
+    distances = np.linalg.norm(points, axis=1)
     return np.max(distances)
 
 def generate_reference_points(center_of_mass, principal_axes, max_distance):
@@ -186,16 +197,22 @@ def compute_fingerprint(points, masses, n_prot, n_neut, n_elec):
     #particles = [n_prot, n_neut, n_elec]
     fingerprints = []
 
-    points, center_of_mass = translate_points_to_center_of_mass(points, masses), [0,0,0]
+    #points, center_of_mass = translate_points_to_center_of_mass(points, masses), [0,0,0]
+    points, geometrical_center = translate_points_to_geometrical_center(points), [0,0,0]
 
-    inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
+    #inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
+    weights = np.ones(len(points))
+    inertia_tensor = compute_inertia_tensor(points, weights, geometrical_center)
+
     principal_axes, eigenvalues = compute_principal_axes(inertia_tensor, points, masses)
 
-    max_distance = max_distance_from_center_of_mass(points, center_of_mass)
+    #max_distance = max_distance_from_center_of_mass(points, center_of_mass)
+    max_distance = max_distance_from_geometrical_center(points, geometrical_center)
 
-    reference_points = generate_reference_points(center_of_mass, principal_axes, max_distance)
+    #reference_points = generate_reference_points(center_of_mass, principal_axes, max_distance)
+    reference_points = generate_reference_points(geometrical_center, principal_axes, max_distance)
     # compute distances
-    #distances = compute_distances(points, reference_points )
+    #distances = compute_distances(points, reference_points)
     # compute weighted distances
     proton_distances = compute_weighted_distances(points, n_prot, reference_points)
     neutron_distances = compute_weighted_distances(points, n_neut, reference_points)
