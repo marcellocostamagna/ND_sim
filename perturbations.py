@@ -72,3 +72,19 @@ def perturb_coordinates(points, decimal_place):
 
     return perturbed_points
 
+
+
+def scale_coordinates(points, s):
+    """
+    Scale the input 3D points by a given factor while maintaining the relative distances among the points.
+
+    Parameters:
+    points (numpy.ndarray): A numpy array of shape (n, 3) representing the 3D coordinates of n points.
+    s (float): The scaling factor.
+
+    Returns:
+    numpy.ndarray: A new numpy array with the scaled coordinates.
+    """
+
+    scaled_points = points * s
+    return scaled_points
