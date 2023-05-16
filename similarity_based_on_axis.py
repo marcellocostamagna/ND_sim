@@ -16,7 +16,8 @@ from utils import *
 # 3. Number of electrons
 
 # Molecules 
-suppl = Chem.SDMolSupplier('isomers.sdf', removeHs=False)
+suppl = Chem.SDMolSupplier('swapping.sdf', removeHs=False)
+#suppl = Chem.SDMolSupplier('isomers.sdf', removeHs=False)
 molecules = [mol for mol in suppl if mol is not None]
 print(len(molecules))
 
@@ -32,13 +33,13 @@ for i, molecule in enumerate(molecules):
     molecules_info[f'molecule_{i}'] = info
 
 molecule_1 = molecules_info['molecule_0']
-molecule_2 = molecules_info['molecule_1']
+molecule_2 = molecules_info['molecule_3']
 
 # Rotate molecule_2
-molecule_2['coordinates'] = rotate_points(molecule_2['coordinates'], 90, 45, -35)
+#molecule_2['coordinates'] = rotate_points(molecule_2['coordinates'], 90, 45, -35)
 
 # Perturb coordinates of molecule_2
-molecule_2['coordinates'] = perturb_coordinates(molecule_2['coordinates'], 4)
+#molecule_2['coordinates'] = perturb_coordinates(molecule_2['coordinates'], 4)
 
      
 # Fingerprints
@@ -67,8 +68,11 @@ fingerprints_2 = afp.compute_fingerprint(molecule_2['coordinates'],
 # proton,neutron,elctron similarity
 # average implementation
 proton_similarity = 1/(1 + calculate_partial_score(fingerprints_1[0], fingerprints_2[0]))
+print('Proton similarity: ', proton_similarity)
 neutron_similarity = 1/(1 + calculate_partial_score(fingerprints_1[1], fingerprints_2[1]))
+print('Neutron similarity: ', neutron_similarity)
 electron_similarity = 1/(1 + calculate_partial_score(fingerprints_1[2], fingerprints_2[2]))
+print('Electron similarity: ', electron_similarity)
 similarity_mean = np.mean([proton_similarity, neutron_similarity, electron_similarity])
 print(f'Similarity as mean = {similarity_mean}')
 

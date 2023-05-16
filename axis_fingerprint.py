@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.stats import skew
+import math as m
 
 def compute_center_of_mass(points, masses):
     return np.average(points, axis=0, weights=masses)
@@ -66,18 +67,23 @@ def compute_principal_axes(inertia_tensor, points, masses):
         # TODO: Problem with sign
         projections = np.sign(np.dot(points, axis))
         # Compute the weighted sum of projections using the masses
-        weighted_sum = np.dot(projections, masses)
-        # Normalize the fake axis
-        if weighted_sum == 0:
-            weighted_sum = 1
-        axis = axis * np.sign(weighted_sum)
+        # weighted_sum = np.dot(projections, masses)
+        # # projections without masses
+        sum = np.sum(projections)
+        # # Normalize the fake axis
+        # if weighted_sum == 0:
+        #     weighted_sum = 1
+        # axis = axis * np.sign(weighted_sum)
+        # consdiering no masses
+        axis = axis * np.sign(sum)
         #axis = axis / np.linalg.norm(axis)
         principal_axes[i] = axis
     
     handedness = compute_handedness(principal_axes, eigenvalues)
+    print("Handedness: ", handedness)
 
     if handedness == "left-handed":
-        principal_axes[2] = -principal_axes[2]
+         principal_axes[1] = -principal_axes[1]
 
     return principal_axes, eigenvalues
 
@@ -173,7 +179,9 @@ def compute_weighted_distances(points, masses, reference_points):
 
     for i, (point, mass) in enumerate(zip(points, masses)):
         for j, ref_point in enumerate(reference_points):
-            weighted_distances[j, i] = mass * np.linalg.norm(point - ref_point)
+            if mass == 0:
+                mass = 1
+            weighted_distances[j, i] = ((m.log(mass))) * np.linalg.norm(point - ref_point)
 
     return weighted_distances
 
@@ -194,6 +202,7 @@ def compute_statistics(distances):
 
 def compute_fingerprint(points, masses, n_prot, n_neut, n_elec):
 
+    print(n_neut)
     #particles = [n_prot, n_neut, n_elec]
     fingerprints = []
 
@@ -221,6 +230,7 @@ def compute_fingerprint(points, masses, n_prot, n_neut, n_elec):
     # statistics_matrix, fingerprint_1 = compute_statistics(distances)
     # statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
     proton_fingerprint = compute_statistics(proton_distances)
+    print(proton_fingerprint)
     neutron_fingerprint = compute_statistics(neutron_distances)
     electron_fingerprint = compute_statistics(electron_distances)
     
@@ -238,6 +248,7 @@ def compute_fingerprint(points, masses, n_prot, n_neut, n_elec):
         eigenvalues[2] = 0.5 * eigenvalues[1]
 
     #visualize(points, n_prot, center_of_mass, principal_axes, eigenvalues, max_distance, reference_points)
+    visualize(points, n_prot, geometrical_center, principal_axes, eigenvalues, max_distance, reference_points)
 
     fingerprints = [proton_fingerprint, neutron_fingerprint, electron_fingerprint]
 
