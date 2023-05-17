@@ -6,6 +6,24 @@ import math as m
 from coordinates import *
 from visualization import *
 
+from scipy.spatial import KDTree
+
+
+#### New KDTREE implementation ####
+
+def compute_matching(points_query, points_target):
+    """Compute the matching between two sets of points"""
+    # Build the KDTree
+    tree = KDTree(points_target)
+    # Query the tree
+    distances, indices = tree.query(points_query)
+
+    # Use the indices to access the corresponding points in points_target
+    corresponding_points = points_target[indices]
+
+    # Now you can compare points_query and corresponding_points
+    differences = points_query - corresponding_points
+    return distances, indices, differences
 
 def compute_distances(points, reference_points):
     """Compute the distance of each point to the 4 refernce points"""
