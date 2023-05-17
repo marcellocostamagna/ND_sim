@@ -3,12 +3,12 @@
 
 import numpy as np
 import math
-import axis_fingerprint as afp
 from similarity_3d import calculate_partial_score
 import matplotlib.pyplot as plt
 from perturbations import *
 from rdkit import Chem
 from utils import *
+from fingerprints import *
 
 # The properties should be:
 # 1. Number of protons
@@ -45,12 +45,12 @@ molecule_2 = molecules_info['molecule_3']
 # Fingerprints
 # fingerprint_1, mass_weighted_fingerprint_1 = afp.compute_fingerprint(pc_1, n_protons_1, n_neutrons_1, n_electrons_1)
 # fingerprint_2, mass_weighted_fingerprint_2 = afp.compute_fingerprint(pc_2, n_protons_2, n_neutrons_2, n_electrons_2)
-fingerprints_1= afp.compute_fingerprint(molecule_1['coordinates'], 
+fingerprints_1= compute_fingerprint(molecule_1['coordinates'], 
                                         molecule_1['masses'],
                                         molecule_1['protons'], 
                                         molecule_1['neutrons'], 
                                         molecule_1['electrons'])
-fingerprints_2 = afp.compute_fingerprint(molecule_2['coordinates'], 
+fingerprints_2 = compute_fingerprint(molecule_2['coordinates'], 
                                          molecule_2['masses'],
                                          molecule_2['protons'], 
                                          molecule_2['neutrons'], 
