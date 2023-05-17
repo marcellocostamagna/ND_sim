@@ -5,11 +5,25 @@ from scipy.stats import skew
 import math as m
 from coordinates import *
 from visualization import *
+from utils import *
+from rdkit import Chem
 
 from scipy.spatial import KDTree
 
 
-#### New KDTREE implementation ####
+#### New KDTREE fingerprint implementation ####
+
+def molecule_info(molecule):
+
+    elements, masses, protons, neutrons, electrons, coordinates = get_atoms_info(molecule)
+    info = {'elements': elements,
+            'masses': masses,
+            'protons': protons, 
+            'neutrons': neutrons, 
+            'electrons': electrons, 
+            'coordinates': coordinates}
+    return info
+
 
 def compute_matching(points_query, points_target):
     """Compute the matching between two sets of points"""
@@ -23,7 +37,76 @@ def compute_matching(points_query, points_target):
 
     # Now you can compare points_query and corresponding_points
     differences = points_query - corresponding_points
-    return distances, indices, differences
+    return distances, indices, differences, corresponding_points
+
+
+def size_similarity(N_query, N_target):
+    """Compute the size similarity between two sets of points"""
+    similarity_s = min(N_query, N_target) / max(N_query, N_target)
+    return similarity_s
+
+def positional_similarity(differences):
+    """Compute the positional similarity between two sets of points"""
+    # Compute the mean of the distances
+    mean = np.mean(differences)
+    similarity_r = 1 / (1 + mean)
+    return similarity_r
+
+
+def formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
+    """Compute the formula similarity between two sets of points"""
+    for i in range(0, len(molecule1['elements'])):
+        p_diff = abs(molecule1['protons'][i] - molecule2['protons'][i])
+        if p_diff == 0:
+            n_diff = abs(molecule1['neutrons'][i] - molecule2['neutrons'][i])
+            e_diff = molecule1['electrons'][i] - molecule2['electrons'][i]
+        else:
+            # Get the neutrons and elctron of the most abundant isotope of the element in molecule 2
+            element = molecule2['elements'][i]
+            neutrons = Chem.GetMassDifference(element)
+            electrons = Chem.GetAtomicNum(element)
+            n_diff = molecule2['neutrons'][i] - neutrons
+            e_diff = molecule2['electrons'][i] - electrons    
+
+    similarity_f =1/(1 + p_diff)
+    similarity_n =1/(1 + n_diff)
+    similarity_e =1/(1 + e_diff)
+    return similarity_f, similarity_n, similarity_e
+
+def reduced_formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
+    """Compute the reduced formula similarity between two sets of points"""
+    # Mass of the moleules
+    mass1 = sum(molecule1['masses'])
+    mass2 = sum(molecule2['masses'])
+    similarity_f = min(mass1, mass2) / max(mass1, mass2)
+    # TODO:Check if there are isotopes in the molecules
+    isotopes1 = []
+    isotopes2 = []
+    for i, neutrons in enumerate(molecule1['neutrons']):
+        std_neutrons = Chem.GetMassDifference(molecule1['elements'][i])
+        diff_n = abs(neutrons - std_neutrons)
+        isotopes1.append(diff_n)
+    for j, neutrons in enumerate(molecule2['neutrons']):
+        std_neutrons = Chem.GetMassDifference(molecule2['elements'][j])
+        diff_n = abs(neutrons - std_neutrons)
+        isotopes2.append(diff_n)
+
+    diff1 = abs(len(isotopes1) - len(isotopes2))
+    diff2 = abs(sum(isotopes1) - sum(isotopes2))
+    similarity_n = 1 / (1 + diff1 + diff2)
+    
+    # Charges of the molecules
+    charge1 = sum(molecule1['protons']) - sum(molecule1['electrons'])
+    charge2 = sum(molecule2['protons']) - sum(molecule2['electrons'])
+
+    similarity_e = 1/ (1 + abs(charge1 - charge2)/ len(molecule1['elements']))
+
+    return similarity_f, similarity_e, similarity_n
+
+    
+
+
+################################################
 
 def compute_distances(points, reference_points):
     """Compute the distance of each point to the 4 refernce points"""
