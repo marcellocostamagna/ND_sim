@@ -14,10 +14,11 @@ def get_atoms_info(molecule):
     electrons = []
     formal_charges = []
     masses = []
+    elements = []
     coordinates = []
-    nutrons_difference = []
 
     for atom in molecule.GetAtoms():
+        element_symbol = atom.GetSymbol()
         atomic_num = atom.GetAtomicNum()
         mass_num = atom.GetMass()  # Extracts the mass number (isotope) of the atom
         neutron_num = int(round(mass_num)) - atomic_num
@@ -29,15 +30,12 @@ def get_atoms_info(molecule):
         electrons.append(atomic_num - formal_charge)  # Adjusted for the formal charge
         formal_charges.append(formal_charge)
         masses.append(mass_num)
+        elements.append(element_symbol)
         coordinates.append((position.x, position.y, position.z))
-        if atomic_num == 1 and neutron_num == 0:
-            nutrons_difference.append(0)
-        else:
-            nutrons_difference.append(neutron_num - atomic_num)
 
     coordinates = np.array(coordinates)
 
-    return masses, protons, nutrons_difference, formal_charges, coordinates
+    return elements, masses, protons, neutrons, formal_charges, coordinates
     #return protons, neutrons, electrons, coordinates
 
 

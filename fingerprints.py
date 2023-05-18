@@ -24,22 +24,15 @@ def molecule_info(molecule):
             'coordinates': coordinates}
     return info
 
-
-def compute_matching(points_query, points_target):
+def compute_matching(points1, points2):
     """Compute the matching between two sets of points"""
     # Build the KDTree
-    tree = KDTree(points_target)
+    tree = KDTree(points2)
     # Query the tree
-    distances, indices = tree.query(points_query)
+    distances, indices = tree.query(points1)
+    return distances, indices
 
-    # Use the indices to access the corresponding points in points_target
-    corresponding_points = points_target[indices]
-
-    # Now you can compare points_query and corresponding_points
-    differences = points_query - corresponding_points
-    return distances, indices, differences, corresponding_points
-
-
+# SIMILARITIES
 def size_similarity(N_query, N_target):
     """Compute the size similarity between two sets of points"""
     similarity_s = min(N_query, N_target) / max(N_query, N_target)
@@ -52,25 +45,39 @@ def positional_similarity(differences):
     similarity_r = 1 / (1 + mean)
     return similarity_r
 
-
 def formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
     """Compute the formula similarity between two sets of points"""
+    delta_protons= []
+    delta_neutrons = []
+    delta_electrons = []
+    p_change = 0
+    n_change = 0
+    e_change = 0
     for i in range(0, len(molecule1['elements'])):
         p_diff = abs(molecule1['protons'][i] - molecule2['protons'][i])
         if p_diff == 0:
             n_diff = abs(molecule1['neutrons'][i] - molecule2['neutrons'][i])
             e_diff = molecule1['electrons'][i] - molecule2['electrons'][i]
         else:
-            # Get the neutrons and elctron of the most abundant isotope of the element in molecule 2
-            element = molecule2['elements'][i]
-            neutrons = Chem.GetMassDifference(element)
-            electrons = Chem.GetAtomicNum(element)
-            n_diff = molecule2['neutrons'][i] - neutrons
-            e_diff = molecule2['electrons'][i] - electrons    
+            p_change += 1
+            current_mass = molecule1['masses'][i] + molecule2['masses'][i]
+            standard_mass = Chem.GetMass(molecule1['elements'][i]) + Chem.GetMass(molecule2['elements'][i])
+            n_diff = round(current_mass - standard_mass)
+            current_electrons = molecule1['electrons'][i] + molecule2['electrons'][i]
+            electrons = Chem.GetAtomicNum(molecule1['elements'][i]) + Chem.GetAtomicNum(molecule2['elements'][i])
+            e_diff = abs(electrons - current_electrons)
 
-    similarity_f =1/(1 + p_diff)
-    similarity_n =1/(1 + n_diff)
-    similarity_e =1/(1 + e_diff)
+        if n_diff != 0:
+                n_change += 1
+        if e_diff != 0:
+                e_change += 1     
+        delta_protons.append(p_diff)
+        delta_neutrons.append(n_diff)
+        delta_electrons.append(e_diff)
+
+    similarity_f =1/(1 + sum(p_diff) + (p_change/len(molecule1['elements'])))
+    similarity_n =1/(1 + sum(n_diff) + (n_change/len(molecule1['elements'])))
+    similarity_e =1/(1 + sum(e_diff) + (e_change/len(molecule1['elements'])))
     return similarity_f, similarity_n, similarity_e
 
 def reduced_formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
@@ -95,16 +102,58 @@ def reduced_formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict)
     diff2 = abs(sum(isotopes1) - sum(isotopes2))
     similarity_n = 1 / (1 + diff1 + diff2)
     
-    # Charges of the molecules
+    # TODO: Charges of the molecules
     charge1 = sum(molecule1['protons']) - sum(molecule1['electrons'])
     charge2 = sum(molecule2['protons']) - sum(molecule2['electrons'])
-
     similarity_e = 1/ (1 + abs(charge1 - charge2)/ len(molecule1['elements']))
 
     return similarity_f, similarity_e, similarity_n
 
-    
+def final_similarity(similarity_s, similarity_r, similarity_f, similarity_e, similarity_n):
+    """Compute the final similarity between two sets of points"""
+    similarities = [similarity_s, similarity_r, similarity_f, similarity_e, similarity_n]
+    similarity = similarity_s * similarity_r * similarity_f * similarity_e * similarity_n
+    return similarities, similarity
 
+def reorder_info(molecule, indices):
+
+    reordered_molecule = {}
+    for key, values in molecule.items():
+        values_array = np.array(values)  
+        reordered_molecule[key] = values_array[indices]
+
+    return reordered_molecule
+
+def compute_similarity(query, target):
+    # Align the molecules
+    N1, N2 = len(query['elements']), len(target['elements'])
+    if N1 <= N2:
+        points1, points2 = query['coordinates'], target['coordinates']
+        molecule1, molecule2 = query, target
+    else:   
+        points1, points2 = target['coordinates'], query['coordinates']
+        molecule1, molecule2 = target, query
+    points1, points2 = molecule1['coordinates'], molecule2['coordinates']
+    tensor1, tensor2 = compute_inertia_tensor(points1), compute_inertia_tensor(points2)
+    principal_axes1, _ , principal_axes2, _ = compute_principal_axes(tensor1), compute_principal_axes(tensor2)
+    points1, points2 = compute_new_coordinates(principal_axes1, points1), compute_new_coordinates(principal_axes2, points2)
+
+    # Compute the matching
+    distances, indices = compute_matching(points1, points2)
+    molecule2 = reorder_info(molecule2, indices)
+    
+    # Compute the similarities
+    similarity_s = size_similarity(N1, N2)
+    similarity_r = positional_similarity(distances)
+    if similarity_s > 0.9 and similarity_r > 0.8: #TODO: is there a more objective way of doing this? 
+        similarity_f, similarity_n, similarity_e = formula_isotopic_charge_similarity(molecule1, molecule2)
+    else:
+        similarity_f, similarity_e, similarity_n = reduced_formula_isotopic_charge_similarity(molecule1, molecule2)
+    
+    # Compute the final similarity
+    similarities, similarity = final_similarity(similarity_s, similarity_r, similarity_f, similarity_e, similarity_n)
+
+    return similarities, similarity
 
 ################################################
 
