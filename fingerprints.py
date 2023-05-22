@@ -7,6 +7,7 @@ from coordinates import *
 from visualization import *
 from utils import *
 from rdkit import Chem
+from similarity_3d import calculate_partial_score
 
 from scipy.spatial import KDTree
 
@@ -57,7 +58,7 @@ def formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
         p_diff = abs(molecule1['protons'][i] - molecule2['protons'][i])
         if p_diff == 0:
             n_diff = abs(molecule1['neutrons'][i] - molecule2['neutrons'][i])
-            e_diff = molecule1['electrons'][i] - molecule2['electrons'][i]
+            e_diff = abs(molecule1['electrons'][i] - molecule2['electrons'][i])
         else:
             p_change += 1
             current_mass = molecule1['masses'][i] + molecule2['masses'][i]
@@ -75,9 +76,10 @@ def formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
         delta_neutrons.append(n_diff)
         delta_electrons.append(e_diff)
 
-    similarity_f =1/(1 + sum(p_diff) + (p_change/len(molecule1['elements'])))
-    similarity_n =1/(1 + sum(n_diff) + (n_change/len(molecule1['elements'])))
-    similarity_e =1/(1 + sum(e_diff) + (e_change/len(molecule1['elements'])))
+    l = len(molecule1['elements'])
+    similarity_f =1/(1 + sum(p_diff)/l + (p_change/l))
+    similarity_n =1/(1 + sum(n_diff)/l + (n_change/l))
+    similarity_e =1/(1 + sum(e_diff)/l + (e_change/l))
     return similarity_f, similarity_n, similarity_e
 
 def reduced_formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
@@ -124,7 +126,7 @@ def reorder_info(molecule, indices):
 
     return reordered_molecule
 
-def compute_similarity(query, target):
+def compute_similarity_based_on_matching(query, target):
     # Align the molecules
     N1, N2 = len(query['elements']), len(target['elements'])
     if N1 <= N2:
@@ -134,8 +136,8 @@ def compute_similarity(query, target):
         points1, points2 = target['coordinates'], query['coordinates']
         molecule1, molecule2 = target, query
     points1, points2 = molecule1['coordinates'], molecule2['coordinates']
-    tensor1, tensor2 = compute_inertia_tensor(points1), compute_inertia_tensor(points2)
-    principal_axes1, _ , principal_axes2, _ = compute_principal_axes(tensor1), compute_principal_axes(tensor2)
+    tensor1, tensor2 = compute_inertia_tensor_no_masses(points1), compute_inertia_tensor(points2)
+    principal_axes1, _ , principal_axes2, _ = compute_principal_axes(tensor1, points1), compute_principal_axes(tensor2, points2)
     points1, points2 = compute_new_coordinates(principal_axes1, points1), compute_new_coordinates(principal_axes2, points2)
 
     # Compute the matching
@@ -157,6 +159,10 @@ def compute_similarity(query, target):
 
 ################################################
 
+##### Moments fingerprints #####################
+
+##### 3-dimensional fingerprint ####################
+
 def compute_distances(points, reference_points):
     """Compute the distance of each point to the 4 refernce points"""
     num_points = points.shape[0]
@@ -168,7 +174,6 @@ def compute_distances(points, reference_points):
             distances[j, i] = np.linalg.norm(point - ref_point)
             
     return distances  
-
 
 def compute_weighted_distances(points, masses, reference_points):
     """Compute the mass-weigthed distance of each point to the 4 refernce points"""
@@ -184,7 +189,6 @@ def compute_weighted_distances(points, masses, reference_points):
 
     return weighted_distances
 
-
 def compute_statistics(distances):
     means = np.mean(distances, axis=1)
     std_devs = np.std(distances, axis=1)
@@ -196,12 +200,10 @@ def compute_statistics(distances):
     # add all rows to a list   
     statistics_list = [element for row in statistics_matrix for element in row]
 
-    
     return statistics_list  
 
-def compute_fingerprint(points, masses, n_prot, n_neut, n_elec):
+def compute_3d_fingerprint(points, n_prot, n_neut, n_elec):
 
-    print(n_neut)
     #particles = [n_prot, n_neut, n_elec]
     fingerprints = []
 
@@ -211,44 +213,138 @@ def compute_fingerprint(points, masses, n_prot, n_neut, n_elec):
     #inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
     weights = np.ones(len(points))
     inertia_tensor = compute_inertia_tensor(points, weights, geometrical_center)
+    inertia_tensor = compute_inertia_tensor_no_masses(points, geometrical_center)
 
-    principal_axes, eigenvalues = compute_principal_axes(inertia_tensor, points, masses)
+    principal_axes, eigenvalues = compute_principal_axes(inertia_tensor)
 
     #max_distance = max_distance_from_center_of_mass(points, center_of_mass)
     max_distance = max_distance_from_geometrical_center(points, geometrical_center)
 
     #reference_points = generate_reference_points(center_of_mass, principal_axes, max_distance)
     reference_points = generate_reference_points(geometrical_center, principal_axes, max_distance)
-    # compute distances
-    #distances = compute_distances(points, reference_points)
+
     # compute weighted distances
     proton_distances = compute_weighted_distances(points, n_prot, reference_points)
     neutron_distances = compute_weighted_distances(points, n_neut, reference_points)
     electron_distances = compute_weighted_distances(points, n_elec, reference_points)
+    
     # compute statistics
-    # statistics_matrix, fingerprint_1 = compute_statistics(distances)
-    # statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
     proton_fingerprint = compute_statistics(proton_distances)
-    print(proton_fingerprint)
     neutron_fingerprint = compute_statistics(neutron_distances)
     electron_fingerprint = compute_statistics(electron_distances)
-    
-    # print("Center of mass:", center_of_mass)
-    # # print("Inertia tensor:", inertia_tensor)
-    # print("Principal axes:", principal_axes)
-    # print("Eigenvalues:", eigenvalues)
-    # # print("Distances:", distances)
-    # # print("Fingerprint of regular distances:", fingerprint_1)
-    # # print("Fingerprint of weighted distances:", fingerprint_2)
-    # print(f'Handedness: {compute_handedness(principal_axes, eigenvalues)}')
-
-    # If the third eigenvalue less than 0.001, we still need to visulaize the third axis
-    if np.abs(eigenvalues[2]) < 0.001:
-        eigenvalues[2] = 0.5 * eigenvalues[1]
-
-    #visualize(points, n_prot, center_of_mass, principal_axes, eigenvalues, max_distance, reference_points)
-    visualize(points, n_prot, geometrical_center, principal_axes, eigenvalues, max_distance, reference_points)
 
     fingerprints = [proton_fingerprint, neutron_fingerprint, electron_fingerprint]
 
     return fingerprints
+
+def compute_3d_similarity(query, target):
+    """Compute the similarity between two 3d fingerprints"""
+    similarities = []
+    # compute the fingerprints
+    query_fingerprints = compute_3d_fingerprint(query['coordinates', query['n_prot'], query['n_neut'], query['n_elec']])
+    target_fingerprints = compute_3d_fingerprint(target['coordinates', target['n_prot'], target['n_neut'], target['n_elec']])
+
+    # compute the similarities
+    for i in range(3):
+        similarities.append(1/(1 + calculate_partial_score(query_fingerprints[i], target_fingerprints[i])))
+
+    # compute the final similarity
+    similarity_mean = np.mean(similarities)
+
+    return similarities, similarity_mean
+
+
+##### n-Dimensionl fingerprints #####################
+
+def principal_components(data):
+    """
+    Calculates the principal components (eigenvectors) of the covariance matrix of points with 
+    additional info.
+    """
+    covariance_matrix = np.cov(data, ddof=0, rowvar=False)
+    eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
+    sorted_indices = np.argsort(eigenvalues)[::-1]
+    return eigenvectors[:, sorted_indices]
+
+def compute_reference_points(data, eigenvectors):
+    centroid = data.mean(axis = 0)
+    reference_points = centroid + eigenvectors*(data.max(axis=0)-centroid)
+    reference_points.insert(0, centroid)
+    return reference_points
+
+def compute_nD_fingerprint(data):
+    pca_axis = principal_components(data)
+    reference_points = compute_reference_points(data, pca_axis)
+    distances = compute_distances(data, reference_points)
+    fingerprint = compute_statistics(distances)
+    return fingerprint
+
+def compute_nD_similarity(query, target):
+    """Compute the similarity between two nD fingerprints"""
+
+    data = np.hstack((query['coordinates'], query['masses'].reshape(-1, 1)))
+    data1 = np.hstack((target['coordinates'], target['masses'].reshape(-1, 1)))
+
+    fingerprint_query = compute_nD_fingerprint(data)
+    fingerprint_target = compute_nD_fingerprint(data1)
+
+    similarity = 1/(1 + calculate_partial_score(fingerprint_query, fingerprint_target))
+    return similarity
+        
+
+
+
+
+
+# def compute_fingerprint(points, masses, n_prot, n_neut, n_elec):
+
+#     #particles = [n_prot, n_neut, n_elec]
+#     fingerprints = []
+
+#     #points, center_of_mass = translate_points_to_center_of_mass(points, masses), [0,0,0]
+#     points, geometrical_center = translate_points_to_geometrical_center(points), [0,0,0]
+
+#     #inertia_tensor = compute_inertia_tensor(points, masses, center_of_mass)
+#     weights = np.ones(len(points))
+#     inertia_tensor = compute_inertia_tensor(points, weights, geometrical_center)
+
+#     principal_axes, eigenvalues = compute_principal_axes(inertia_tensor, points, masses)
+
+#     #max_distance = max_distance_from_center_of_mass(points, center_of_mass)
+#     max_distance = max_distance_from_geometrical_center(points, geometrical_center)
+
+#     #reference_points = generate_reference_points(center_of_mass, principal_axes, max_distance)
+#     reference_points = generate_reference_points(geometrical_center, principal_axes, max_distance)
+#     # compute distances
+#     #distances = compute_distances(points, reference_points)
+#     # compute weighted distances
+#     proton_distances = compute_weighted_distances(points, n_prot, reference_points)
+#     neutron_distances = compute_weighted_distances(points, n_neut, reference_points)
+#     electron_distances = compute_weighted_distances(points, n_elec, reference_points)
+#     # compute statistics
+#     # statistics_matrix, fingerprint_1 = compute_statistics(distances)
+#     # statistics_matrix, fingerprint_2 = compute_statistics(weighted_distances)
+#     proton_fingerprint = compute_statistics(proton_distances)
+#     print(proton_fingerprint)
+#     neutron_fingerprint = compute_statistics(neutron_distances)
+#     electron_fingerprint = compute_statistics(electron_distances)
+    
+#     # print("Center of mass:", center_of_mass)
+#     # # print("Inertia tensor:", inertia_tensor)
+#     # print("Principal axes:", principal_axes)
+#     # print("Eigenvalues:", eigenvalues)
+#     # # print("Distances:", distances)
+#     # # print("Fingerprint of regular distances:", fingerprint_1)
+#     # # print("Fingerprint of weighted distances:", fingerprint_2)
+#     # print(f'Handedness: {compute_handedness(principal_axes, eigenvalues)}')
+
+#     # If the third eigenvalue less than 0.001, we still need to visulaize the third axis
+#     if np.abs(eigenvalues[2]) < 0.001:
+#         eigenvalues[2] = 0.5 * eigenvalues[1]
+
+#     #visualize(points, n_prot, center_of_mass, principal_axes, eigenvalues, max_distance, reference_points)
+#     visualize(points, n_prot, geometrical_center, principal_axes, eigenvalues, max_distance, reference_points)
+
+#     fingerprints = [proton_fingerprint, neutron_fingerprint, electron_fingerprint]
+
+#     return fingerprints
