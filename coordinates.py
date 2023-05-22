@@ -4,12 +4,15 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.stats import skew
 import math as m
 
+### Center of mass and geometrical center ###
 def compute_center_of_mass(points, masses):
     return np.average(points, axis=0, weights=masses)
 
 def compute_geometrical_center(points):
     return np.mean(points, axis=0)
 
+
+### Coordinates transformations ###
 def translate_points_to_center_of_mass(points, masses):
     # Calculate the center of mass
     center_of_mass = np.average(points, axis=0, weights=masses)
@@ -24,22 +27,7 @@ def translate_points_to_geometrical_center(points):
     translated_points = points - geometrical_center
     return translated_points
 
-def max_distance_from_center_of_mass(points, center_of_mass):
-    distances = np.linalg.norm(points - center_of_mass, axis=1)
-    return np.max(distances)
-
-def max_distance_from_geometrical_center(points, geometrical_center):
-    distances = np.linalg.norm(points, axis=1)
-    return np.max(distances)
-
-def generate_reference_points(center_of_mass, principal_axes, max_distance):
-    points = [center_of_mass]
-    
-    for axis in principal_axes:
-        point = center_of_mass + max_distance * (axis/np.linalg.norm(axis))
-        points.append(point)
-    
-    return points
+### Tensor of inertia and principal axes ###
 
 def compute_inertia_tensor(points, masses, center_of_mass):
     inertia_tensor = np.zeros((3, 3))
@@ -50,7 +38,16 @@ def compute_inertia_tensor(points, masses, center_of_mass):
 
     return inertia_tensor
 
-def compute_principal_axes(inertia_tensor, points, masses):
+def compute_inertia_tensor_no_masses(points):
+    geometrical_center = compute_geometrical_center(points)
+    inertia_tensor = np.zeros((3, 3))
+    for point in points:
+        r = point - geometrical_center
+        inertia_tensor += (np.eye(3) * np.dot(r, r) - np.outer(r, r))
+
+    return inertia_tensor
+
+def compute_principal_axes(inertia_tensor, points):
     eigenvalues, eigenvectors = np.linalg.eigh(inertia_tensor)
     principal_axes = eigenvectors.T
 
@@ -80,7 +77,7 @@ def compute_principal_axes(inertia_tensor, points, masses):
         principal_axes[i] = axis
     
     handedness = compute_handedness(principal_axes, eigenvalues)
-    print("Handedness: ", handedness)
+    #print("Handedness: ", handedness)
 
     if handedness == "left-handed":
          principal_axes[1] = -principal_axes[1]
@@ -98,3 +95,54 @@ def compute_handedness(principal_axes, eigenvalues):
         return "right-handed"
     else:
         return "left-handed"
+
+### Covariance and principal axes ###
+
+def covariance_principal_components(points):
+    """
+    Calculates the principal components (eigenvectors) of the covariance matrix of points 
+    """
+    covariance_matrix = np.cov(points, ddof=0, rowvar=False)
+    eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
+    sorted_indices = np.argsort(eigenvalues)[::-1]
+    return eigenvectors[:, sorted_indices]
+
+### Fixed reference system ###
+def compute_new_coordinates(principal_axes, points):
+    # Translate the points to the center of mass
+    translated_points = translate_points_to_geometrical_center(points)
+    # Rotate the points so that the principal axes are aligned with the axes of the reference system
+    points_new_coord = translated_points @ principal_axes.T
+    return points_new_coord
+
+### Distances from the center of mass ###
+
+def max_distance_from_center_of_mass(points, center_of_mass):
+    distances = np.linalg.norm(points - center_of_mass, axis=1)
+    return np.max(distances)
+
+def max_distance_from_geometrical_center(points):
+    distances = np.linalg.norm(points, axis=1)
+    return np.max(distances)
+
+### Distances from axis ###
+
+def max_distance_from_axis(points, axis):
+    distances = np.abs(np.dot(points, axis))
+    return np.max(distances)
+
+### Reference points ###
+
+### methods based on the principal axes ###
+def generate_reference_points(center_of_mass, principal_axes, max_distance):
+    points = [center_of_mass]
+    
+    for axis in principal_axes:
+        point = center_of_mass + max_distance * (axis/np.linalg.norm(axis))
+        points.append(point)
+    
+    return points
+
+### methods baseed on closest and furthest concepts ###
+# TODO: Implement the methods based on the closest and furthest concepts from 
+# similarity_3d.py
