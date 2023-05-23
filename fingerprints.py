@@ -8,6 +8,7 @@ from visualization import *
 from utils import *
 from similarity_3d import calculate_partial_score
 from rdkit import Chem
+from scipy.optimize import linear_sum_assignment
 
 from scipy.spatial import KDTree
 
@@ -25,12 +26,26 @@ def molecule_info(molecule):
             'coordinates': coordinates}
     return info
 
+# def compute_matching(points1, points2):
+#     """Compute the matching between two sets of points"""
+#     # Build the KDTree
+#     tree = KDTree(points2)
+#     # Query the tree
+#     distances, indices = tree.query(points1)
+#     return distances, indices
+
 def compute_matching(points1, points2):
-    """Compute the matching between two sets of points"""
-    # Build the KDTree
-    tree = KDTree(points2)
-    # Query the tree
-    distances, indices = tree.query(points1)
+    """Compute the matching between two sets of points using the Hungarian Algorithm"""
+    # Calculate the Euclidean distance matrix between every pair of points in the two sets
+    cost_matrix = np.sqrt(((points1[:, np.newaxis] - points2)**2).sum(axis=2))
+
+    # Apply the Hungarian algorithm to find the minimum cost matching
+    row_indices, col_indices = linear_sum_assignment(cost_matrix)
+
+    # Get the distances and indices of the matching
+    distances = cost_matrix[row_indices, col_indices]
+    indices = col_indices
+
     return distances, indices
 
 # SIMILARITIES
@@ -48,6 +63,8 @@ def positional_similarity(differences):
 
 def formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
     """Compute the formula similarity between two sets of points"""
+    # Periodic table
+    pt = Chem.GetPeriodicTable()
     delta_protons= []
     delta_neutrons = []
     delta_electrons = []
@@ -62,10 +79,11 @@ def formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
         else:
             p_change += 1
             current_mass = molecule1['masses'][i] + molecule2['masses'][i]
-            standard_mass = Chem.GetMass(molecule1['elements'][i]) + Chem.GetMass(molecule2['elements'][i])
+            #standard_mass = Chem.GetMass(molecule1['elements'][i]) + Chem.GetMass(molecule2['elements'][i])
+            standard_mass = pt.GetAtomicWeight(molecule1['elements'][i]) + pt.GetAtomicWeight(molecule2['elements'][i])
             n_diff = round(current_mass - standard_mass)
             current_electrons = molecule1['electrons'][i] + molecule2['electrons'][i]
-            electrons = Chem.GetAtomicNum(molecule1['elements'][i]) + Chem.GetAtomicNum(molecule2['elements'][i])
+            electrons = pt.GetAtomicNumber(molecule1['elements'][i]) + pt.GetAtomicNumber(molecule2['elements'][i])
             e_diff = abs(electrons - current_electrons)
 
         if n_diff != 0:
@@ -77,9 +95,13 @@ def formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
         delta_electrons.append(e_diff)
 
     l = len(molecule1['elements'])
-    similarity_f =1/(1 + sum(delta_protons)/l + (p_change/l))
-    similarity_n =1/(1 + sum(delta_neutrons)/l + (n_change/l))
-    similarity_e =1/(1 + sum(delta_electrons)/l + (e_change/l))
+    tot_protons = sum(molecule1['protons']) + sum(molecule2['protons'])
+    tot_neutrons = sum(molecule1['neutrons']) + sum(molecule2['neutrons'])
+    tot_electrons = sum(molecule1['electrons']) + sum(molecule2['electrons'])
+    similarity_f =1/(1 + (sum(delta_protons)/tot_protons * (p_change/l)))
+    #similarity_f = 1/ (1 + sum(delta_protons) * p_change)
+    similarity_n =1/(1 + (sum(delta_neutrons)/tot_neutrons * (n_change/l)))
+    similarity_e =1/(1 + (sum(delta_electrons)/tot_electrons * (e_change/l)))
     return similarity_f, similarity_n, similarity_e
 
 def reduced_formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
@@ -116,7 +138,10 @@ def reduced_formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict)
 def final_similarity(similarity_s, similarity_r, similarity_f, similarity_e, similarity_n):
     """Compute the final similarity between two sets of points"""
     similarities = [similarity_s, similarity_r, similarity_f, similarity_e, similarity_n]
-    similarity = similarity_s * similarity_r * similarity_f * similarity_e * similarity_n
+    # similarity as the product of the similarities
+    #similarity = similarity_s * similarity_r * similarity_f * similarity_e * similarity_n
+    # similarity as the mean of the similarities
+    similarity = np.mean(similarities)
     return similarities, similarity
 
 def reorder_info(molecule, indices):
@@ -145,8 +170,8 @@ def compute_similarity_based_on_matching(query, target):
     principal_axes2, eigenvalues2 = compute_principal_axes(tensor2, points2)
 
     #TODO: to be optimized
-    visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
-    visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
+    #visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
+    #visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
 
     # rotate both the points and the relative axis to align with x,y,z
 
@@ -157,8 +182,8 @@ def compute_similarity_based_on_matching(query, target):
     principal_axes2, eigenvalues2 = compute_principal_axes(tensor2, points2)
 
     #visualize(points, n_prot, center_of_mass, principal_axes, eigenvalues, max_distance, reference_points)
-    visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
-    visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
+    #visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
+    #visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
 
     # Compute the matching
     distances, indices = compute_matching(points1, points2)
