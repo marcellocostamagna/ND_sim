@@ -5,6 +5,7 @@ from rdkit import Chem
 
 
 
+
 def get_atoms_info(molecule):
     """
     Extracts the information of the atoms of a molecule
@@ -16,6 +17,7 @@ def get_atoms_info(molecule):
     masses = []
     elements = []
     coordinates = []
+    coordinates_no_H = []
 
     for atom in molecule.GetAtoms():
         element_symbol = atom.GetSymbol()
@@ -32,10 +34,12 @@ def get_atoms_info(molecule):
         masses.append(mass_num)
         elements.append(element_symbol)
         coordinates.append((position.x, position.y, position.z))
+        if element_symbol != 'H':
+            coordinates_no_H.append((position.x, position.y, position.z))
 
     coordinates = np.array(coordinates)
 
-    return elements, masses, protons, neutrons, formal_charges, coordinates
+    return elements, masses, protons, neutrons, electrons, coordinates, coordinates_no_H
     #return protons, neutrons, electrons, coordinates
 
 
