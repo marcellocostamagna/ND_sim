@@ -17,36 +17,37 @@ from scipy.spatial import KDTree
 
 def molecule_info(molecule):
 
-    elements, masses, protons, neutrons, electrons, coordinates = get_atoms_info(molecule)
+    elements, masses, protons, neutrons, electrons, coordinates, coordinates_no_H = get_atoms_info(molecule)
     info = {'elements': elements,
             'masses': masses,
             'protons': protons, 
             'neutrons': neutrons, 
             'electrons': electrons, 
-            'coordinates': coordinates}
+            'coordinates': coordinates,
+            'coordinates_no_H': coordinates_no_H }
     return info
 
-# def compute_matching(points1, points2):
-#     """Compute the matching between two sets of points"""
-#     # Build the KDTree
-#     tree = KDTree(points2)
-#     # Query the tree
-#     distances, indices = tree.query(points1)
-#     return distances, indices
-
 def compute_matching(points1, points2):
-    """Compute the matching between two sets of points using the Hungarian Algorithm"""
-    # Calculate the Euclidean distance matrix between every pair of points in the two sets
-    cost_matrix = np.sqrt(((points1[:, np.newaxis] - points2)**2).sum(axis=2))
-
-    # Apply the Hungarian algorithm to find the minimum cost matching
-    row_indices, col_indices = linear_sum_assignment(cost_matrix)
-
-    # Get the distances and indices of the matching
-    distances = cost_matrix[row_indices, col_indices]
-    indices = col_indices
-
+    """Compute the matching between two sets of points"""
+    # Build the KDTree
+    tree = KDTree(points2)
+    # Query the tree
+    distances, indices = tree.query(points1)
     return distances, indices
+
+# def compute_matching(points1, points2):
+#     """Compute the matching between two sets of points using the Hungarian Algorithm"""
+#     # Calculate the Euclidean distance matrix between every pair of points in the two sets
+#     cost_matrix = np.sqrt(((points1[:, np.newaxis] - points2)**2).sum(axis=2))
+
+#     # Apply the Hungarian algorithm to find the minimum cost matching
+#     row_indices, col_indices = linear_sum_assignment(cost_matrix)
+
+#     # Get the distances and indices of the matching
+#     distances = cost_matrix[row_indices, col_indices]
+#     indices = col_indices
+
+#     return distances, indices
 
 # SIMILARITIES
 def size_similarity(N_query, N_target):
@@ -79,7 +80,6 @@ def formula_isotopic_charge_similarity(molecule1: dict, molecule2: dict):
         else:
             p_change += 1
             current_mass = molecule1['masses'][i] + molecule2['masses'][i]
-            #standard_mass = Chem.GetMass(molecule1['elements'][i]) + Chem.GetMass(molecule2['elements'][i])
             standard_mass = pt.GetAtomicWeight(molecule1['elements'][i]) + pt.GetAtomicWeight(molecule2['elements'][i])
             n_diff = round(current_mass - standard_mass)
             current_electrons = molecule1['electrons'][i] + molecule2['electrons'][i]
@@ -158,32 +158,35 @@ def compute_similarity_based_on_matching(query, target):
     N1, N2 = len(query['elements']), len(target['elements'])
     if N1 <= N2:
         points1, points2 = query['coordinates'], target['coordinates']
+        points1_no_H, points2_no_H = query['coordinates_no_H'], target['coordinates_no_H']
         molecule1, molecule2 = query, target
     else:   
         points1, points2 = target['coordinates'], query['coordinates']
+        points1_no_H, points2_no_H = target['coordinates_no_H'], query['coordinates_no_H']
         molecule1, molecule2 = target, query
     points1, points2 = molecule1['coordinates'], molecule2['coordinates']
     geometrical_center = [0, 0, 0]
     points1, points2 = translate_points_to_geometrical_center(points1), translate_points_to_geometrical_center(points2)
-    tensor1, tensor2 = compute_inertia_tensor_no_masses(points1), compute_inertia_tensor_no_masses(points2)
-    principal_axes1, eigenvalues1 = compute_principal_axes(tensor1, points1)
-    principal_axes2, eigenvalues2 = compute_principal_axes(tensor2, points2)
+    points1_no_H, points2_no_H = translate_points_to_geometrical_center(points1_no_H), translate_points_to_geometrical_center(points2_no_H)
+    tensor1, tensor2 = compute_inertia_tensor_no_masses(points1_no_H), compute_inertia_tensor_no_masses(points2_no_H)
+    principal_axes1, eigenvalues1 = compute_principal_axes(tensor1, points1_no_H)
+    principal_axes2, eigenvalues2 = compute_principal_axes(tensor2, points2_no_H)
 
     #TODO: to be optimized
-    #visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
-    #visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
+    # visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
+    # visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
 
     # rotate both the points and the relative axis to align with x,y,z
 
     points1, points2 = compute_new_coordinates(principal_axes1, points1), compute_new_coordinates(principal_axes2, points2)
+    points1_no_H, points2_no_H = compute_new_coordinates(principal_axes1, points1_no_H), compute_new_coordinates(principal_axes2, points2_no_H)
 
-    tensor1, tensor2 = compute_inertia_tensor_no_masses(points1), compute_inertia_tensor_no_masses(points2)
-    principal_axes1, eigenvalues1 = compute_principal_axes(tensor1, points1)
-    principal_axes2, eigenvalues2 = compute_principal_axes(tensor2, points2)
+    tensor1, tensor2 = compute_inertia_tensor_no_masses(points1_no_H), compute_inertia_tensor_no_masses(points2_no_H)
+    principal_axes1, eigenvalues1 = compute_principal_axes(tensor1, points1_no_H)
+    principal_axes2, eigenvalues2 = compute_principal_axes(tensor2, points2_no_H)
 
-    #visualize(points, n_prot, center_of_mass, principal_axes, eigenvalues, max_distance, reference_points)
-    #visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
-    #visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
+    visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
+    visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
 
     # Compute the matching
     distances, indices = compute_matching(points1, points2)
