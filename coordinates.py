@@ -57,22 +57,16 @@ def compute_principal_axes(inertia_tensor, points):
     for i, eigenvalue in enumerate(eigenvalues):
         axis = principal_axes[i]
         if abs(eigenvalue) <= 1e-2:
-            eigenvalues[i] = 1e-6
+            eigenvalues[i] = 1e-2
             axis = np.cross(principal_axes[(i+1)%3], principal_axes[(i+2)%3])
             
         # Project the coordinates of the cloud of points onto the fake axis
         # TODO: Problem with sign
         projections = np.sign(np.dot(points, axis))
-        # Compute the weighted sum of projections using the masses
-        # weighted_sum = np.dot(projections, masses)
-        # # projections without masses
+        # projections without masses
         sum = np.sum(projections)
-        # # Normalize the fake axis
-        # if weighted_sum == 0:
-        #     weighted_sum = 1
-        # axis = axis * np.sign(weighted_sum)
-        # consdiering no masses
-        axis = axis * np.sign(sum)
+        if sum != 0:
+            axis = axis * np.sign(sum)
         #axis = axis / np.linalg.norm(axis)
         principal_axes[i] = axis
     
@@ -80,7 +74,7 @@ def compute_principal_axes(inertia_tensor, points):
     #print("Handedness: ", handedness)
 
     if handedness == "left-handed":
-         principal_axes[1] = -principal_axes[1]
+         principal_axes[0] = -principal_axes[0]
 
     return principal_axes, eigenvalues
 
@@ -110,9 +104,9 @@ def covariance_principal_components(points):
 ### Fixed reference system ###
 def compute_new_coordinates(principal_axes, points):
     # Translate the points to the center of mass
-    translated_points = translate_points_to_geometrical_center(points)
+    #translated_points = translate_points_to_geometrical_center(points)
     # Rotate the points so that the principal axes are aligned with the axes of the reference system
-    points_new_coord = translated_points @ principal_axes.T
+    points_new_coord = points @ principal_axes.T
     return points_new_coord
 
 ### Distances from the center of mass ###

@@ -9,16 +9,12 @@ from rdkit import Chem
 from utils import *
 from fingerprints import *
 from similarity_3d import *
-#from pca_fingerprint import *
 from copy import deepcopy
 
-# The properties should be:
-# 1. Number of protons
-# 2. Number of neutrons
-# 3. Number of electrons
 
 # Molecules 
-suppl = Chem.SDMolSupplier('swapping.sdf', removeHs=False)
+#suppl = Chem.SDMolSupplier('swapping.sdf', removeHs=False)
+suppl = Chem.SDMolSupplier('coumarins_test.sdf', removeHs=False)
 #suppl = Chem.SDMolSupplier('isomers.sdf', removeHs=False)
 molecules = [mol for mol in suppl if mol is not None]
 print(len(molecules))
@@ -26,27 +22,18 @@ print(len(molecules))
 molecules_info = {}
 
 for i, molecule in enumerate(molecules):
-    elements, masses, protons, neutrons, electrons, coordinates = get_atoms_info(molecule)
     info = molecule_info(molecule)
-
-    info1 = {'elements': elements, 
-            'masses': masses,
-            'protons': protons, 
-            'neutrons': neutrons, 
-            'electrons': electrons, 
-            'coordinates': coordinates}
     molecules_info[f'molecule_{i}'] = info
 
-molecule_1 = deepcopy(molecules_info['molecule_0'])
-molecule_2 = deepcopy(molecules_info['molecule_0'])
+molecule_1 = deepcopy(molecules_info['molecule_1'])
+molecule_2 = deepcopy(molecules_info['molecule_2'])
 
 # Rotate molecule_2
-molecule_2['coordinates'] = rotate_points(molecule_2['coordinates'], -90, 45, 3)
+molecule_2['coordinates'] = rotate_points(molecule_2['coordinates'], 180, -180, 0)
+molecule_2['coordinates_no_H'] = rotate_points(molecule_2['coordinates_no_H'], 180, -180, 0)
 
 # Perturb coordinates of molecule_2
-molecule_2['coordinates'] = perturb_coordinates(molecule_2['coordinates'], 4)
-
-     
+#molecule_2['coordinates'] = perturb_coordinates(molecule_2['coordinates'], 3)
 
 print('SIMILARITIES')
 print('-------------')
@@ -71,25 +58,24 @@ print('-------------')
 
 # (Standard USR (closest, furthest atoms) with masses, isotopes and charges (It does not handle chirality))
 
+# #### 3- Similarities ND ####
 
-#### 3- Similarities ND ####
+# # 4D with masses 
 
-# 4D with masses 
+# similarity = compute_4D_similarity(molecule_1, molecule_2)
+# print(f'Similarity 4d: {similarity}')
+# print('-------------')
 
-similarity = compute_4D_similarity(molecule_1, molecule_2)
-print(f'Similarity 4d: {similarity}')
-print('-------------')
+# # 5D with masses and charges
 
-# 5D with masses and charges
+# similarity = compute_5D_similarity(molecule_1, molecule_2)
+# print(f'Similarity 5d: {similarity}')
+# print('-------------')
 
-similarity = compute_5D_similarity(molecule_1, molecule_2)
-print(f'Similarity 5d: {similarity}')
-print('-------------')
+# # 6D with masses, isotopes and charges
 
-# 6D with masses, isotopes and charges
-
-similarity = compute_6D_similarity(molecule_1, molecule_2)
-print(f'Similarity 6d: {similarity}')
-print('-------------')
+# similarity = compute_6D_similarity(molecule_1, molecule_2)
+# print(f'Similarity 6d: {similarity}')
+# print('-------------')
 
 plt.show()

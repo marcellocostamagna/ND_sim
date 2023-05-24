@@ -148,6 +148,8 @@ def reorder_info(molecule, indices):
 
     reordered_molecule = {}
     for key, values in molecule.items():
+        if key == 'coordinates_no_H':
+            continue
         values_array = np.array(values)  
         reordered_molecule[key] = values_array[indices]
 
@@ -165,16 +167,22 @@ def compute_similarity_based_on_matching(query, target):
         points1_no_H, points2_no_H = target['coordinates_no_H'], query['coordinates_no_H']
         molecule1, molecule2 = target, query
     points1, points2 = molecule1['coordinates'], molecule2['coordinates']
-    geometrical_center = [0, 0, 0]
     points1, points2 = translate_points_to_geometrical_center(points1), translate_points_to_geometrical_center(points2)
-    points1_no_H, points2_no_H = translate_points_to_geometrical_center(points1_no_H), translate_points_to_geometrical_center(points2_no_H)
+
+    geometrical_center1 = np.mean(points1, axis=0)
+    geometrical_center2 = np.mean(points2, axis=0)
+    points1, points2 = translate_points_to_geometrical_center(points1), translate_points_to_geometrical_center(points2)
+    geometrical_center = [0,0,0]
+    points1_no_H = points1_no_H - geometrical_center1
+    points2_no_H = points2_no_H - geometrical_center2
+    #points1_no_H, points2_no_H = translate_points_to_geometrical_center(points1_no_H), translate_points_to_geometrical_center(points2_no_H)
     tensor1, tensor2 = compute_inertia_tensor_no_masses(points1_no_H), compute_inertia_tensor_no_masses(points2_no_H)
     principal_axes1, eigenvalues1 = compute_principal_axes(tensor1, points1_no_H)
     principal_axes2, eigenvalues2 = compute_principal_axes(tensor2, points2_no_H)
-
+    print(eigenvalues1, eigenvalues2)
     #TODO: to be optimized
-    # visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
-    # visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
+    visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
+    visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
 
     # rotate both the points and the relative axis to align with x,y,z
 
@@ -185,8 +193,8 @@ def compute_similarity_based_on_matching(query, target):
     principal_axes1, eigenvalues1 = compute_principal_axes(tensor1, points1_no_H)
     principal_axes2, eigenvalues2 = compute_principal_axes(tensor2, points2_no_H)
 
-    visualize1(points1, query['protons'], geometrical_center, principal_axes1, eigenvalues1)
-    visualize1(points2, target['protons'], geometrical_center, principal_axes2, eigenvalues2)
+    visualize1(points1, molecule1['protons'], geometrical_center, principal_axes1, eigenvalues1)
+    visualize1(points2, molecule2['protons'], geometrical_center, principal_axes2, eigenvalues2)
 
     # Compute the matching
     distances, indices = compute_matching(points1, points2)
@@ -195,7 +203,7 @@ def compute_similarity_based_on_matching(query, target):
     # Compute the similarities
     similarity_s = size_similarity(N1, N2)
     similarity_r = positional_similarity(distances)
-    if similarity_s > 0.9 and similarity_r > 0.8: #TODO: is there a more objective way of doing this? 
+    if similarity_s > 0.8 and similarity_r > 0.75: #TODO: is there a more objective way of doing this? 
         similarity_f, similarity_n, similarity_e = formula_isotopic_charge_similarity(molecule1, molecule2)
     else:
         similarity_f, similarity_e, similarity_n = reduced_formula_isotopic_charge_similarity(molecule1, molecule2)
@@ -271,16 +279,18 @@ def compute_3d_fingerprint(points, n_prot, n_neut, n_elec):
     reference_points = generate_reference_points(geometrical_center, principal_axes, max_distance)
 
     # compute weighted distances
+    distances = compute_distances(points, reference_points)
     proton_distances = compute_weighted_distances(points, n_prot, reference_points)
     neutron_distances = compute_weighted_distances(points, n_neut, reference_points)
     electron_distances = compute_weighted_distances(points, n_elec, reference_points)
     
     # compute statistics
+    usr_fingerprint = compute_statistics(distances)
     proton_fingerprint = compute_statistics(proton_distances)
     neutron_fingerprint = compute_statistics(neutron_distances)
     electron_fingerprint = compute_statistics(electron_distances)
 
-    fingerprints = [proton_fingerprint, neutron_fingerprint, electron_fingerprint]
+    fingerprints = [usr_fingerprint , proton_fingerprint, neutron_fingerprint, electron_fingerprint]
 
     return fingerprints
 
@@ -292,7 +302,7 @@ def compute_3d_similarity(query, target):
     target_fingerprints = compute_3d_fingerprint(target['coordinates'], target['protons'], target['neutrons'], target['electrons'])
 
     # compute the similarities
-    for i in range(3):
+    for i in range(4):
         similarities.append(1/(1 + calculate_partial_score(query_fingerprints[i], target_fingerprints[i])))
 
     # compute the final similarity
@@ -329,9 +339,12 @@ def compute_nD_fingerprint(data):
 def compute_4D_similarity(query, target):
     """Compute the similarity between two 4D fingerprints"""
 
+    points = translate_points_to_geometrical_center(query['coordinates'])
+    points1 = translate_points_to_geometrical_center(target['coordinates'])
+
     # add the protons to the coordinates
-    data = np.hstack((query['coordinates'], np.array(query['protons']).reshape(-1, 1)))
-    data1 = np.hstack((target['coordinates'], np.array(target['protons']).reshape(-1, 1)))
+    data = np.hstack((points, np.array(query['protons']).reshape(-1, 1)))
+    data1 = np.hstack((points1, np.array(target['protons']).reshape(-1, 1)))
     fingerprint_query = compute_nD_fingerprint(data)
     fingerprint_target = compute_nD_fingerprint(data1)
 
@@ -341,8 +354,11 @@ def compute_4D_similarity(query, target):
 def compute_5D_similarity(query, target):
     """Compute the similarity between two 5D fingerprints"""
 
-    data = np.hstack((query['coordinates'], np.array(query['protons']).reshape(-1, 1), np.array(query['electrons']).reshape(-1, 1)))
-    data1 = np.hstack((target['coordinates'], np.array(target['protons']).reshape(-1, 1), np.array(target['electrons']).reshape(-1, 1)))
+    points = translate_points_to_geometrical_center(query['coordinates'])
+    points1 = translate_points_to_geometrical_center(target['coordinates'])
+
+    data = np.hstack((points, np.array(query['protons']).reshape(-1, 1), np.array(query['electrons']).reshape(-1, 1)))
+    data1 = np.hstack((points1, np.array(target['protons']).reshape(-1, 1), np.array(target['electrons']).reshape(-1, 1)))
 
     fingerprint_query = compute_nD_fingerprint(data)
     fingerprint_target = compute_nD_fingerprint(data1)
@@ -353,8 +369,11 @@ def compute_5D_similarity(query, target):
 def compute_6D_similarity(query, target):
     """Compute the similarity between two 6D fingerprints"""
 
-    data = np.hstack((query['coordinates'], np.array(query['protons']).reshape(-1, 1), np.array(query['electrons']).reshape(-1, 1), np.array(query['neutrons']).reshape(-1, 1)))
-    data1 = np.hstack((target['coordinates'], np.array(target['protons']).reshape(-1, 1), np.array(target['electrons']).reshape(-1, 1), np.array(target['neutrons']).reshape(-1, 1)))
+    points = translate_points_to_geometrical_center(query['coordinates'])
+    points1 = translate_points_to_geometrical_center(target['coordinates'])
+
+    data = np.hstack((points, np.array(query['protons']).reshape(-1, 1), np.array(query['electrons']).reshape(-1, 1), np.array(query['neutrons']).reshape(-1, 1)))
+    data1 = np.hstack((points1, np.array(target['protons']).reshape(-1, 1), np.array(target['electrons']).reshape(-1, 1), np.array(target['neutrons']).reshape(-1, 1)))
 
     fingerprint_query = compute_nD_fingerprint(data)
     fingerprint_target = compute_nD_fingerprint(data1)
