@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.stats import skew
 import math as m
+from rdkit import Geometry as geom
 
 ### Center of mass and geometrical center ###
 def compute_center_of_mass(points, masses):
@@ -34,7 +35,6 @@ def compute_inertia_tensor(points, masses, center_of_mass):
     for point, mass in zip(points, masses):
         r = point - center_of_mass
         inertia_tensor += mass * (np.eye(3) * np.dot(r, r) - np.outer(r, r))
-        #inertia_tensor *= -1
 
     return inertia_tensor
 
@@ -129,10 +129,15 @@ def max_distance_from_axis(points, axis):
 
 ### methods based on the principal axes ###
 def generate_reference_points(center_of_mass, principal_axes, max_distance):
-    points = [center_of_mass]
+    center = geom.Point3D(*center_of_mass.tolist())
+    points = [center]
     
     for axis in principal_axes:
         point = center_of_mass + max_distance * (axis/np.linalg.norm(axis))
+        # Point to 3dPoint
+        point = point.tolist()
+        point = geom.Point3D(*point)
+
         points.append(point)
     
     return points

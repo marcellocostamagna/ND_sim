@@ -155,14 +155,14 @@ def get_all_coordinates(mol):
         coords.append(mol.GetConformer().GetAtomPosition(atom.GetIdx()))
     return coords
 
-def generate_usre_fingerprint(mol):
+def generate_usre_fingerprint(mol, reference_points):
     """Generate the USR fingerprint for a molecule."""
     fingerprint = {}
     # Calculate the fixed points
-    reference_points = calculate_fixed_points(mol)
+    #reference_points = calculate_fixed_points(mol)
     #(Alternative)
-    #reference_points = get_alternative_fix_points_1(fix_points)
-    #reference_points = get_alternative_fix_points_2(fix_points)
+    #reference_points = get_alternative_fix_points_1(reference_points)
+    #reference_points = get_alternative_fix_points_2(reference_points)
     # Calculate the standard USR moments for the entire molecule
     coords = get_all_coordinates(mol)
     moments = calculate_usr_moments(coords, reference_points)
