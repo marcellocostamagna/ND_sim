@@ -176,30 +176,51 @@ def get_coordinates_and_masses(mol):
         masses.append(atom.GetMass())
     return coords, masses
 
+# def generate_usre_fingerprint(mol, reference_points):
+#     """Generate the USR fingerprint for a molecule."""
+#     fingerprint = {}
+#     # Calculate the fixed points
+#     #reference_points = calculate_fixed_points(mol)
+#     #(Alternative)
+#     #reference_points = get_alternative_fix_points_1(reference_points)
+#     #reference_points = get_alternative_fix_points_2(reference_points)
+#     # Calculate the standard USR moments for the entire molecule
+#     coords = get_all_coordinates(mol)
+#     moments = calculate_usr_moments(coords, reference_points)
+#     # Add the moments to the fingerprint (first entry of the dictionary)
+#     fingerprint['molecule'] = moments
+#     # Calculate the USR moments for each element in the molecule
+#     # Get the list of unique atoms in the molecule
+#     unique_atoms = get_list_of_unique_atoms(mol)
+#     for element in unique_atoms:
+#         # Get the coordinates of the element
+#         coords = get_element_coordinates(mol, element)
+#         # Calculate the USR moments for the element
+#         moments = calculate_usr_moments(coords, reference_points)
+#         # Add the moments to the fingerprint
+#         fingerprint[element] = moments
+#     return fingerprint
+
 def generate_usre_fingerprint(mol, reference_points):
     """Generate the USR fingerprint for a molecule."""
     fingerprint = {}
-    # Calculate the fixed points
-    #reference_points = calculate_fixed_points(mol)
-    #(Alternative)
-    #reference_points = get_alternative_fix_points_1(reference_points)
-    #reference_points = get_alternative_fix_points_2(reference_points)
     # Calculate the standard USR moments for the entire molecule
     coords = get_all_coordinates(mol)
     moments = calculate_usr_moments(coords, reference_points)
     # Add the moments to the fingerprint (first entry of the dictionary)
     fingerprint['molecule'] = moments
-    # Calculate the USR moments for each element in the molecule
-    # Get the list of unique atoms in the molecule
-    unique_atoms = get_list_of_unique_atoms(mol)
-    for element in unique_atoms:
+    # Calculate the USR moments for each label in the molecule
+    # Get the list of unique labels in the molecule
+    unique_labels = get_list_of_unique_atoms(mol)
+    for label in unique_labels:
         # Get the coordinates of the element
-        coords = get_element_coordinates(mol, element)
+        coords = get_coordinates_from_label(mol, label)
         # Calculate the USR moments for the element
         moments = calculate_usr_moments(coords, reference_points)
         # Add the moments to the fingerprint
-        fingerprint[element] = moments
+        fingerprint['label'] = moments
     return fingerprint
+
 
 ################### Isomers Discrimination ###################
 
