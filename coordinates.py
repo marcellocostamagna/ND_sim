@@ -47,7 +47,7 @@ def compute_inertia_tensor_no_masses(points):
 
     return inertia_tensor
 
-def compute_principal_axes(inertia_tensor, points):
+def compute_principal_axes(inertia_tensor, points, masses):
     eigenvalues, eigenvectors = np.linalg.eigh(inertia_tensor)
     principal_axes = eigenvectors.T
 
@@ -61,20 +61,25 @@ def compute_principal_axes(inertia_tensor, points):
             axis = np.cross(principal_axes[(i+1)%3], principal_axes[(i+2)%3])
             
         # Project the coordinates of the cloud of points onto the fake axis
-        # TODO: Problem with sign
         projections = np.sign(np.dot(points, axis))
-        # projections without masses
-        sum = np.sum(projections)
-        if sum != 0:
-            axis = axis * np.sign(sum)
+        #Compute the weighted sum of projections using the masses
+        weighted_sum = np.dot(projections, masses)
+        # Normalize the fake axis
+        if weighted_sum == 0:
+            weighted_sum = 1
+        axis = axis * np.sign(weighted_sum)
+        # # projections without masses
+        # sum = np.sum(projections)
+        # if sum != 0:
+        #     axis = axis * np.sign(sum)
         #axis = axis / np.linalg.norm(axis)
         principal_axes[i] = axis
     
     handedness = compute_handedness(principal_axes, eigenvalues)
-    #print("Handedness: ", handedness)
+    print("Handedness: ", handedness)
 
     if handedness == "left-handed":
-         principal_axes[0] = -principal_axes[0]
+         principal_axes[2] = -principal_axes[2]
 
     return principal_axes, eigenvalues
 
