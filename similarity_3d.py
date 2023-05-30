@@ -77,8 +77,13 @@ def get_list_of_unique_atoms(mol):
     """Get the list of unique atoms in the molecule."""
     unique_atoms = []
     for atom in mol.GetAtoms():
-        if atom.GetSymbol() not in unique_atoms:
-            unique_atoms.append(atom.GetSymbol())
+        mass = round(atom.GetMass())
+        charge = atom.GetFormalCharge()
+        symbol = atom.GetSymbol()
+        label = f'{symbol}_{mass}_{charge}'
+        atom.SetProp('label', label)
+        if label not in unique_atoms:
+            unique_atoms.append(label)
     return unique_atoms
 
 def get_distributions(coords: list, fixed_points):
@@ -154,6 +159,14 @@ def get_all_coordinates(mol):
     for atom in mol.GetAtoms():
         coords.append(mol.GetConformer().GetAtomPosition(atom.GetIdx()))
     return coords
+
+def get_coordinates_and_masses(mol):
+    coords = []
+    masses = []
+    for atom in mol.GetAtoms():
+        coords.append(mol.GetConformer().GetAtomPosition(atom.GetIdx()))
+        masses.append(atom.GetMass())
+    return coords, masses
 
 def generate_usre_fingerprint(mol, reference_points):
     """Generate the USR fingerprint for a molecule."""
