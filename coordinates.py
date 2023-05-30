@@ -94,6 +94,26 @@ def compute_handedness(principal_axes, eigenvalues):
         return "right-handed"
     else:
         return "left-handed"
+    
+def find_minimal_rotation(eigenvectors_1, eigenvectors_2):
+    """
+    Finds the minimal rotation to align eignevectorsa_1 with eigenvectors_2
+    """
+    max_trace = -np.inf
+    best_R = None
+
+    orientations = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]]
+
+    for orientation in orientations:
+        evecs_2_oriented = eigenvectors_2 * np.array(orientation)[:, np.newaxis]
+
+        R = evecs_2_oriented @ eigenvectors_1.T
+
+        if np.trace(R) > max_trace:
+            max_trace = np.trace(R)
+            best_R = R
+
+    return best_R
 
 ### Covariance and principal axes ###
 
