@@ -153,6 +153,14 @@ def get_element_coordinates(mol, element):
             coords.append(mol.GetConformer().GetAtomPosition(atom.GetIdx()))
     return coords
 
+def get_coordinates_from_label(mol, label):
+    """Get the coordinates of all the atoms with a given label in the molecule."""
+    coords = []
+    for atom in mol.GetAtoms():
+        if atom.GetProp('label') == label:
+            coords.append(mol.GetConformer().GetAtomPosition(atom.GetIdx()))
+    return coords
+
 def get_all_coordinates(mol):
     """Get the coordinates of all the atoms in the molecule."""
     coords = []
