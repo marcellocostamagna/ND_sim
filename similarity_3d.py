@@ -15,6 +15,14 @@ def get_number_of_atoms_of_element(element: str, mol):
             counter += 1
     return counter
 
+def get_number_of_atoms_with_label(label, mol):
+    """Get the number of atoms with a given label in the molecule."""
+    counter = 0
+    for atom in mol.GetAtoms():
+        if atom.GetProp('label') == label:
+            counter += 1
+    return counter
+
 ########### Functions to generate the USRE fingerprint of a molecule ###########
 
 def calculate_centroid(molecule):
@@ -218,7 +226,7 @@ def generate_usre_fingerprint(mol, reference_points):
         # Calculate the USR moments for the element
         moments = calculate_usr_moments(coords, reference_points)
         # Add the moments to the fingerprint
-        fingerprint['label'] = moments
+        fingerprint[f'{label}'] = moments
     return fingerprint
 
 
@@ -280,6 +288,42 @@ def get_keys_to_iterate_on(fingerprint_1, fingerprint_2):
     atoms = list(intersection) + list(diff1) + list(diff2)
     return atoms, intersection, diff1, diff2
 
+# def compute_USRE_similarity(fingerprint_target, fingerprint_query, target_mol, query_mol):
+#     """Compute the USRE similarity between two molecules."""
+#     # Get the keys to iterate on
+#     _, intersection, _, _ = get_keys_to_iterate_on(fingerprint_target, fingerprint_query)
+
+#     # First component (standard USR)
+#     # Calculate the partial score for the entire molecule
+#     partial_score = calculate_partial_score(fingerprint_target['molecule'], fingerprint_query['molecule'])
+#     usr_similarity = 1/(1 + partial_score)
+
+#     # Second component (shared elements)
+#     # Calculate the partial score for the shared elements
+#     partial_score_shared = 0
+#     shared_atoms_similarity = 0
+#     shared_atoms_target = 0
+#     shared_atoms_query = 0
+#     # Get the total number of shared atoms in the molecules
+#     for atom in intersection - {'molecule'}:
+#         shared_atoms_target += get_number_of_atoms_of_element(atom, target_mol)
+#         shared_atoms_query += get_number_of_atoms_of_element(atom, query_mol)
+#     total_shared_atoms = shared_atoms_target + shared_atoms_query    
+
+#     # Iterate through the shared elements but not molecule
+#     for atom in intersection - {'molecule'}:
+#         partial_score_shared = calculate_partial_score(fingerprint_target[atom], fingerprint_query[atom])
+#         local_coefficient = (get_number_of_atoms_of_element(atom, target_mol) + get_number_of_atoms_of_element(atom, query_mol))/total_shared_atoms
+#         shared_atoms_similarity += (1/(1 + partial_score_shared)) * local_coefficient
+
+#     # Third component (unshared elements)
+#     f = (shared_atoms_target + shared_atoms_query)/(target_mol.GetNumAtoms() + query_mol.GetNumAtoms())
+
+#     # Final similarity score
+#     similarity = ( usr_similarity +  shared_atoms_similarity + f)/3  
+
+#     return similarity
+
 def compute_USRE_similarity(fingerprint_target, fingerprint_query, target_mol, query_mol):
     """Compute the USRE similarity between two molecules."""
     # Get the keys to iterate on
@@ -298,14 +342,14 @@ def compute_USRE_similarity(fingerprint_target, fingerprint_query, target_mol, q
     shared_atoms_query = 0
     # Get the total number of shared atoms in the molecules
     for atom in intersection - {'molecule'}:
-        shared_atoms_target += get_number_of_atoms_of_element(atom, target_mol)
-        shared_atoms_query += get_number_of_atoms_of_element(atom, query_mol)
+        shared_atoms_target += get_number_of_atoms_with_label(atom, target_mol)
+        shared_atoms_query += get_number_of_atoms_with_label(atom, query_mol)
     total_shared_atoms = shared_atoms_target + shared_atoms_query    
 
     # Iterate through the shared elements but not molecule
     for atom in intersection - {'molecule'}:
         partial_score_shared = calculate_partial_score(fingerprint_target[atom], fingerprint_query[atom])
-        local_coefficient = (get_number_of_atoms_of_element(atom, target_mol) + get_number_of_atoms_of_element(atom, query_mol))/total_shared_atoms
+        local_coefficient = (get_number_of_atoms_with_label(atom, target_mol) + get_number_of_atoms_with_label(atom, query_mol))/total_shared_atoms
         shared_atoms_similarity += (1/(1 + partial_score_shared)) * local_coefficient
 
     # Third component (unshared elements)
@@ -315,4 +359,3 @@ def compute_USRE_similarity(fingerprint_target, fingerprint_query, target_mol, q
     similarity = ( usr_similarity +  shared_atoms_similarity + f)/3  
 
     return similarity
-
