@@ -1,6 +1,35 @@
 # Python script collecting operration to modify, perturb and change the poin clouds 
 
 import numpy as np
+def translate_points(points, x, y, z):
+    """
+    Translate a set of 3D points by the given x, y, and z values.
+    
+    Parameters
+    ----------
+    points : numpy.ndarray
+        An n x 3 array of 3D points.
+    x : float
+        Translation along the x-axis.
+    y : float
+        Translation along the y-axis.
+    z : float
+        Translation along the z-axis.
+
+    Returns
+    -------
+    numpy.ndarray
+        An n x 3 array of translated 3D points.
+    """
+
+    # Create a translation vector
+    translation = np.array([x, y, z])
+
+    # Translate the points
+    translated_points = points + translation
+
+    return translated_points
+
 
 def rotate_points(points, angle1_deg, angle2_deg, angle3_deg):
     """
@@ -47,7 +76,8 @@ def rotate_points(points, angle1_deg, angle2_deg, angle3_deg):
     R_combined = np.dot(Rx, np.dot(Ry, Rz))
 
     # Apply the combined rotation matrix
-    rotated_points = np.dot(points, R_combined)
+    #rotated_points = np.dot(points, R_combined)
+    rotated_points = np.dot(R_combined.T, points.T).T
 
     return rotated_points
 
