@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.decomposition import PCA
 from scipy.spatial import distance
+from scipy.linalg import null_space
 import math
 from nD_tools import *
 from perturbations import *
@@ -8,16 +9,24 @@ from fingerprints import *
 from similarity_3d import calculate_partial_score
 
 
-# TETRAHEDRON
-data = np.array([
-    [  1,  0, -1/math.sqrt(2),  7],
-    [  0,  0,  0,               6],
-    [ -1,  0, -1/math.sqrt(2),  1],
-    [  0,  1.1,  1/math.sqrt(2),  8],
-    [  0, -1,  1/math.sqrt(2),  9],
-])
 
-print(data)
+
+# TETRAHEDRON
+# data = np.array([
+#     [  1,  0, -1/math.sqrt(2),  7],
+#     [  0,  0,  0,               6],
+#     [ -1,  0, -1/math.sqrt(2),  1],
+#     [  0,  1.01,  1/math.sqrt(2),  8],
+#     [  0, -1,  1/math.sqrt(2),  9],
+# ])
+
+# LINEAR MOLECULE
+data = np.array([
+    [  0,  0,  1,  6],
+    [  0,  0,  -1,  1],
+])
+# numeber of coloumns in data
+N_AXIS_REQUIRED = np.shape(data)[1] 
 
 # tetrahedron rotated 90 degrees around x axis
 # data_rotated = np.array([
@@ -50,14 +59,19 @@ print(data)
 # data = data - np.mean(data, axis=0)
 
 # Perform PCA on the 4D data
-pca = PCA(n_components=4)
+pca = PCA()
 pca.fit(data)
 
 # The principal axes in feature space, representing the directions of maximum variance in the data.
 # These are your "direction vectors" for each principal axis
 axes = pca.components_
+n_axes = pca.n_components_
 eigenvalues = pca.explained_variance_
-
+if n_axes < N_AXIS_REQUIRED:
+    additional_vectors = null_space(axes)
+    additional_vectors = additional_vectors / np.linalg.norm(additional_vectors, axis=0)
+    additional_vectors = additional_vectors.T
+    axes = np.vstack((axes, additional_vectors))
 
 print('Principal components')
 for i in np.argsort(eigenvalues)[::-1]:
@@ -79,9 +93,9 @@ for i, point in enumerate(data):
     for j, ref_point in enumerate(reference_points):
         distances[i, j] = distance.euclidean(point, ref_point)
 
-print(distances)
+print(distances.T)
 
-fingerprint = compute_statistics(distances)
+fingerprint = compute_statistics(distances.T)
 
 print(fingerprint)
 
@@ -89,10 +103,18 @@ print(fingerprint)
 coords = data[:, :-1]
 masses = data[:, -1]
 
-coords, rotation_matrix = rotate_points(coords, 0, 0, 90)
+#coords, rotation_matrix = rotate_points(coords, 0, 0, 90)
+
+angle_x = np.random.uniform(-180, 180)
+angle_y = np.random.uniform(-180, 180)
+angle_z = np.random.uniform(-180, 180)
+
+coords, rotation_matrix = rotate_points(coords, angle_x, angle_y, angle_z)
 
 data1 = np.c_[coords, masses]
 #data1 = data_rotated
+
+N_AXIS_REQUIRED = np.shape(data1)[1] 
 
 print(data1)
 
@@ -100,11 +122,17 @@ print(data1)
 # data1 = data1 - np.mean(data1, axis=0)
 
 # Perform PCA on the 4D data
-pca1 = PCA(n_components=4)
+pca1 = PCA()
 pca1.fit(data1)
 
 axes1 = pca1.components_
 eigenvalues1 = pca1.explained_variance_
+
+if pca1.n_components_ < N_AXIS_REQUIRED:    
+    additional_vectors = null_space(axes1)
+    additional_vectors = additional_vectors / np.linalg.norm(additional_vectors, axis=0)
+    additional_vectors = additional_vectors.T
+    axes1 = np.vstack((axes1, additional_vectors))
 
 
 print('Principal components')
@@ -123,9 +151,9 @@ for i, point in enumerate(data1):
     for j, ref_point in enumerate(reference_points1):
         distances1[i, j] = distance.euclidean(point, ref_point)
 
-print(distances1)
+print(distances1.T)
 
-fingerprint1 = compute_statistics(distances1)
+fingerprint1 = compute_statistics(distances1.T)
 
 print(fingerprint1)
 
