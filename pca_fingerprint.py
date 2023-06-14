@@ -1,52 +1,67 @@
 import numpy as np
+from sklearn.decomposition import PCA
+from scipy.spatial import distance
+from scipy.linalg import null_space
+import math
+from nD_tools import *
+from perturbations import *
+import fingerprints as fp
+import sklearn.preprocessing as skp
 
 
-def principal_components(points, masses):
-    """
-    Calculates the principal components (eigenvectors) of the covariance matrix of points with masses.
 
-    Args:
-        points (numpy.ndarray): A numpy array of shape (n, 3), representing n points in 3D space.
-        masses (numpy.ndarray): A numpy array of shape (n,), representing the masses of each point.
+def get_pca_fingerprint(data):
+    """Computes the PCA fingerprint of a given data set."""
+    N_AXIS_REQUIRED = np.shape(data)[1]
+    DIST = 1
+    print('Data')   
+    print(data)
 
-    Returns:
-        numpy.ndarray: A numpy array of shape (3, 3), containing the eigenvectors corresponding to the principal components.
-    """
-    points_with_masses = np.hstack((points, masses.reshape(-1, 1)))
-    covariance_matrix = np.cov(points_with_masses, ddof=0, rowvar=False)
-    eigenvalues, eigenvectors = np.linalg.eig(covariance_matrix)
-    sorted_indices = np.argsort(eigenvalues)[::-1]
-    return eigenvectors[:, sorted_indices]
+    pca = PCA()
+    pca.fit(data)
 
-def max_distance_from_center(points, center):
-    """
-    Calculates the maximum distance between any point in the points array and the given center point.
-
-    Args:
-        points (numpy.ndarray): A numpy array of shape (n, 3), representing n points in 3D space.
-        center (numpy.ndarray): A numpy array of shape (3,), representing the central point.
-
-    Returns:
-        float: The maximum distance between any point in the points array and the given center point.
-    """
-    distances = np.linalg.norm(points - center, axis=1)
-    return np.max(distances)
-
-def compute_reference_points(points, masses):
-    """
-    Computes the four reference points along the principal axes, each at the maximum distance from the center.
-
-    Args:
-        points (numpy.ndarray): A numpy array of shape (n, 3), representing n points in 3D space.
-        masses (numpy.ndarray): A numpy array of shape (n,), representing the masses of each point.
-
-    Returns:
-        list: A list of four numpy arrays of shape (3,), each representing a reference point along the principal axes.
-    """
-    center = center_of_mass(points, masses)
-    principal_axes = principal_components(points, masses)
+    # The principal axes in feature space, representing the directions of maximum variance in the data.
+    axes = pca.components_
+    n_axes = pca.n_components_
+    eigenvalues = pca.explained_variance_
     
-    scale = max_distance_from_center(points, center)
-    
-    reference_points = [center + scale * axis for axis in principal_axes.T]
-    return reference_points
+    if n_axes < N_AXIS_REQUIRED:
+        additional_vectors = null_space(axes).T
+        axes = np.vstack((axes, additional_vectors))
+
+    print('Principal components')
+    for i in np.argsort(eigenvalues)[::-1]:
+        print(eigenvalues[i],'->',axes[i])
+
+    # Standardize the data
+    data = skp.StandardScaler().fit_transform(data)
+    print('Standardized data')
+    print(data)
+
+    # Compute the centroid
+    centroid = np.mean(data, axis=0)
+    print('Centroid')
+    print(centroid)
+
+    # Compute the 4 reference points along each axis
+    reference_points = [centroid + DIST * axis for axis in axes]
+    reference_points.append(centroid)
+
+    print('Reference_points')
+    print(np.array(reference_points))
+
+
+    # Compute the Euclidean distance of each point from each reference point
+    distances = np.empty((data.shape[0], len(reference_points)))
+    for i, point in enumerate(data):
+        for j, ref_point in enumerate(reference_points):
+            distances[i, j] = distance.euclidean(point, ref_point)
+    print('Distances')
+    print(distances.T)
+
+    fingerprint = fp.compute_statistics(distances.T)
+    print('Fingerprint')
+    print(fingerprint)
+
+    return fingerprint
+
