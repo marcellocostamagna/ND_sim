@@ -18,6 +18,7 @@ def get_atoms_info(molecule):
     elements = []
     coordinates = []
     coordinates_no_H = []
+    delta_neutrons = []
 
     for atom in molecule.GetAtoms():
         element_symbol = atom.GetSymbol()
@@ -36,25 +37,51 @@ def get_atoms_info(molecule):
         coordinates.append((position.x, position.y, position.z))
         if element_symbol != 'H':
             coordinates_no_H.append((position.x, position.y, position.z))
+        delta_neutrons.append(neutron_num - atomic_num)
+
 
     coordinates = np.array(coordinates)
+    coordinates_no_H = np.array(coordinates_no_H)
 
-    return elements, masses, protons, neutrons, electrons, coordinates, coordinates_no_H
-    #return protons, neutrons, electrons, coordinates
-
-
-# # Molecules 
-# suppl = Chem.SDMolSupplier('coumarins.sdf', removeHs=False)
-# molecules = [mol for mol in suppl if mol is not None]
-# #molecules_2 = Chem.SDMolSupplier('sample3d_optimized_switched.sdf')
+    return elements, masses, protons, neutrons, electrons, coordinates, coordinates_no_H, formal_charges, delta_neutrons
 
 
-# for i, molecule in enumerate(molecules):
-#     protons, neutrons, electrons, formal_charges, isotopes, coordinates = get_atoms_info(molecule)
-#     print(f'Molecule {i + 1}:')
-#     print("Protons:", protons)
-#     print("Neutrons:", neutrons)
-#     print("Electrons:", electrons)
-#     print("Formal charges:", formal_charges)
-#     print("Isotopes:", isotopes)
+def molecule_info(molecule):
+
+    elements, masses, protons, neutrons, electrons, coordinates, coordinates_no_H, formal_charges, delta_neutrons = get_atoms_info(molecule)
+    info = {'elements': elements,
+            'masses': masses,
+            'protons': protons, 
+            'neutrons': neutrons, 
+            'electrons': electrons, 
+            'coordinates': coordinates,
+            'coordinates_no_H': coordinates_no_H,
+            'formal_charges': formal_charges,
+            'delta_neutrons': delta_neutrons }
+    return info
+
+def normalize_features(info: dict):
+    """
+    Normalizes the numbers of protons, neutrons and electrons of a molecule 
+    using the range of the coordinates
+    """
+    # Get the maximum and minimum from the coordinates array
+    max = np.amax(info['coordinates'])
+    min = np.amin(info['coordinates'])
+
+    # Normalize the features
+    # Protons
+    p_min = np.amin(info['protons'])
+    p_max = np.amax(info['protons'])
+    info['protons'] = (info['protons'] - p_min) / (p_max - p_min) * (max - min) + min
+    # Neutrons
+    n_min = np.amin(info['neutrons'])
+    n_max = np.amax(info['neutrons'])
+    info['neutrons'] = (info['neutrons'] - n_min) / (n_max - n_min) * (max - min) + min
+    # Electrons
+    e_min = np.amin(info['electrons'])
+    e_max = np.amax(info['electrons'])
+    info['electrons'] = (info['electrons'] - e_min) / (e_max - e_min) * (max - min) + min
+
+    return info
 
