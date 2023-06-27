@@ -1,26 +1,20 @@
+import numpy as np
 import pytest
-import sys
-import os
-from fingerprints import *
-from pca_fingerprint import *
+from ..source import pca
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+def test_perform_PCA_and_get_transformed_data():
+    # Define a simple 2D data to perform PCA
+    original_data = np.array([[1, 2], [3, 4], [5, 6]])
 
-def test_principle_components():
-    """ Test that the principle components obtained from the 
-    Single Value Decomposition and from the eigendecomposition of 
-    the covariance matrix are the same.
-    """
-    data = np.array([[0, 0, 0, 0, 0, 0],
-                        [1, 1, 1, 1, 1, 1],
-                        [2, 2, 2, 2, 2, 2],
-                        [3, 3, 3, 3, 3, 3],
-                        [4, 4, 4, 4, 4, 4],
-                        [5, 5, 5, 5, 5, 5],
-                        [6, 6, 6, 6, 6, 6]]).astype(float)
-    
-    fingerprint_pca = get_pca_fingerprint(data)
-    fingerprint_cov = compute_nD_fingerprint(data)
+    # Call your function
+    original, transformed_data, axes, eigenvalues = pca.perform_PCA_and_get_transformed_data(original_data)
 
-    with pytest.raises(AssertionError):
-        assert fingerprint_pca == fingerprint_cov
+    # Assertions to check if function is working correctly
+
+    # Check if original data is unchanged
+    np.testing.assert_array_equal(original, original_data)
+
+    # Check if axes and eigenvalues are of correct shape
+    assert axes.shape[0] == eigenvalues.shape[0] == original_data.shape[1]
+
+    # Add more assertions as needed to verify the correctness of transformed_data, axes, and eigenvalues
