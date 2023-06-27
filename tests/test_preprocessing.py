@@ -55,59 +55,44 @@ def test_collect_molecules_from_sdf(benzene_molecule):
  
     molecules = pre_processing.collect_molecules_from_sdf(temp_name)
 
-    # adjust these tests based on the contents of your test sdf file
     assert len(molecules) > 0
     assert isinstance(molecules[0], Chem.Mol)
 
-# Testing function colslect_molecule_info
 def test_collect_molecule_info(benzene_molecule):
-    # Given
-    # use benzene molecule as input
-
-    # When
     info = pre_processing.collect_molecule_info(benzene_molecule)
-
-    # Then
     assert isinstance(info, dict)
     assert set(info.keys()) == set(['coordinates', 'protons', 'delta_neutrons', 'formal_charges'])
+    for key in info.keys():
+        assert len(info[key]) > 0
+        assert not np.any(np.isnan(info[key]))
 
-# Testing function normalize_features
 def test_normalize_features(benzene_molecule):
-    # Given
     info = pre_processing.collect_molecule_info(benzene_molecule)
-
-    # When
     normalized_info = pre_processing.normalize_features(info)
 
-    # Then
     assert np.max(normalized_info['protons']) <= np.max(normalized_info['coordinates'])
     assert np.min(normalized_info['protons']) >= np.min(normalized_info['coordinates'])
-    # Repeat this for 'neutrons' and 'formal_charges'
+    assert np.max(normalized_info['delta_neutrons']) <= np.max(normalized_info['coordinates'])
+    assert np.min(normalized_info['delta_neutrons']) >= np.min(normalized_info['coordinates'])
+    assert np.max(normalized_info['formal_charges']) <= np.max(normalized_info['coordinates'])
+    assert np.min(normalized_info['formal_charges']) >= np.min(normalized_info['coordinates'])
 
-# Testing function taper_features
 def test_taper_features(benzene_molecule):
-    # Given
     info = pre_processing.collect_molecule_info(benzene_molecule)
     info = pre_processing.normalize_features(info)
 
-    # When
-    tapered_info = pre_processing.taper_features(info, np.tanh)  # for example, using np.tanh as tapering function
+    tapered_info = pre_processing.taper_features(info, np.log) 
 
-    # Then
-    assert np.all(np.isfinite(tapered_info['protons']))  # no NaN or infinite values
+    assert np.all(np.isfinite(tapered_info['protons'])) 
     assert np.all(np.isfinite(tapered_info['delta_neutrons']))
     assert np.all(np.isfinite(tapered_info['formal_charges']))
 
-# Testing function get_molecule_6D_datastructure
 def test_get_molecule_6D_datastructure(benzene_molecule):
-    # Given
     info = pre_processing.collect_molecule_info(benzene_molecule)
     info = pre_processing.normalize_features(info)
-    info = pre_processing.taper_features(info, np.tanh)
+    info = pre_processing.taper_features(info, np.log)
 
-    # When
     molecule_6D = pre_processing.get_molecule_6D_datastructure(info)
 
-    # Then
-    assert molecule_6D.shape[1] == 6  # Check if it's indeed a 6D data structure
-    assert molecule_6D.shape[0] == benzene_molecule.GetNumAtoms()  # Check if the number of rows matches the number of atoms
+    assert molecule_6D.shape[1] == 6 
+    assert molecule_6D.shape[0] == benzene_molecule.GetNumAtoms()  
