@@ -4,7 +4,6 @@ import tempfile
 from rdkit import Chem
 from ..source import pre_processing
 import pytest
-import os
 
 # Create fixture for benzene molecule
 
@@ -79,17 +78,13 @@ def test_normalize_features(benzene_molecule):
 
 def test_taper_features(benzene_molecule):
     info = pre_processing.collect_molecule_info(benzene_molecule)
-    info = pre_processing.normalize_features(info)
-
     tapered_info = pre_processing.taper_features(info, np.log) 
-
     assert np.all(np.isfinite(tapered_info['protons'])) 
     assert np.all(np.isfinite(tapered_info['delta_neutrons']))
     assert np.all(np.isfinite(tapered_info['formal_charges']))
 
 def test_get_molecule_6D_datastructure(benzene_molecule):
     info = pre_processing.collect_molecule_info(benzene_molecule)
-    info = pre_processing.normalize_features(info)
     info = pre_processing.taper_features(info, np.log)
 
     molecule_6D = pre_processing.get_molecule_6D_datastructure(info)
