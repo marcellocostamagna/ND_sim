@@ -1,0 +1,9 @@
+image: python:3.10.11
+
+before_script:
+  - python -m pip install --upgrade pip
+  - pip install pytest
+
+test:
+  script:
+    - pytest tests/
