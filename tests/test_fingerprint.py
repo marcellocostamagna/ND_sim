@@ -2,10 +2,11 @@
 
 import numpy as np
 import pytest
-from ..source import fingerprint
+from source import fingerprint
 
 def test_get_reference_points():
-    points = fingerprint.get_reference_points()
+    dimensionality = 6
+    points = fingerprint.get_reference_points(dimensionality)
     assert isinstance(points, np.ndarray)
     assert points.shape == (7, 6)  # 6D centroid plus 6 6D unit vectors
 

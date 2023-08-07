@@ -2,7 +2,7 @@
 import numpy as np
 import tempfile
 from rdkit import Chem
-from ..source import pre_processing
+from source import pre_processing
 import pytest
 
 # Create fixture for benzene molecule
