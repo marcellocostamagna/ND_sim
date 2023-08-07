@@ -17,14 +17,14 @@ molecules_info = [collect_molecule_info(molecule) for molecule in molecules]
 # Second normalization
 #molecules_info = [normalize_features2(molecule) for molecule in molecules_info]
 # Tapering
-#molecules_info = [taper_features(molecule, np.log) for molecule in molecules_info]
+molecules_info = [taper_features(molecule, np.log) for molecule in molecules_info]
 # Get the 6D matrix for each molecule
 molecules_data = [get_molecule_6D_datastructure(molecule_info) for molecule_info in molecules_info]
 
 # PCA
 # Get the PCA tranformed data 
-_, tranformed_data, _, _ = perform_PCA_and_get_transformed_data(molecules_data[0])
-_, transformed_data1, _, _ = perform_PCA_and_get_transformed_data(molecules_data[1])
+_, tranformed_data, _, _ = perform_PCA_and_get_transformed_data_cov(molecules_data[2])
+_, transformed_data1, _, _ = perform_PCA_and_get_transformed_data_cov(molecules_data[3])
 
 # FINGERPRINT
 # Get the fingerprint from teh tranformed data
