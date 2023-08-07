@@ -4,12 +4,12 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.stats import skew
 
-def get_reference_points():
+def get_reference_points(dimensionality):
     """
     Returns the reference points
     """
-    centroid = np.array([0, 0, 0, 0, 0, 0])
-    axis_points = np.eye(6)
+    centroid = np.zeros(dimensionality)
+    axis_points = np.eye(dimensionality)
     reference_points = np.vstack((centroid, axis_points))
     return reference_points
 
@@ -17,7 +17,7 @@ def compute_distances(molecule_data: np.ndarray):
     """
     Computes the Euclidean distance of each point from each reference point
     """
-    reference_points = get_reference_points()
+    reference_points = get_reference_points(molecule_data.shape[1])
     distances = np.empty((molecule_data.shape[0], len(reference_points)))
     for i, point in enumerate(molecule_data):
         for j, ref_point in enumerate(reference_points):
@@ -36,7 +36,6 @@ def compute_statistics(distances):
     statistics_list = [element for row in statistics_matrix for element in row]
 
     return statistics_list  
-
 
 def get_fingerprint(molecule_data: np.ndarray):
     """Computes the fingerprint of a given data set."""
