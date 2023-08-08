@@ -1,8 +1,9 @@
-# Import necessary packages and modules
+# Script to test the functions in the preprocessing.py file
+
 import numpy as np
 import tempfile
 from rdkit import Chem
-from source import pre_processing
+from similarity.source import pre_processing
 import pytest
 
 # Create fixture for benzene molecule

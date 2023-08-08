@@ -1,5 +1,6 @@
-import pytest
-from source import similarity
+# Script to test the functions in the similarity.py file
+
+from similarity.source import similarity
 
 def test_calculate_partial_score():
     moments1 = [1, 2, 3, 4, 5]

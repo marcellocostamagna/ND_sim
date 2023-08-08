@@ -1,6 +1,7 @@
+# Script to test the functions in the pca_ransform.py file
+
 import numpy as np
-import pytest
-from source import pca_tranform
+from similarity.source import pca_tranform
 
 def generate_multivariate_not_rotated_data(n_dim, variances):
     mean = np.zeros(n_dim)

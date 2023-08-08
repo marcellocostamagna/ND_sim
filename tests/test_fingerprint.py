@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from source import fingerprint
+from similarity.source import fingerprint
 
 def test_get_reference_points():
     dimensionality = 6
