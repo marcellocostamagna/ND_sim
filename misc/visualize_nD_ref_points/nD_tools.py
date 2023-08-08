@@ -43,11 +43,13 @@ def plot_data_and_ref_points(data):
                c='red', marker='*', alpha=POINTTRANSPARENCY)
     
     reference_points = centroid + eigenvectors*(data.max(axis=0)-centroid)
-    
+    dist = []
     distances = np.linalg.norm(data - centroid, axis = 1)
     print(f'Distances to cen0',distances)
+    dist.append(distances)
     for i in range(data.shape[1]):
         distances = np.linalg.norm(data - reference_points[i], axis = 1)
+        dist.append(distances)
         print(f'Distances to cen{(i+1)}',distances)
     
     x_coord_refs = reference_points[:, [0]]
@@ -62,5 +64,7 @@ def plot_data_and_ref_points(data):
     for x,y,z,i in zip(x_coord_refs,y_coord_refs,z_coord_refs,range(
         len(x_coord_refs))):
         ax.text(x[0],y[0],z[0],i)
-    plt.show()
+    plt.show(block=False)
+    plt.pause(0.001)
+    return dist
 
