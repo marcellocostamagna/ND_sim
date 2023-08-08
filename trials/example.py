@@ -8,7 +8,7 @@ import os
 cwd = os.getcwd()
 # PRE-PROCESSING
 # List of molecules from SDF file
-molecules = collect_molecules_from_sdf(f'{cwd}/similarity/swapping.sdf')
+molecules = collect_molecules_from_sdf(f'{cwd}/similarity/sd_data/swapping.sdf')
 # List of dictionaries containing information about each molecule
 molecules_info = [collect_molecule_info(molecule) for molecule in molecules]
 # Manipulation of molecules_info: Normalization or Tapering
