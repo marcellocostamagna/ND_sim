@@ -1,16 +1,20 @@
 # 6D Molecular Similarity
 
-This directory contains the files and folder created during the development of a 6D molecular similarity measure and it ought to become the package to import when willing to use such similarity.
+This directory hosts the resources for the development of a 6D molecular similarity measure. Ideally, this will serve as the go-to package for those looking to employ such a similarity metric.
 
-# Folder structure
+## Folder Structure
 
-Source: conatins the actual code of the similarity
+- **Source**: 
+  - Houses the core code for the 6D molecular similarity measure.
+  
+- **Tests**: 
+  - Consists of unit tests ensuring the proper functionality of the measure.
 
-Tests: Unit tests
-
-Trials: Collect miscellaneous scripts, e.g., `example.py` illustrates the use of the similarity and its functions.
-There are two visualization script for the 3D and 4D case to show the outcomes of the similarity.
-`perturbation.py` collects different functions for applying some transformations to molecules (e.g, translation, rotation, ...)
+- **Trials**: 
+  - A collection of miscellaneous scripts. For instance:
+    - `example.py` demonstrates how to utilize the similarity measure and its associated functions.
+    - There are visualization scripts for both 3D and 4D cases, showcasing the results of the similarity metric.
+    - `perturbation.py` aggregates various functions to apply transformations to molecules, such as translation, rotation, and more.
 
 
 
