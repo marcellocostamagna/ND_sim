@@ -13,16 +13,28 @@ def get_reference_points(dimensionality):
     reference_points = np.vstack((centroid, axis_points))
     return reference_points
 
-def compute_distances(molecule_data: np.ndarray):
+def compute_distances(molecule_data: np.ndarray, scaling_factor=None, scaling_matrix=None):
     """
     Computes the Euclidean distance of each point from each reference point
     """
+
+    if scaling_factor is not None and scaling_matrix is not None:
+        raise ValueError("Both scaling_factor and scaling_matrix provided. Please provide only one.")
+
     reference_points = get_reference_points(molecule_data.shape[1])
+
+    # Scale the reference points based on provided scaling factor or matrix
+    if scaling_factor is not None:
+        reference_points *= scaling_factor
+    elif scaling_matrix is not None:
+        reference_points = np.dot(reference_points, scaling_matrix)
+
     distances = np.empty((molecule_data.shape[0], len(reference_points)))
     for i, point in enumerate(molecule_data):
         for j, ref_point in enumerate(reference_points):
             distances[i, j] = distance.euclidean(point, ref_point)
     return distances
+
 
 def compute_statistics(distances):
     means = np.mean(distances, axis=1)
