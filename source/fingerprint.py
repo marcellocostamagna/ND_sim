@@ -17,10 +17,6 @@ def compute_distances(molecule_data: np.ndarray, scaling_factor=None, scaling_ma
     """
     Computes the Euclidean distance of each point from each reference point
     """
-
-    if scaling_factor is not None and scaling_matrix is not None:
-        raise ValueError("Both scaling_factor and scaling_matrix provided. Please provide only one.")
-
     reference_points = get_reference_points(molecule_data.shape[1])
 
     # Scale the reference points based on provided scaling factor or matrix
@@ -49,8 +45,20 @@ def compute_statistics(distances):
 
     return statistics_list  
 
-def get_fingerprint(molecule_data: np.ndarray):
-    """Computes the fingerprint of a given data set."""
+def get_fingerprint(molecule_data: np.ndarray, scaling_factor=None, scaling_matrix=None):
+    """Computes the fingerprint of a given data set.
+    Parameters:
+    - molecule_data (np.ndarray): The data set of molecules.
+    - scaling_factor (float, optional): The scaling factor to use. Default is None.
+    - scaling_matrix (np.ndarray, optional): The scaling matrix to use. Default is None.
+    
+    Returns:
+    - list: The fingerprint of the given molecule data.
+    """
+
+    if scaling_factor is not None and scaling_matrix is not None:
+        raise ValueError("Both scaling_factor and scaling_matrix provided. Please provide only one.")
+
     # Compute the Euclidean distance of each point from each reference point (which are fixed)
     distances = compute_distances(molecule_data)
     # Compute the statistics of the distances (mean, std_dev, skewness)
