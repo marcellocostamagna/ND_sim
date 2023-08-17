@@ -2,8 +2,8 @@ import numpy as np
 from similarity.source import pca_tranform
 from similarity.source import fingerprint
 from similarity.source import similarity
-from perturbations import *
-from utils import *
+from .perturbations import *
+from .utils import *
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt

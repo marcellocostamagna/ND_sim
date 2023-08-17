@@ -2,8 +2,8 @@ import os
 print(f'Current working directory: {os.getcwd()}')
 import numpy as np
 from scipy.stats import skew
-from utils import *
-from source.similarity import calculate_partial_score
+from similarity.trials.utils import *
+from similarity.source.similarity import calculate_partial_score
 
 def compute_distances(points, reference_points):
     """Compute the distance of each point to the 4 refernce points"""

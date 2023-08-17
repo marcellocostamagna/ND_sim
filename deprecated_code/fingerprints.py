@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.stats import skew
 import math as m
-from coordinates import *
+from deprecated_code.coordinates import *
 from visualization import *
 from trials.utils import *
-from similarity_3d import calculate_nD_partial_score
+from deprecated_code.similarity_3d import calculate_nD_partial_score
 from rdkit import Chem
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial import distance

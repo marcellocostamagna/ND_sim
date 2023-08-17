@@ -1,7 +1,7 @@
 # Python script to generate the USRE fingerprint of molecules and compute their similarity
 
 from rdkit import Chem
-import similarity_3d as sim3d
+import deprecated_code.similarity_3d as sim3d
 
 molecules = Chem.SDMolSupplier('sample3d_optimized.sdf')
 molecules_2 = Chem.SDMolSupplier('sample3d_optimized_switched.sdf')

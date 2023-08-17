@@ -1,8 +1,8 @@
 # Python script to generate the USRE fingerprint of molecules and compute their similarity
 
 from rdkit import Chem
-import similarity_3d as sim3d
-import coordinates as coord
+import deprecated_code.similarity_3d as sim3d
+import deprecated_code.coordinates as coord
 import numpy as np
 from trials.utils import get_atoms_info
 from visualization import *

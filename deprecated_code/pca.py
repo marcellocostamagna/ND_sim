@@ -6,7 +6,7 @@ import math
 from nD_tools import *
 from trials.perturbations import *
 from fingerprints import * 
-from similarity_3d import calculate_partial_score
+from deprecated_code.similarity_3d import calculate_partial_score
 from sklearn.preprocessing import StandardScaler
 
 DIST = 1

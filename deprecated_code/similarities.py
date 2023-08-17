@@ -7,7 +7,7 @@ from trials.perturbations import *
 from rdkit import Chem
 from trials.utils import *
 from fingerprints import *
-from similarity_3d import *
+from deprecated_code.similarity_3d import *
 from copy import deepcopy
 
 

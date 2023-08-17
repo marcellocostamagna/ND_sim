@@ -3,7 +3,7 @@
 
 import numpy as np
 import math
-from similarity_3d import calculate_partial_score
+from deprecated_code.similarity_3d import calculate_partial_score
 import matplotlib.pyplot as plt
 from trials.perturbations import *
 from rdkit import Chem
