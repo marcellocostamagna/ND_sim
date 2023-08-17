@@ -4,6 +4,11 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.stats import skew
 
+from similarity.source.pre_processing import *
+from similarity.source.pca_tranform import *
+from similarity.source.utils import *
+
+
 def get_reference_points(dimensionality):
     """
     Returns the reference points
@@ -63,5 +68,37 @@ def get_fingerprint(molecule_data: np.ndarray, scaling_factor=None, scaling_matr
     distances = compute_distances(molecule_data)
     # Compute the statistics of the distances (mean, std_dev, skewness)
     fingerprint = compute_statistics(distances.T)
+    
+    return fingerprint
+
+
+def get_nd_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='factor'):
+    """
+    Computes the fingerprint for the given molecule using all the provided steps.
+    
+    Parameters:
+    - molecule: RDKit molecule object.
+    - features: Dictionary of features to be used. Default is DEFAULT_FEATURES.
+    - scaling_method: 'factor' to use scaling factor or 'matrix' to use scaling matrix.
+
+    Returns:
+    - Fingerprint of the molecule.
+    """
+    
+    # Convert molecule to n-dimensional data
+    molecule_data = mol_nd_data(molecule, features)
+    
+    # PCA transformation
+    _, transformed_data, _, _ = perform_PCA_and_get_transformed_data_cov(molecule_data)
+    
+    # Determine scaling
+    if scaling_method == 'factor':
+        scaling = compute_scaling_factor(transformed_data)
+        fingerprint = get_fingerprint(transformed_data, scaling_factor=scaling)
+    elif scaling_method == 'matrix':
+        scaling = compute_scaling_matrix(transformed_data)
+        fingerprint = get_fingerprint(transformed_data, scaling_matrix=scaling)
+    else:
+        raise ValueError(f"Invalid scaling method: {scaling_method}. Choose 'factor' or 'matrix'.")
     
     return fingerprint
