@@ -6,11 +6,18 @@ import numpy as np
 from rdkit import Chem
 from utils import DEFAULT_FEATURES
 
-def collect_molecules_from_sdf(path):
+def collect_molecules_from_sdf(path, removeHs=False):
     """
-    Collects molecules from a SDF file and returns a list of RDKit molecules
+    Collects molecules from a SDF file and returns a list of RDKit molecules.
+
+    Parameters:
+        path (str): Path to the SDF file.
+        removeHs (bool, optional): Whether to remove hydrogens. Defaults to False.
+        
+    Returns:
+        list: A list of RDKit molecule objects.
     """
-    suppl = Chem.SDMolSupplier(path, removeHs=False)
+    suppl = Chem.SDMolSupplier(path, removeHs=removeHs)
     molecules = [mol for mol in suppl if mol is not None]
     return molecules
 
