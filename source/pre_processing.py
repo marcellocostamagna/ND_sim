@@ -21,39 +21,6 @@ def collect_molecules_from_sdf(path, removeHs=False):
     molecules = [mol for mol in suppl if mol is not None]
     return molecules
 
-def collect_molecule_info(molecule):
-    """
-    Collects information from a rdkit molecule and returns a dictionary with the following keys:
-
-    'coordinates': array of the 3D coordinates of the atoms
-    'protons': array of the number of protons of the atoms
-    'neutrons': array of the number of neutrons of the atoms
-    'formal_charges': array of the formal charges of the atoms
-    """
-    molecule_info = {
-        'coordinates': [],
-        'protons': [],
-        'delta_neutrons': [],
-        'formal_charges': []
-    }
-    for atom in molecule.GetAtoms():
-        atomic_num = atom.GetAtomicNum()
-        mass_num = atom.GetMass()  
-        neutron_num = int(round(mass_num)) - atomic_num
-        delta_neutrons = neutron_num - atomic_num
-        formal_charge = atom.GetFormalCharge()
-        position = molecule.GetConformer().GetAtomPosition(atom.GetIdx())
-
-        molecule_info['coordinates'].append((position.x, position.y, position.z))
-        molecule_info['protons'].append(atomic_num)
-        molecule_info['delta_neutrons'].append(delta_neutrons)
-        molecule_info['formal_charges'].append(formal_charge)
-        
-    # convert lists to numpy arrays
-    for key in molecule_info:
-        molecule_info[key] = np.array(molecule_info[key])
-    return molecule_info
-
 def mol_nd_data(molecule, features=DEFAULT_FEATURES):
     """
     Generates a numpy array representing the given molecule.
