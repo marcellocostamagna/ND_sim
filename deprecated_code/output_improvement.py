@@ -2,9 +2,9 @@ import numpy as np
 from trials.perturbations import *
 from rdkit import Chem
 from trials.utils import *
-from trials.cov_fingerprint import *
-from similarity_3d import *
-from pca_fingerprint import *
+from deprecated_code.cov_fingerprint import *
+from deprecated_code.similarity_3d import *
+from deprecated_code.pca_fingerprint import *
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
