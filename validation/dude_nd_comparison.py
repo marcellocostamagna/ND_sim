@@ -99,14 +99,18 @@ def get_partial_charges(atom):
     return partial_charge
 
 def scaling_fn(value):
-    return value * 25
+    result = value * 25
+    # Handle possible overflows of maximum value allowed for float
+    if result > np.finfo(np.float32).max:
+        result = np.finfo(np.float32).max
+    return result
 
 PSEUDO_ELECTROSHAPE_FEATURES = { 'partial_charge' : [ get_partial_charges, scaling_fn] }
 
 # START
 print(f'CWD: {os.getcwd()}')
 root_directory = f"{os.getcwd()}/similarity/validation/all"
-methods =  ['pseudo_usr_cat', 'pseudo_electroshape'] #['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape']
+methods =  ['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape']
 
 enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
 
@@ -155,6 +159,18 @@ for method in methods:
         folder_end_time = time.time()
         print(f"Finished processing folder {folder} in {folder_end_time - folder_start_time:.2f} seconds")
 
+        avg_enrichments = {percentage: np.mean(values) for percentage, values in enrichments.items()}
+
+        results[method] = {
+        'enrichments': avg_enrichments
+        }
+
+        # Print results for this method immediately after its processing
+        print(f"\nResults for {method}:")
+        for percentage, ef in avg_enrichments.items():
+            print(f"Enrichment Factor at {percentage*100}%: {ef}")
+        print("\n" + "-"*50 + "\n")  # Separator line for clarity
+    
     end_time_total = time.time()
     print(f"\nTotal processing time for {method}: {end_time_total - start_time_total:.2f} seconds")
 
