@@ -25,7 +25,7 @@ def taper_n(value):
 def taper_c(value):
     return np.log(value + 5)
 
-# Normalization functions
+## Normalization functions
 
 def normalize_feature_using_full_range(feature_data: np.ndarray, coordinates: np.ndarray) -> np.ndarray:
     """
