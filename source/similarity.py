@@ -8,3 +8,10 @@ def calculate_partial_score(moments1: list, moments2:list):
 
 def get_similarity_measure(partial_score):
     return 1/(1 + partial_score)
+
+def get_similarity_score(fingerprint_1, fingerprint_2):
+    partial_score = calculate_partial_score(fingerprint_1, fingerprint_2)
+    similarity = get_similarity_measure(partial_score)
+    return similarity
+
+  
