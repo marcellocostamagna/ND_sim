@@ -93,11 +93,14 @@ def get_nd_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='fact
     
     # Determine scaling
     if scaling_method == 'factor':
-        scaling = compute_scaling_factor(transformed_data)
+        # scaling = compute_scaling_factor(transformed_data)
+        scaling = 25
         fingerprint = get_fingerprint(transformed_data, scaling_factor=scaling)
     elif scaling_method == 'matrix':
         scaling = compute_scaling_matrix(transformed_data)
         fingerprint = get_fingerprint(transformed_data, scaling_matrix=scaling)
+    elif scaling_method is None:
+        fingerprint = get_fingerprint(transformed_data)
     else:
         raise ValueError(f"Invalid scaling method: {scaling_method}. Choose 'factor' or 'matrix'.")
     
