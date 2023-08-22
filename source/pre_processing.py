@@ -4,7 +4,7 @@
 
 import numpy as np
 from rdkit import Chem
-from utils import DEFAULT_FEATURES
+from similarity.source.utils import DEFAULT_FEATURES
 
 def collect_molecules_from_sdf(path, removeHs=False):
     """
@@ -38,6 +38,10 @@ def mol_nd_data(molecule, features=DEFAULT_FEATURES):
     
     molecule_info = {'coordinates': []}
 
+    if features:
+        for key in features:
+            molecule_info[key] = []
+
     for atom in molecule.GetAtoms():
         position = molecule.GetConformer().GetAtomPosition(atom.GetIdx())
         molecule_info['coordinates'].append([position.x, position.y, position.z])
@@ -47,11 +51,16 @@ def mol_nd_data(molecule, features=DEFAULT_FEATURES):
                 raw_value = funcs[0](atom)
                 value = funcs[1](raw_value) if len(funcs) > 1 else raw_value
 
-                if key not in molecule_info:
-                    molecule_info[key] = []
+                # if key not in molecule_info:
+                #     molecule_info[key] = []
                 molecule_info[key].append(value)
 
-    arrays = [np.array(molecule_info[key]).reshape(-1, 1) for key in molecule_info]
+    arrays = []
+    for key in molecule_info:
+        if key == 'coordinates':
+            arrays.append(np.array(molecule_info[key]))  # Convert directly to numpy array without reshaping
+        else:
+            arrays.append(np.array(molecule_info[key]).reshape(-1, 1))
     mol_nd = np.hstack(arrays)
     return mol_nd
 
