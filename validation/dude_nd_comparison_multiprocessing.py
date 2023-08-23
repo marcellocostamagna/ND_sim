@@ -10,7 +10,7 @@ from similarity.source.similarity import *
 from similarity.source.utils import *
 from rdkit.Chem import rdPartialCharges
 
-MAX_CORES = 4
+MAX_CORES = 8
 
 def read_molecules_from_sdf(sdf_file):
     supplier = Chem.SDMolSupplier(sdf_file, removeHs=False)
@@ -74,7 +74,7 @@ def get_pseudo_usrcat_similarity(query_usrcat_fingerprint, target_usrcat_fingerp
 # PSEUDO_ELECTROSHAPE PARAMETERS & FUNCTIONS
 def compute_partial_charges(mol):
     # Compute the partial charges of the molecule
-    rdPartialCharges.ComputeGasteigerCharges(mol)
+    rdPartialCharges.ComputeGasteigerCharges(mol, nIter=50)
     # Add partial_charges as a property of each atom
     for atom in mol.GetAtoms():
         atom.SetProp('partial_charge', str(atom.GetDoubleProp('_GasteigerCharge')))
@@ -83,8 +83,7 @@ def compute_partial_charges(mol):
 def get_partial_charges(atom):
     partial_charge = float(atom.GetProp('partial_charge'))
     # Handle the case where the partial charge is NaN or Inf with np.nan_to_num
-    if np.isnan(partial_charge) or np.isinf(partial_charge):
-        partial_charge = np.nan_to_num(partial_charge)
+    partial_charge = np.nan_to_num(partial_charge)
     return partial_charge
 
 def scaling_fn(value):
