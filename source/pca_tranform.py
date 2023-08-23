@@ -2,7 +2,8 @@
 # and returning the transformed data with which obtain the fingerprint
 
 import numpy as np
-    
+
+# TODO: Improve name of function and return values    
 def perform_PCA_and_get_transformed_data_cov(original_data):
     """
     Performs the PCA analysis via the eigendecomposition of the covariance 

@@ -1,4 +1,4 @@
-# Script that provides the fingerprints of the molecules represented as a 6D array
+# Script that provides the fingerprints of the molecules represented as a ND array
 
 import numpy as np
 from scipy.spatial import distance
@@ -65,13 +65,13 @@ def get_fingerprint(molecule_data: np.ndarray, scaling_factor=None, scaling_matr
         raise ValueError("Both scaling_factor and scaling_matrix provided. Please provide only one.")
 
     # Compute the Euclidean distance of each point from each reference point (which are fixed)
-    distances = compute_distances(molecule_data)
+    distances = compute_distances(molecule_data, scaling_factor, scaling_matrix)
     # Compute the statistics of the distances (mean, std_dev, skewness)
     fingerprint = compute_statistics(distances.T)
     
     return fingerprint
 
-
+# TODO: Improve handling of sclaing method/factor/matrix and section 'Determine scaling'(line:94)
 def get_nd_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='factor'):
     """
     Computes the fingerprint for the given molecule using all the provided steps.
@@ -93,8 +93,7 @@ def get_nd_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='fact
     
     # Determine scaling
     if scaling_method == 'factor':
-        # scaling = compute_scaling_factor(transformed_data)
-        scaling = 25
+        scaling = compute_scaling_factor(transformed_data)
         fingerprint = get_fingerprint(transformed_data, scaling_factor=scaling)
     elif scaling_method == 'matrix':
         scaling = compute_scaling_matrix(transformed_data)

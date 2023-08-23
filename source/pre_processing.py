@@ -21,6 +21,7 @@ def collect_molecules_from_sdf(path, removeHs=False):
     molecules = [mol for mol in suppl if mol is not None]
     return molecules
 
+# TODO: Improve function name
 def mol_nd_data(molecule, features=DEFAULT_FEATURES):
     """
     Generates a numpy array representing the given molecule.
