@@ -30,7 +30,7 @@ def calculate_enrichment_factor(y_true, y_scores, percentage):
     enrichment_factor = n_top_actives / expected_actives
     return enrichment_factor
 
-def compute_fingerprints(molecules, method):
+def compute_fingerprints(molecules, method, actives, decoys):
     if method == "pseudo_usr":
         return {mol: get_nd_fingerprint(mol, features=None, scaling_method=None) for mol in molecules}
     elif method == "pseudo_usr_cat":
@@ -114,7 +114,7 @@ def process_folder(args):
         all_mols = actives + decoys
         
         # Pre-compute fingerprints
-        fingerprints = compute_fingerprints(all_mols, method)
+        fingerprints = compute_fingerprints(all_mols, method, actives, decoys)
 
         for query_mol in actives:
             other_mols = list(all_mols)  # create a new list
@@ -146,7 +146,7 @@ def process_folder(args):
 if __name__ == "__main__":
     print(f'CWD: {os.getcwd()}')
     root_directory = f"{os.getcwd()}/similarity/validation/all"
-    methods = ['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape']
+    methods =  ['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
     enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
     
     overall_results = {}
