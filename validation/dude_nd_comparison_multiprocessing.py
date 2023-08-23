@@ -146,7 +146,7 @@ def process_folder(args):
 if __name__ == "__main__":
     print(f'CWD: {os.getcwd()}')
     root_directory = f"{os.getcwd()}/similarity/validation/all"
-    methods = [ 'pseudo_electroshape'] #['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape']
+    methods = ['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape']
     enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
     
     overall_results = {}
