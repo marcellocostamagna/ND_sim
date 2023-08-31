@@ -9,11 +9,18 @@ from similarity.source.fingerprint import *
 from similarity.source.similarity import *
 from similarity.source.utils import *
 from rdkit.Chem import rdPartialCharges
+from oddt import toolkit
 
-MAX_CORES = 8
+MAX_CORES = 4
+
+def read_molecules_from_file(file_path):
+    mols = []
+    for mol in toolkit.readfile(os.path.splitext(file_path)[1][1:], file_path):
+        mols.append(mol)
+    return mols
 
 def read_molecules_from_sdf(sdf_file):
-    supplier = Chem.SDMolSupplier(sdf_file, removeHs=False)
+    supplier = Chem.SDMolSupplier(sdf_file, removeHs=False, sanitize=False)
     mols = [mol for mol in supplier if mol]
     return mols
 
@@ -36,9 +43,11 @@ def compute_fingerprints(molecules, method, actives, decoys):
     elif method == "pseudo_usr_cat":
         return {mol: get_pseudo_usrcat_fingerprint(mol) for mol in molecules}
     elif method == "pseudo_electroshape":
-        actives = [compute_partial_charges(mol) for mol in actives]
-        decoys = [compute_partial_charges(mol) for mol in decoys]
-        return {mol: get_nd_fingerprint(mol, features=PSEUDO_ELECTROSHAPE_FEATURES, scaling_method=None) for mol in molecules}
+        # actives = [compute_partial_charges(mol) for mol in actives]
+        # decoys = [compute_partial_charges(mol) for mol in decoys]
+        # actives = [partial_charges(mol) for mol in actives]
+        # decoys = [partial_charges(mol) for mol in decoys]
+        return {mol: get_nd_fingerprint(mol, features=PSEUDO_ELECTROSHAPE_FEATURES, scaling_method='factor') for mol in molecules}
 
 # PSEUDO_USRCAT PARAMETERS & FUNCTIONS
 USRCAT_SMARTS = {'hydrophobic' : "[#6+0!$(*~[#7,#8,F]),SH0+0v2,s+0,S^3,Cl+0,Br+0,I+0]",        
@@ -72,22 +81,39 @@ def get_pseudo_usrcat_similarity(query_usrcat_fingerprint, target_usrcat_fingerp
     return get_similarity_measure(final_partial_score)
 
 # PSEUDO_ELECTROSHAPE PARAMETERS & FUNCTIONS
-def compute_partial_charges(mol):
-    # Compute the partial charges of the molecule
-    rdPartialCharges.ComputeGasteigerCharges(mol, nIter=50)
-    # Add partial_charges as a property of each atom
+# def compute_partial_charges(mol):
+#     # Compute the partial charges of the molecule
+#     rdPartialCharges.ComputeGasteigerCharges(mol, nIter=50)
+#     # Add partial_charges as a property of each atom
+#     for atom in mol.GetAtoms():
+#         atom.SetProp('partial_charge', str(atom.GetDoubleProp('_GasteigerCharge')))
+#     return mol
+
+def partial_charges(mol, mol_charges):
+    # Set atomic property partail:charge from mol.atom_dict['charge']
+    charges = mol_charges.atom_dict['charge']
     for atom in mol.GetAtoms():
-        atom.SetProp('partial_charge', str(atom.GetDoubleProp('_GasteigerCharge')))
+        # Set partial charge = 0 if hydrogen
+        if atom.GetAtomicNum() == 1:
+            atom.SetProp('partial_charge', str(0.0))
+        else:
+            atom.SetProp('partial_charge', str(charges[atom.GetIdx()]))
+        
     return mol
 
 def get_partial_charges(atom):
-    partial_charge = float(atom.GetProp('partial_charge'))
+    try:
+        partial_charge = float(atom.GetProp('partial_charge'))
+    except KeyError:
+        print('property not found')
+        return 0.0
+    
     # Handle the case where the partial charge is NaN or Inf with np.nan_to_num
     partial_charge = np.nan_to_num(partial_charge)
     return partial_charge
 
 def scaling_fn(value):
-    result = value * 25
+    result = value * 50
     # Handle possible overflows of maximum value allowed for float
     if result > np.finfo(np.float32).max:
         result = np.finfo(np.float32).max
@@ -110,8 +136,17 @@ def process_folder(args):
         
         actives = read_molecules_from_sdf(actives_file)
         decoys = read_molecules_from_sdf(decoys_file)
-        all_mols = actives + decoys
         
+
+        # Set partial charges as in the oddt implementation
+        if method == 'pseudo_electroshape':
+            actives_charges = read_molecules_from_file(actives_file)
+            decoys_charges = read_molecules_from_file(decoys_file)
+            actives = [partial_charges(mol, mol_charge) for mol, mol_charge in zip(actives, actives_charges)]
+            decoys = [partial_charges(mol, mol_charge) for mol, mol_charge in zip(decoys, decoys_charges)]
+
+        all_mols = actives + decoys
+
         # Pre-compute fingerprints
         fingerprints = compute_fingerprints(all_mols, method, actives, decoys)
 
@@ -145,7 +180,7 @@ def process_folder(args):
 if __name__ == "__main__":
     print(f'CWD: {os.getcwd()}')
     root_directory = f"{os.getcwd()}/similarity/validation/all"
-    methods =  ['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
+    methods =  [ 'pseudo_electroshape'] #['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
     enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
     
     overall_results = {}
