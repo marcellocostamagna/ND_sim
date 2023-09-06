@@ -72,12 +72,17 @@ def process_folder(args):
         'enrichments': avg_enrichments
     }
 
+    # Print the average enrichment factors for this folder
+    print(f"\nAverage Enrichment Factors for folder {folder}:")
+    for percentage, ef in avg_enrichments.items():
+        print(f"Enrichment Factor at {percentage*100}%: {ef}")
+        
     return results
 
 if __name__ == "__main__":
     print(f'CWD: {os.getcwd()}')
     root_directory = f"{os.getcwd()}/similarity/validation/all"
-    methods = ['usr', 'usr_cat', 'electroshape']
+    methods = ['electroshape']#['usr', 'usr_cat', 'electroshape']
     enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
     overall_results = {}
 
