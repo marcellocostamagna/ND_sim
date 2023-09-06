@@ -63,5 +63,8 @@ def mol_nd_data(molecule, features=DEFAULT_FEATURES):
         else:
             arrays.append(np.array(molecule_info[key]).reshape(-1, 1))
     mol_nd = np.hstack(arrays)
+    # Center the data
+    # print(f'mean: {np.mean(mol_nd, axis=0)}')
+    mol_nd = mol_nd - np.mean(mol_nd, axis=0)
     return mol_nd
 
