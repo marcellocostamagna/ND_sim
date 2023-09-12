@@ -10,7 +10,7 @@ from similarity.source.similarity import *
 from similarity.source.utils import *
 from oddt import toolkit
 
-MAX_CORES = 5
+MAX_CORES = 4
 
 def read_molecules_from_file(file_path):
     mols = []
@@ -101,7 +101,7 @@ def get_partial_charges(atom):
     return partial_charge
 
 def scaling_fn(value):
-    result = value * 10000
+    result = value * 100000
     # Handle possible overflows of maximum value allowed for float
     if result > np.finfo(np.float32).max:
         result = np.finfo(np.float32).max
