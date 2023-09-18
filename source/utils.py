@@ -5,29 +5,28 @@ from rdkit import Chem
 ###### PRE-PROCESSING #######
 
 ### Fetaures fucntions ###
-def get_protons(atom):
+def extract_proton_number(atom):
     return atom.GetAtomicNum()
 
 # Difference between the mass of the atom and the number of protons (aka, number of neutrons)
-def get_delta_neutrons(atom):
+def extract_neutron_differencce(atom):
     return int(round(atom.GetMass())) - atom.GetAtomicNum()
 
 # Difference between the number of neutrons of the current atom
 # and the number of neutrons of the most common isotope of the element
-def delta_neutrons_vs_most_common_isotope(atom):
+def extract_neutron_difference_from_common_isotope(atom):
     pt = Chem.GetPeriodicTable()
     n_neutrons = int(round(atom.GetMass())) - atom.GetAtomicNum()
     n_neutrons_most_common = pt.GetMostCommonIsotope(atom.GetAtomicNum()) - atom.GetAtomicNum()
     return n_neutrons - n_neutrons_most_common
 
-def get_formal_charge(atom):
+def extract_formal_charge(atom):
     return atom.GetFormalCharge()
 
 ### Re-scaling functions ###
 
 ## Tapering functions
 def taper_p(value):
-    # return np.sqrt(value)
     return np.log(value)
 
 def taper_n(value):
@@ -39,10 +38,9 @@ def taper_c(value):
     else:
         return np.log(abs(value)+1) * np.sign(value)
 
-
 ## Normalization functions
 
-def normalize_feature_using_full_range(feature_data: np.ndarray, coordinates: np.ndarray) -> np.ndarray:
+def normalize_feature_by_coordinate_range(feature_data: np.ndarray, coordinates: np.ndarray) -> np.ndarray:
     """
     Normalizes the given feature using the range of the coordinates.
     """
@@ -61,7 +59,7 @@ def normalize_feature_using_full_range(feature_data: np.ndarray, coordinates: np
         normalized_feature = feature_data
     return normalized_feature
 
-def normalize_feature_using_specific_axis(feature_data: np.ndarray, coordinates: np.ndarray, axis_choice: str = "smallest") -> np.ndarray:
+def normalize_feature_by_selected_axis(feature_data: np.ndarray, coordinates: np.ndarray, axis_choice: str = "smallest") -> np.ndarray:
     """
     Normalizes the given feature using the range of a specific axis (largest, smallest, or intermediate) of the coordinates.
     """
@@ -112,15 +110,9 @@ def compute_scaling_matrix(molecule_data):
 
 #### DEFAULTS #####
 
-# DEFAULT_FEATURES = {
-#     'protons' : [get_protons, taper_p],
-#     'delta_neutrons' : [get_delta_neutrons, taper_n],
-#     'formal_charges' : [get_formal_charge, taper_c]
-#     }
-
 DEFAULT_FEATURES = {
-    'protons' : [get_protons, taper_p],
-    'delta_neutrons' : [delta_neutrons_vs_most_common_isotope, taper_n],
-    'formal_charges' : [get_formal_charge, taper_c]
+    'protons' : [extract_proton_number, taper_p],
+    'delta_neutrons' : [extract_neutron_difference_from_common_isotope, taper_n],
+    'formal_charges' : [extract_formal_charge, taper_c]
     }
 

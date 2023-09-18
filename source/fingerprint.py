@@ -9,7 +9,7 @@ from similarity.source.pca_tranform import *
 from similarity.source.utils import *
 
 
-def get_reference_points(dimensionality):
+def generate_reference_points(dimensionality):
     """
     Generate reference points in the n-dimensional space.
     
@@ -46,7 +46,7 @@ def compute_distances(molecule_data: np.ndarray, scaling_factor=None, scaling_ma
     np.ndarray
         Matrix with distances between each point and each reference point.
     """
-    reference_points = get_reference_points(molecule_data.shape[1])
+    reference_points = generate_reference_points(molecule_data.shape[1])
 
     # Scale the reference points based on provided scaling factor or matrix
     if scaling_factor is not None:
@@ -87,7 +87,7 @@ def compute_statistics(distances):
 
     return statistics_list  
 
-def get_fingerprint(molecule_data: np.ndarray, scaling_factor=None, scaling_matrix=None):
+def generate_molecule_fingerprint(molecule_data: np.ndarray, scaling_factor=None, scaling_matrix=None):
     """
     Compute a fingerprint for the provided molecular data based on distance statistics.
 
@@ -117,7 +117,7 @@ def get_fingerprint(molecule_data: np.ndarray, scaling_factor=None, scaling_matr
     return fingerprint
 
 # TODO: Improve handling of sclaing method/factor/matrix and section 'Determine scaling'(line:94)
-def get_nd_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='factor'):
+def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='factor'):
     """
     Generate a fingerprint for the given molecule.
     
@@ -140,20 +140,20 @@ def get_nd_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='fact
     """
     
     # Convert molecule to n-dimensional data
-    molecule_data = mol_nd_data(molecule, features)
+    molecule_data = molecule_to_ndarray(molecule, features)
     
     # PCA transformation
-    _, transformed_data, _, _ = perform_PCA_and_get_transformed_data_cov(molecule_data)
+    _, transformed_data, _, _ = compute_pca_using_covariance(molecule_data)
     
     # Determine scaling
     if scaling_method == 'factor':
         scaling = compute_scaling_factor(transformed_data)
-        fingerprint = get_fingerprint(transformed_data, scaling_factor=scaling)
+        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=scaling)
     elif scaling_method == 'matrix':
         scaling = compute_scaling_matrix(transformed_data)
-        fingerprint = get_fingerprint(transformed_data, scaling_matrix=scaling)
+        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_matrix=scaling)
     elif scaling_method is None:
-        fingerprint = get_fingerprint(transformed_data)
+        fingerprint = generate_molecule_fingerprint(transformed_data)
     else:
         raise ValueError(f"Invalid scaling method: {scaling_method}. Choose 'factor' or 'matrix'.")
     

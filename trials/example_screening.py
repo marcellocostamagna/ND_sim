@@ -9,17 +9,17 @@ import os
 cwd = os.getcwd()
 # PRE-PROCESSING
 # List of molecules from SDF file
-molecules = collect_molecules_from_sdf(f'{cwd}/similarity/sd_data/guac_sample_20.sdf')
+molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/guac_sample_20.sdf')
 
 # OPTONAL
 # Define new fetaures function and respective rescaling functions to store
 # into a features dictionary
 
 # QUERY FINGERPRINT
-query_fp = get_nd_fingerprint(molecules[0], DEFAULT_FEATURES, scaling_method= None)
+query_fp = generate_nd_molecule_fingerprint(molecules[0], DEFAULT_FEATURES, scaling_method= None)
 
 # ALL FINGERPRINTS
-all_fp = [get_nd_fingerprint(mol) for mol in  molecules]
+all_fp = [generate_nd_molecule_fingerprint(mol) for mol in  molecules]
 
 
 # SIMILARITIES

@@ -4,7 +4,7 @@
 import numpy as np
 
 # TODO: Improve name of function and return values    
-def perform_PCA_and_get_transformed_data_cov(original_data):
+def compute_pca_using_covariance(original_data):
     """
     Perform PCA analysis via eigendecomposition of the covariance matrix.
     
@@ -31,14 +31,14 @@ def perform_PCA_and_get_transformed_data_cov(original_data):
     eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
     eigenvalues, eigenvectors = eigenvalues[::-1], eigenvectors[:, ::-1]
 
-    eigenvectors = choose_eig_sign(original_data, eigenvectors)
+    eigenvectors = adjust_eigenvector_signs(original_data, eigenvectors)
 
     transformed_data = np.dot(original_data, eigenvectors)
 
     return original_data, transformed_data, eigenvectors, eigenvalues
 
 
-def choose_eig_sign(original_data, eigenvectors, tolerance= 1e-4):
+def adjust_eigenvector_signs(original_data, eigenvectors, tolerance= 1e-4):
     """
     Adjust the sign of eigenvectors based on the data's projections.
 

@@ -11,10 +11,10 @@ np.set_printoptions(precision=4, suppress=True)
 cwd = os.getcwd()
 # PRE-PROCESSING
 # List of molecules from SDF file
-molecules = collect_molecules_from_sdf(f'{cwd}/similarity/sd_data/swapping_sim_2d.sdf', removeHs=False, sanitize=True)
+molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/swapping_sim_2d.sdf', removeHs=False, sanitize=True)
 
 # Get molecules representaTion based on features expressed by the user
-molecules_data = [mol_nd_data(mol) for mol in molecules]
+molecules_data = [molecule_to_ndarray(mol) for mol in molecules]
 
 # print molecules_data
 for i in range(len(molecules_data)):
@@ -24,7 +24,7 @@ fingerprints = []
 for j, molecule_data in enumerate(molecules_data):
     # PCA
     # Get the PCA tranformed data 
-    _, transformed_data, _, _ = perform_PCA_and_get_transformed_data_cov(molecule_data)
+    _, transformed_data, _, _ = compute_pca_using_covariance(molecule_data)
     print(f"molecule {j+1} : \n {transformed_data}")
 
     # FINGERPRINT
@@ -35,13 +35,13 @@ for j, molecule_data in enumerate(molecules_data):
     # scaling_factor = 1
 
     # Get the fingerprint from the tranformed data
-    fingerprint = get_fingerprint(transformed_data, scaling_factor=scaling_factor)
+    fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=scaling_factor)
     fingerprints.append(fingerprint)
 
 # Compute similarity between all pairs of fingerprints
 n_molecules = len(fingerprints)
 for i in range(n_molecules):
     for j in range(i+1, n_molecules):
-        partial_score = calculate_partial_score(fingerprints[i], fingerprints[j])
-        similarity = get_similarity_measure(partial_score)
+        partial_score = calculate_mean_absolute_difference(fingerprints[i], fingerprints[j])
+        similarity = calculate_similarity_from_difference(partial_score)
         print(f"{i+1}-{j+1}: {similarity}")
