@@ -1,6 +1,9 @@
 # Python script collecting operration to modify, perturb and change the poin clouds 
 
 import numpy as np
+import random
+from rdkit import Chem
+
 def translate_points(points, x, y, z):
     """
     Translate a set of 3D points by the given x, y, and z values.
@@ -175,3 +178,48 @@ def rotate_points_and_get_rotation_matrix(points, angle1_deg, angle2_deg, angle3
 
 
     return rotated_points, R_combined
+
+def permute_atoms(mol):
+    """
+    Permutes the order of atoms in a molecule without breaking bond information.
+    """
+    indices = list(range(mol.GetNumAtoms()))
+    random.shuffle(indices)
+    
+    # Create a new molecule
+    new_mol = Chem.RWMol()
+
+    # Add atoms to new molecule in permuted order
+    new_indices = {}
+    for idx in indices:
+        atom = mol.GetAtomWithIdx(idx)
+        new_idx = new_mol.AddAtom(atom)
+        new_indices[idx] = new_idx
+
+    # Traverse bonds in the original molecule and add to new molecule
+    for bond in mol.GetBonds():
+        begin_idx = bond.GetBeginAtomIdx()
+        end_idx = bond.GetEndAtomIdx()
+        new_mol.AddBond(new_indices[begin_idx], new_indices[end_idx], bond.GetBondType())
+
+    # Update molecule properties from the original molecule
+    new_mol.SetProp("_Name", mol.GetProp("_Name"))
+    for prop_name in mol.GetPropNames():
+        new_mol.SetProp(prop_name, mol.GetProp(prop_name))
+
+    return new_mol.GetMol()
+
+def permute_sdf(input_filename, output_filename):
+    """
+    Reads an SDF, permutes the order of atoms in each molecule, and writes the result to another SDF.
+    """
+    supplier = Chem.SDMolSupplier(input_filename, removeHs=False)
+    writer = Chem.SDWriter(output_filename)
+    
+    for mol in supplier:
+        if mol:  # Check if molecule was read properly
+            permuted_mol = permute_atoms(mol)
+            writer.write(permuted_mol)
+
+    writer.close()
+

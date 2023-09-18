@@ -1,5 +1,6 @@
 import numpy as np
 from rdkit import Chem
+from rdkit import Chem
 
 ###### PRE-PROCESSING #######
 
@@ -7,8 +8,17 @@ from rdkit import Chem
 def get_protons(atom):
     return atom.GetAtomicNum()
 
+# Difference between the mass of the atom and the number of protons (aka, number of neutrons)
 def get_delta_neutrons(atom):
     return int(round(atom.GetMass())) - atom.GetAtomicNum()
+
+# Difference between the number of neutrons of the current atom
+# and the number of neutrons of the most common isotope of the element
+def delta_neutrons_vs_most_common_isotope(atom):
+    pt = Chem.GetPeriodicTable()
+    n_neutrons = int(round(atom.GetMass())) - atom.GetAtomicNum()
+    n_neutrons_most_common = pt.GetMostCommonIsotope(atom.GetAtomicNum()) - atom.GetAtomicNum()
+    return n_neutrons - n_neutrons_most_common
 
 def get_formal_charge(atom):
     return atom.GetFormalCharge()
@@ -17,13 +27,18 @@ def get_formal_charge(atom):
 
 ## Tapering functions
 def taper_p(value):
+    # return np.sqrt(value)
     return np.log(value)
 
 def taper_n(value):
-    return np.log(value + 2)
+    return np.log(value + 1)
 
 def taper_c(value):
-    return np.log(value + 5)
+    if value == 0:
+        return 0
+    else:
+        return np.log(abs(value)+1) * np.sign(value)
+
 
 ## Normalization functions
 
@@ -97,8 +112,15 @@ def compute_scaling_matrix(molecule_data):
 
 #### DEFAULTS #####
 
+# DEFAULT_FEATURES = {
+#     'protons' : [get_protons, taper_p],
+#     'delta_neutrons' : [get_delta_neutrons, taper_n],
+#     'formal_charges' : [get_formal_charge, taper_c]
+#     }
+
 DEFAULT_FEATURES = {
     'protons' : [get_protons, taper_p],
-    'delta_neutrons' : [get_delta_neutrons, taper_n],
+    'delta_neutrons' : [delta_neutrons_vs_most_common_isotope, taper_n],
     'formal_charges' : [get_formal_charge, taper_c]
     }
+
