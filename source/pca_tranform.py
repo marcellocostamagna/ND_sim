@@ -6,16 +6,32 @@ import numpy as np
 # TODO: Improve name of function and return values    
 def perform_PCA_and_get_transformed_data_cov(original_data):
     """
-    Performs the PCA analysis via the eigendecomposition of the covariance 
-    matrix to the n-dimensional data representing a molecule and returning 
-    the transformed data with which obtain the fingerprint, 
+    Perform PCA analysis via eigendecomposition of the covariance matrix.
+    
+    The function carries out PCA on n-dimensional data representing a molecule 
+    and returns the original and transformed data alongside eigenvectors and eigenvalues.
+
+    Parameters
+    ----------
+    original_data : numpy.ndarray
+        N-dimensional array representing a molecule, where each row is a sample/point.
+
+    Returns
+    -------
+    original_data : numpy.ndarray
+        The input n-dimensional data.
+    transformed_data : numpy.ndarray
+        Data after PCA transformation.
+    eigenvectors : numpy.ndarray
+        Eigenvectors obtained from the PCA decomposition.
+    eigenvalues : numpy.ndarray
+        Eigenvalues obtained from the PCA decomposition.
     """
     covariance_matrix = np.cov(original_data, rowvar=False, ddof=0,)
     eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
     eigenvalues, eigenvectors = eigenvalues[::-1], eigenvectors[:, ::-1]
 
     eigenvectors = choose_eig_sign(original_data, eigenvectors)
-    #print(f"eigenvectors: \n {eigenvectors}")
 
     transformed_data = np.dot(original_data, eigenvectors)
 
@@ -23,6 +39,27 @@ def perform_PCA_and_get_transformed_data_cov(original_data):
 
 
 def choose_eig_sign(original_data, eigenvectors, tolerance= 1e-4):
+    """
+    Adjust the sign of eigenvectors based on the data's projections.
+
+    For each eigenvector, the function determines the sign by looking at 
+    the direction of the data's maximum projection. If the maximum projection
+    is negative, the sign of the eigenvector is flipped.
+
+    Parameters
+    ----------
+    original_data : numpy.ndarray
+        N-dimensional array representing a molecule, where each row is a sample/point.
+    eigenvectors : numpy.ndarray
+        Eigenvectors obtained from the PCA decomposition.
+    tolerance : float, optional
+        Tolerance used when comparing projections. Defaults to 1e-4.
+
+    Returns
+    -------
+    eigenvectors : numpy.ndarray
+        Adjusted eigenvectors with their sign possibly flipped.
+    """
     for i in range(eigenvectors.shape[1]):
         # Compute the projections of the original data onto the current eigenvector
         projections = original_data.dot(eigenvectors[:, i])

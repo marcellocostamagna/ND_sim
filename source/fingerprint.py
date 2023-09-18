@@ -11,7 +11,17 @@ from similarity.source.utils import *
 
 def get_reference_points(dimensionality):
     """
-    Returns the reference points
+    Generate reference points in the n-dimensional space.
+    
+    Parameters
+    ----------
+    dimensionality : int
+        The number of dimensions.
+
+    Returns
+    -------
+    np.ndarray
+        An array of reference points including the centroid and the points on each axis.
     """
     centroid = np.zeros(dimensionality)
     axis_points = np.eye(dimensionality)
@@ -20,7 +30,21 @@ def get_reference_points(dimensionality):
 
 def compute_distances(molecule_data: np.ndarray, scaling_factor=None, scaling_matrix=None):
     """
-    Computes the Euclidean distance of each point from each reference point
+    Calculate the Euclidean distance between each point in molecule_data and reference points.
+    
+    Parameters
+    ----------
+    molecule_data : np.ndarray
+        Data of the molecule with each row representing a point.
+    scaling_factor : float, optional
+        Factor by which reference points are scaled.
+    scaling_matrix : np.ndarray, optional
+        Matrix by which reference points are scaled.
+
+    Returns
+    -------
+    np.ndarray
+        Matrix with distances between each point and each reference point.
     """
     reference_points = get_reference_points(molecule_data.shape[1])
 
@@ -38,6 +62,19 @@ def compute_distances(molecule_data: np.ndarray, scaling_factor=None, scaling_ma
 
 
 def compute_statistics(distances):
+    """
+    Calculate statistical measures (mean, standard deviation, skewness) for the given distances.
+    
+    Parameters
+    ----------
+    distances : np.ndarray
+        Matrix with distances between each point and each reference point.
+
+    Returns
+    -------
+    list
+        A list of computed statistics.
+    """
     means = np.mean(distances, axis=1)
     std_devs = np.std(distances, axis=1)
     skewness = skew(distances, axis=1)
@@ -51,14 +88,22 @@ def compute_statistics(distances):
     return statistics_list  
 
 def get_fingerprint(molecule_data: np.ndarray, scaling_factor=None, scaling_matrix=None):
-    """Computes the fingerprint of a given data set.
-    Parameters:
-    - molecule_data (np.ndarray): The data set of molecules.
-    - scaling_factor (float, optional): The scaling factor to use. Default is None.
-    - scaling_matrix (np.ndarray, optional): The scaling matrix to use. Default is None.
-    
-    Returns:
-    - list: The fingerprint of the given molecule data.
+    """
+    Compute a fingerprint for the provided molecular data based on distance statistics.
+
+    Parameters
+    ----------
+    molecule_data : np.ndarray
+        Data of the molecule with each row representing a point.
+    scaling_factor : float, optional
+        Factor by which reference points are scaled.
+    scaling_matrix : np.ndarray, optional
+        Matrix by which reference points are scaled.
+
+    Returns
+    -------
+    list
+        A fingerprint derived from the molecule data.
     """
 
     if scaling_factor is not None and scaling_matrix is not None:
@@ -74,15 +119,24 @@ def get_fingerprint(molecule_data: np.ndarray, scaling_factor=None, scaling_matr
 # TODO: Improve handling of sclaing method/factor/matrix and section 'Determine scaling'(line:94)
 def get_nd_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='factor'):
     """
-    Computes the fingerprint for the given molecule using all the provided steps.
+    Generate a fingerprint for the given molecule.
     
-    Parameters:
-    - molecule: RDKit molecule object.
-    - features: Dictionary of features to be used. Default is DEFAULT_FEATURES.
-    - scaling_method: 'factor' to use scaling factor or 'matrix' to use scaling matrix.
+    This function converts a molecule to n-dimensional data, performs PCA transformation,
+    scales the data if needed, and then computes the fingerprint based on distance statistics.
 
-    Returns:
-    - Fingerprint of the molecule.
+    Parameters
+    ----------
+    molecule : RDKit Mol
+        RDKit molecule object.
+    features : dict, optional
+        Dictionary of features to be considered. Default is DEFAULT_FEATURES.
+    scaling_method : str, optional
+        Specifies how to scale the data. It can be 'factor', 'matrix', or None.
+
+    Returns
+    -------
+    list
+        A fingerprint derived from the molecule data.
     """
     
     # Convert molecule to n-dimensional data

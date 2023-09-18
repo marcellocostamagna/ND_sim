@@ -8,14 +8,21 @@ from similarity.source.utils import DEFAULT_FEATURES
 
 def collect_molecules_from_sdf(path, removeHs=False, sanitize=True):
     """
-    Collects molecules from a SDF file and returns a list of RDKit molecules.
+    Collect molecules from an SDF file.
+    
+    Parameters
+    ----------
+    path : str
+        Path to the SDF file.
+    removeHs : bool, optional
+        Whether to remove hydrogens. Defaults to False.
+    sanitize : bool, optional
+        Whether to sanitize the molecules. Defaults to True.
 
-    Parameters:
-        path (str): Path to the SDF file.
-        removeHs (bool, optional): Whether to remove hydrogens. Defaults to False.
-        
-    Returns:
-        list: A list of RDKit molecule objects.
+    Returns
+    -------
+    list of rdkit.Chem.rdchem.Mol
+        A list of RDKit molecule objects.
     """
     suppl = Chem.SDMolSupplier(path, removeHs=removeHs, sanitize=sanitize)
     molecules = [mol for mol in suppl if mol is not None]
@@ -24,17 +31,20 @@ def collect_molecules_from_sdf(path, removeHs=False, sanitize=True):
 # TODO: Improve function name
 def mol_nd_data(molecule, features=DEFAULT_FEATURES):
     """
-    Generates a numpy array representing the given molecule.
-    Each row of the array corresponds to an atom in the molecule:
-    - First three columns are the x, y, z coordinates of the atom.
-    - Subsequent columns represent values of the features specified in the features dictionary.
+    Generate a numpy array representing the given molecule.
 
-    Parameters:
-    - molecule: The input molecule (rdkit molecule object).
-    - features: Dictionary where keys are feature names and values are lists of functions to compute the feature.
+    Parameters
+    ----------
+    molecule : rdkit.Chem.rdchem.Mol
+        The input RDKit molecule object.
+    features : dict, optional
+        Dictionary where keys are feature names and values are lists of functions to compute the feature.
+        Defaults to DEFAULT_FEATURES.
 
-    Returns:
-    - Numpy array with shape (number of atoms, 3 + number of features).
+    Returns
+    -------
+    numpy.ndarray
+        Array with shape (number of atoms, 3 + number of features), representing the molecule.
     """
     
     molecule_info = {'coordinates': []}
@@ -70,20 +80,30 @@ def mol_nd_data(molecule, features=DEFAULT_FEATURES):
 
 #### TEMPORARY FUNCTIONS ####
 
-from rdkit import Chem
-
 def collect_molecules_from_file(path, file_format='sdf', removeHs=False, sanitize=True):
     """
-    Collects molecules from a file (of given format) and returns a list of RDKit molecules.
+    Collect molecules from a file of the specified format.
 
-    Parameters:
-        path (str): Path to the file.
-        file_format (str, optional): Type of the file ('sdf', 'mol', 'pdb', 'mol2', 'xyz'). Defaults to 'sdf'.
-        removeHs (bool, optional): Whether to remove hydrogens. Defaults to False.
-        sanitize (bool, optional): Whether to sanitize molecules. Defaults to True.
-        
-    Returns:
-        list: A list of RDKit molecule objects.
+    Parameters
+    ----------
+    path : str
+        Path to the file.
+    file_format : str, optional
+        Type of the file. Accepted formats: 'sdf', 'mol', 'pdb', 'mol2', 'xyz'. Defaults to 'sdf'.
+    removeHs : bool, optional
+        Whether to remove hydrogens. Defaults to False.
+    sanitize : bool, optional
+        Whether to sanitize the molecules. Defaults to True.
+
+    Returns
+    -------
+    list of rdkit.Chem.rdchem.Mol
+        A list of RDKit molecule objects.
+    
+    Raises
+    ------
+    ValueError
+        If an unsupported file format is provided.
     """
     
     if file_format == 'sdf':
