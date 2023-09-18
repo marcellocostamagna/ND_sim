@@ -6,7 +6,7 @@ import numpy as np
 from rdkit import Chem
 from similarity.source.utils import DEFAULT_FEATURES
 
-def collect_molecules_from_sdf(path, removeHs=False):
+def collect_molecules_from_sdf(path, removeHs=False, sanitize=True):
     """
     Collects molecules from a SDF file and returns a list of RDKit molecules.
 
@@ -17,7 +17,7 @@ def collect_molecules_from_sdf(path, removeHs=False):
     Returns:
         list: A list of RDKit molecule objects.
     """
-    suppl = Chem.SDMolSupplier(path, removeHs=removeHs)
+    suppl = Chem.SDMolSupplier(path, removeHs=removeHs, sanitize=sanitize)
     molecules = [mol for mol in suppl if mol is not None]
     return molecules
 
@@ -68,3 +68,38 @@ def mol_nd_data(molecule, features=DEFAULT_FEATURES):
     mol_nd = mol_nd - np.mean(mol_nd, axis=0)
     return mol_nd
 
+#### TEMPORARY FUNCTIONS ####
+
+from rdkit import Chem
+
+def collect_molecules_from_file(path, file_format='sdf', removeHs=False, sanitize=True):
+    """
+    Collects molecules from a file (of given format) and returns a list of RDKit molecules.
+
+    Parameters:
+        path (str): Path to the file.
+        file_format (str, optional): Type of the file ('sdf', 'mol', 'pdb', 'mol2', 'xyz'). Defaults to 'sdf'.
+        removeHs (bool, optional): Whether to remove hydrogens. Defaults to False.
+        sanitize (bool, optional): Whether to sanitize molecules. Defaults to True.
+        
+    Returns:
+        list: A list of RDKit molecule objects.
+    """
+    
+    if file_format == 'sdf':
+        suppl = Chem.SDMolSupplier(path, removeHs=removeHs, sanitize=sanitize)
+    elif file_format == 'mol':
+        suppl = Chem.MolFromMolFile(path, removeHs=removeHs, sanitize=sanitize)
+    elif file_format == 'pdb':
+        suppl = Chem.MolFromPDBFile(path, removeHs=removeHs, sanitize=sanitize)
+    elif file_format == 'mol2':
+        suppl = Chem.MolFromMol2File(path, removeHs=removeHs, sanitize=sanitize)
+    elif file_format == 'xyz':
+        # RDKit doesn't natively support XYZ. You might want to use another approach/library for this.
+        # For the purpose of this example, we'll return an empty list.
+        return []
+    else:
+        raise ValueError(f"Unsupported file format: {file_format}")
+
+    molecules = [mol for mol in suppl if mol is not None]
+    return molecules
