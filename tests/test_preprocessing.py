@@ -12,7 +12,7 @@ import pytest
 def benzene_molecule():
     # the following sdf information was extracted for benzene molecule
     benzene_sdf = """
- OpenBabel04252322153D
+ Benzene
 
  12 12  0  0  0  0  0  0  0  0999 V2000
     1.3829   -0.2211    0.0055 C   0  0  0  0  0  0  0  0  0  0  0  0

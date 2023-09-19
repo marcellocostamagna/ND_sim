@@ -44,7 +44,8 @@ def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES):
     Returns
     -------
     numpy.ndarray
-        Array with shape (number of atoms, 3 + number of features), representing the molecule.
+        Array with shape (number of atoms, 3 spataial coordinates + number of features),
+        representing the molecule.
     """
     
     molecule_info = {'coordinates': []}
@@ -61,20 +62,16 @@ def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES):
             for key, funcs in features.items():
                 raw_value = funcs[0](atom)
                 value = funcs[1](raw_value) if len(funcs) > 1 else raw_value
-
-                # if key not in molecule_info:
-                #     molecule_info[key] = []
                 molecule_info[key].append(value)
 
     arrays = []
     for key in molecule_info:
         if key == 'coordinates':
-            arrays.append(np.array(molecule_info[key]))  # Convert directly to numpy array without reshaping
+            arrays.append(np.array(molecule_info[key]))  
         else:
             arrays.append(np.array(molecule_info[key]).reshape(-1, 1))
     mol_nd = np.hstack(arrays)
-    # Center the data
-    # print(f'mean: {np.mean(mol_nd, axis=0)}')
+    # Centering data
     mol_nd = mol_nd - np.mean(mol_nd, axis=0)
     return mol_nd
 

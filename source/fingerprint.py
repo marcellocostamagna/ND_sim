@@ -63,7 +63,7 @@ def compute_distances(molecule_data: np.ndarray, scaling_factor=None, scaling_ma
 
 def compute_statistics(distances):
     """
-    Calculate statistical measures (mean, standard deviation, skewness) for the given distances.
+    Calculate statistical moments (mean, standard deviation, skewness) for the given distances.
     
     Parameters
     ----------
@@ -78,11 +78,10 @@ def compute_statistics(distances):
     means = np.mean(distances, axis=1)
     std_devs = np.std(distances, axis=1)
     skewness = skew(distances, axis=1)
-    # check if skewness is nan
+    # check if skewness is NaN
     skewness[np.isnan(skewness)] = 0
     
-    statistics_matrix = np.vstack((means, std_devs, skewness)).T 
-    # add all rows to a list   
+    statistics_matrix = np.vstack((means, std_devs, skewness)).T   
     statistics_list = [element for row in statistics_matrix for element in row]
 
     return statistics_list  
@@ -109,15 +108,13 @@ def generate_molecule_fingerprint(molecule_data: np.ndarray, scaling_factor=None
     if scaling_factor is not None and scaling_matrix is not None:
         raise ValueError("Both scaling_factor and scaling_matrix provided. Please provide only one.")
 
-    # Compute the Euclidean distance of each point from each reference point (which are fixed)
     distances = compute_distances(molecule_data, scaling_factor, scaling_matrix)
-    # Compute the statistics of the distances (mean, std_dev, skewness)
     fingerprint = compute_statistics(distances.T)
     
     return fingerprint
 
 # TODO: Improve handling of sclaing method/factor/matrix and section 'Determine scaling'(line:94)
-def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='factor'):
+def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scaling_method='factor', scaling_value=None):
     """
     Generate a fingerprint for the given molecule.
     
@@ -132,6 +129,9 @@ def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scalin
         Dictionary of features to be considered. Default is DEFAULT_FEATURES.
     scaling_method : str, optional
         Specifies how to scale the data. It can be 'factor', 'matrix', or None.
+    scaling_value : float or numpy.ndarray, optional
+        Value used for scaling. If method is 'factor', it should be a number.
+        If method is 'matrix', it should be an array. Default is None.
 
     Returns
     -------
@@ -143,15 +143,17 @@ def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scalin
     molecule_data = molecule_to_ndarray(molecule, features)
     
     # PCA transformation
-    _, transformed_data, _, _ = compute_pca_using_covariance(molecule_data)
+    transformed_data, _ = compute_pca_using_covariance(molecule_data)
     
     # Determine scaling
     if scaling_method == 'factor':
-        scaling = compute_scaling_factor(transformed_data)
-        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=scaling)
+        if scaling_value is None:
+            scaling_value = compute_scaling_factor(transformed_data)
+        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=scaling_value)
     elif scaling_method == 'matrix':
-        scaling = compute_scaling_matrix(transformed_data)
-        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_matrix=scaling)
+        if scaling_value is None:
+            scaling_value = compute_scaling_matrix(transformed_data)
+        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_matrix=scaling_value)
     elif scaling_method is None:
         fingerprint = generate_molecule_fingerprint(transformed_data)
     else:

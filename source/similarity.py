@@ -1,4 +1,4 @@
-# Script to compare two fingerprints and provide a single-value similarity measure
+# Script to calculate similarity scores between molecules and/or their fingerprints
 
 from similarity.source.utils import * 
 from similarity.source.fingerprint import *

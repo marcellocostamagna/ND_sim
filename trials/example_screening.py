@@ -24,7 +24,7 @@ all_fp = [generate_nd_molecule_fingerprint(mol) for mol in  molecules]
 
 # SIMILARITIES
 # Calculate the similarity between the query and all the molecules
-similarities = [get_similarity_score(query_fp, fp) for fp in all_fp]
+similarities = [compute_similarity_score(query_fp, fp) for fp in all_fp]
 
 # Sort the similarities in descending order
 similarities = sorted(similarities, reverse=True)

@@ -24,18 +24,18 @@ fingerprints = []
 for j, molecule_data in enumerate(molecules_data):
     # PCA
     # Get the PCA tranformed data 
-    _, transformed_data, _, _ = compute_pca_using_covariance(molecule_data)
+    transformed_data, _ = compute_pca_using_covariance(molecule_data)
     print(f"molecule {j+1} : \n {transformed_data}")
 
     # FINGERPRINT
     # OPTIONAL
     # Define a scaling factor of a scaling matrix to modify the reference points
-    scaling_factor = compute_scaling_factor(transformed_data)
-    # scaling_matrix = compute_scaling_matrix(transformed_data) 
+    # scaling_factor = compute_scaling_factor(transformed_data)
+    scaling_matrix = compute_scaling_matrix(transformed_data) 
     # scaling_factor = 1
 
     # Get the fingerprint from the tranformed data
-    fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=scaling_factor)
+    fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=None, scaling_matrix=scaling_matrix)
     fingerprints.append(fingerprint)
 
 # Compute similarity between all pairs of fingerprints

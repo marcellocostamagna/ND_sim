@@ -50,7 +50,7 @@ def test_calculate_mean_absolute_difference_different_lengths():
 def test_compute_similarity_3d_mols(ethanol_3d, ethane_3d):
     # Similarity between identical molecules
     similarity_same = similarity.compute_similarity(ethanol_3d, ethanol_3d)
-    assert similarity_same == 1  # Because they are identical
+    assert similarity_same == 1 
 
     # Similarity between different molecules
     similarity_diff_1 = similarity.compute_similarity(ethanol_3d, ethane_3d)

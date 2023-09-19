@@ -1,15 +1,14 @@
-# Script to perform the PCA analysis to the n-dimensional data representing a molecule
-# and returning the transformed data with which obtain the fingerprint
+# Script to perform PCA analysis on n-dimensional molecular data 
+# and return the transformed data for fingerprint calculation
 
 import numpy as np
-
-# TODO: Improve name of function and return values    
+    
 def compute_pca_using_covariance(original_data):
     """
     Perform PCA analysis via eigendecomposition of the covariance matrix.
     
     The function carries out PCA on n-dimensional data representing a molecule 
-    and returns the original and transformed data alongside eigenvectors and eigenvalues.
+    and returns the transformed data and the eigenvectors after PCA.
 
     Parameters
     ----------
@@ -18,14 +17,10 @@ def compute_pca_using_covariance(original_data):
 
     Returns
     -------
-    original_data : numpy.ndarray
-        The input n-dimensional data.
     transformed_data : numpy.ndarray
         Data after PCA transformation.
     eigenvectors : numpy.ndarray
         Eigenvectors obtained from the PCA decomposition.
-    eigenvalues : numpy.ndarray
-        Eigenvalues obtained from the PCA decomposition.
     """
     covariance_matrix = np.cov(original_data, rowvar=False, ddof=0,)
     eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
@@ -35,7 +30,7 @@ def compute_pca_using_covariance(original_data):
 
     transformed_data = np.dot(original_data, eigenvectors)
 
-    return original_data, transformed_data, eigenvectors, eigenvalues
+    return  transformed_data, eigenvectors
 
 
 def adjust_eigenvector_signs(original_data, eigenvectors, tolerance= 1e-4):
@@ -72,7 +67,7 @@ def adjust_eigenvector_signs(original_data, eigenvectors, tolerance= 1e-4):
             mask_max = np.isclose(np.abs(projections[remaining_indices]), max_abs_coordinate, atol=tolerance)
             max_indices = remaining_indices[mask_max]  # indices of points with maximum absolute coordinate
 
-            if len(max_indices) == 1:  # we found a single unambiguous point
+            if len(max_indices) == 1:
                 break
             
             # if there is a tie, ignore these points and find the maximum absolute coordinate again
