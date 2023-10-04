@@ -28,10 +28,9 @@ def load_molecules_from_sdf(path, removeHs=False, sanitize=True):
     molecules = [mol for mol in suppl if mol is not None]
     return molecules
 
-# TODO: Improve function name
 def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES):
     """
-    Generate a numpy array representing the given molecule.
+    Generate a numpy array representing the given molecule in N dimensions.
 
     Parameters
     ----------
@@ -44,7 +43,7 @@ def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES):
     Returns
     -------
     numpy.ndarray
-        Array with shape (number of atoms, 3 spataial coordinates + number of features),
+        Array with shape (number of atoms, 3 spatial coordinates + number of features),
         representing the molecule.
     """
     
