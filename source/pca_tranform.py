@@ -30,36 +30,7 @@ def compute_pca_using_covariance(original_data):
     print(f'covariance_matrix: \n{covariance_matrix}')
     eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix) # STEP 2: Eigendecomposition of Covariance Matrix
     print(f'eigenvalues: \n{eigenvalues}')
-    print(f'eigenevctors: \n{eigenvectors}')
 
-    # STEP 2.5: Adjust for near-zero eigenvalues
-    zero_tolerance = 1e-10  # or any suitable threshold value
-    # zero_indices = np.where(np.abs(eigenvalues) < zero_tolerance)[0]
-    zero_indices = np.where((eigenvalues != 0) & (np.abs(eigenvalues) < zero_tolerance))[0]
-    if len(zero_indices) > 0:
-        eigenvalues[zero_indices] = 0
-        
-        # Set the associated eigenvectors to the canonical form
-        for idx in zero_indices:
-            # Find the component of the eigenvector with the highest absolute value
-            max_component_idx = np.argmax(np.abs(eigenvectors[:, idx]))
-            
-            # Create the canonical vector
-            canonical_vector = np.zeros(eigenvectors.shape[0])
-            canonical_vector[max_component_idx] = 1.0
-            
-            # Replace the original eigenvector with this canonical vector
-            eigenvectors[:, idx] = canonical_vector
-        
-        # Re-orthogonalize the eigenvectors using Gram-Schmidt
-        eigenvectors = gram_schmidt(eigenvectors)
-        # Reconstruct the covariance matrix
-        reconstructed_covariance = eigenvectors @ np.diag(eigenvalues) @ eigenvectors.T
-        
-        # Recompute the eigendecomposition
-        eigenvalues, eigenvectors = np.linalg.eigh(reconstructed_covariance)
-        
-    
     print(f'eigenvectors: \n{eigenvectors}')
     eigenvalues, eigenvectors = eigenvalues[::-1], eigenvectors[:, ::-1]
     # print(f'eigenvalues: \n{eigenvalues:.16f}')
@@ -210,8 +181,21 @@ def extract_relevant_subspace(eigenvectors, significant_indices, tol=1e-10):
     col_mask = ~np.all((np.abs(eigenvectors.T) < tol) | (np.abs(eigenvectors.T - 1) < tol) | (np.abs(eigenvectors.T + 1) < tol), axis=1)
     pruned_eigenvectors = eigenvectors[row_mask][:, col_mask]
     reduced_eigenvectors = pruned_eigenvectors[significant_indices][:, significant_indices]
-    # reduced_eigenvectors = pruned_eigenvectors
-    return reduced_eigenvectors
+    
+    # Gram-Schmidt orthogonalization
+    orthogonalized_vectors = gram_schmidt(reduced_eigenvectors)
+    normalized_vectors = orthogonalized_vectors / np.linalg.norm(orthogonalized_vectors, axis=1)[:, np.newaxis]
+
+    # Check orientation
+    original_vectors = pruned_eigenvectors[significant_indices]
+    original_normalized = original_vectors / np.linalg.norm(original_vectors, axis=1)[:, np.newaxis]
+    
+    dot_products = np.einsum('ij,ij->i', normalized_vectors, original_normalized)
+    for i, dp in enumerate(dot_products):
+        if dp < 0:  # If the orientation is reversed
+            normalized_vectors[i] = -normalized_vectors[i]
+
+    return normalized_vectors
 
 def gram_schmidt(A):
     """Perform the Gram-Schmidt orthogonalization on matrix A."""
