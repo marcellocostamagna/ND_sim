@@ -27,44 +27,57 @@ def compute_pca_using_covariance(original_data):
         Eigenvectors obtained from the PCA decomposition.
     """
     covariance_matrix = np.cov(original_data, rowvar=False, ddof=0,) # STEP 1: Covariance Matrix
-    # print(f'covariance_matrix: \n{covariance_matrix}')
+    print(f'covariance_matrix: \n{covariance_matrix}')
     eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix) # STEP 2: Eigendecomposition of Covariance Matrix
-    # print(f'eigenvectors: \n{eigenvectors}')
+    print(f'eigenvalues: \n{eigenvalues}')
+
+    # STEP 2.5: Adjust for near-zero eigenvalues
+    zero_tolerance = 1e-10  # or any suitable threshold value
+    zero_indices = np.where(np.abs(eigenvalues) < zero_tolerance)[0]
+    if len(zero_indices) > 0:
+        eigenvalues[zero_indices] = 0
+        
+        # Reconstruct the covariance matrix
+        reconstructed_covariance = eigenvectors @ np.diag(eigenvalues) @ eigenvectors.T
+        
+        # Recompute the eigendecomposition
+        eigenvalues, eigenvectors = np.linalg.eigh(reconstructed_covariance)
+        
+    
+    print(f'eigenvectors: \n{eigenvectors}')
     eigenvalues, eigenvectors = eigenvalues[::-1], eigenvectors[:, ::-1]
-    # print(f'eigenvalues: \n{eigenvalues}')
+    # print(f'eigenvalues: \n{eigenvalues:.16f}')
+    formatted_eigenvalues = [f"{value:.16f}" for value in eigenvalues]
+    print(f"eigenvalues: \n{(formatted_eigenvalues)}")
     
     threshold = 1e-4
     significant_indices = np.where(abs(eigenvalues) > threshold)[0]
-    
+    print(f'Initial eigenvectors: \n{eigenvectors}')
+
     # Create the reduced eigenvector matrix by selecting both rows and columns
     # reduced_eigenvectors = eigenvectors[significant_indices][:, significant_indices]
     reduced_eigenvectors = extract_relevant_subspace(eigenvectors, significant_indices)
-    # print(f'reduced_eigenvectors: \n{reduced_eigenvectors}')
+
+    print(f'reduced_eigenvectors: \n{reduced_eigenvectors}')
     
-    # print(f'Initial eigenvectors: \n{eigenvectors}')
     # determinant = np.linalg.det(eigenvectors)
     determinant = np.linalg.det(reduced_eigenvectors)   # STEP 3: Impose eigenvectors' determinant to be positive
+    
     if determinant < 0:
         eigenvectors[:, 0] *= -1
-        # eigenvectors[:, 1] *= -1
-        # eigenvectors[:, 2] *= -1
     # print(f'Determinant imposed eigenvectors: \n{eigenvectors}')
     # adjusted_eigenvectors, n_changes = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices]) # STEP 4: Adjust eigenvector signs
     adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices]) # STEP 4: Adjust eigenvector signs
     eigenvectors[:, significant_indices] = adjusted_eigenvectors
     # print(f"Sign adjusted eigenvectors: \n{eigenvectors}")
     
-    if n_changes % 2 == 1:              # STEP 5: Flip the sign of the first eigenvector of n_changes is odd (Chiral Distinction)
-        # eigenvectors[:, 0] *= -1
-        # eigenvectors[:, 1] *= -1
-        # eigenvectors[:, 2] *= -1
-        # eigenvectors[:, 3] *= -1
+    if n_changes % 2 == 1:              # STEP 5: Flip the sign of the best eigenvector of n_changes is odd (Chiral Distinction)
         eigenvectors[:, best_eigenvector_to_flip] *= -1
         
     # Check determinant
-    # print(f"Final determinant: {np.linalg.det(eigenvectors)}")
+    print(f"Final determinant: {np.linalg.det(eigenvectors)}")
         
-    # print(f"'Chiral' eigenvectors: \n{eigenvectors}")
+    print(f"'Chiral' eigenvectors: \n{eigenvectors}")
     
     transformed_data = np.dot(original_data, eigenvectors)
     # print(f"transformed_data: \n{transformed_data}")
@@ -181,7 +194,7 @@ def extract_relevant_subspace(eigenvectors, significant_indices, tol=1e-10):
     col_mask = ~np.all((np.abs(eigenvectors.T) < tol) | (np.abs(eigenvectors.T - 1) < tol) | (np.abs(eigenvectors.T + 1) < tol), axis=1)
     pruned_eigenvectors = eigenvectors[row_mask][:, col_mask]
     reduced_eigenvectors = pruned_eigenvectors[significant_indices][:, significant_indices]
-    
+    # reduced_eigenvectors = pruned_eigenvectors
     return reduced_eigenvectors
 
 
