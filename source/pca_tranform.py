@@ -30,13 +30,29 @@ def compute_pca_using_covariance(original_data):
     print(f'covariance_matrix: \n{covariance_matrix}')
     eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix) # STEP 2: Eigendecomposition of Covariance Matrix
     print(f'eigenvalues: \n{eigenvalues}')
+    print(f'eigenevctors: \n{eigenvectors}')
 
     # STEP 2.5: Adjust for near-zero eigenvalues
     zero_tolerance = 1e-10  # or any suitable threshold value
-    zero_indices = np.where(np.abs(eigenvalues) < zero_tolerance)[0]
+    # zero_indices = np.where(np.abs(eigenvalues) < zero_tolerance)[0]
+    zero_indices = np.where((eigenvalues != 0) & (np.abs(eigenvalues) < zero_tolerance))[0]
     if len(zero_indices) > 0:
         eigenvalues[zero_indices] = 0
         
+        # Set the associated eigenvectors to the canonical form
+        for idx in zero_indices:
+            # Find the component of the eigenvector with the highest absolute value
+            max_component_idx = np.argmax(np.abs(eigenvectors[:, idx]))
+            
+            # Create the canonical vector
+            canonical_vector = np.zeros(eigenvectors.shape[0])
+            canonical_vector[max_component_idx] = 1.0
+            
+            # Replace the original eigenvector with this canonical vector
+            eigenvectors[:, idx] = canonical_vector
+        
+        # Re-orthogonalize the eigenvectors using Gram-Schmidt
+        eigenvectors = gram_schmidt(eigenvectors)
         # Reconstruct the covariance matrix
         reconstructed_covariance = eigenvectors @ np.diag(eigenvalues) @ eigenvectors.T
         
@@ -197,7 +213,15 @@ def extract_relevant_subspace(eigenvectors, significant_indices, tol=1e-10):
     # reduced_eigenvectors = pruned_eigenvectors
     return reduced_eigenvectors
 
-
+def gram_schmidt(A):
+    """Perform the Gram-Schmidt orthogonalization on matrix A."""
+    Q = np.zeros_like(A)
+    for i in range(A.shape[1]):
+        v = A[:, i]
+        for j in range(i):
+            v = v - np.dot(Q[:, j], A[:, i]) * Q[:, j]
+        Q[:, i] = v / np.linalg.norm(v)
+    return Q
 
 # def adjust_eigenvector_signs(original_data, eigenvectors, tolerance= 1e-4):
 #     """
