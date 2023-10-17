@@ -9,7 +9,7 @@ def extract_proton_number(atom):
     return atom.GetAtomicNum()
 
 # Difference between the mass of the atom and the number of protons (aka, number of neutrons)
-def extract_neutron_differencce(atom):
+def extract_neutron_difference(atom):
     return int(round(atom.GetMass())) - atom.GetAtomicNum()
 
 # # Difference between the number of neutrons of the current atom
@@ -151,6 +151,11 @@ NEUTRONS_CHARGES_FEATURES = {
     'formal_charges' : [extract_formal_charge, taper_c]
     }
     
+EXAMPLE_FEATURES = {
+    'protons' : [extract_proton_number,],
+    'neutrons' : [extract_neutron_difference_from_common_isotope,],
+    'charge' : [extract_formal_charge,]
+    }
 ### CONSTANTS ### 
     
 N_NEUTRONS = {'H': 0, 'He': 2, 'Li': 4, 'Be': 5, 'B': 6, 'C': 6, 'N': 7, 'O': 8,

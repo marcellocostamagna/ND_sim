@@ -27,18 +27,17 @@ def compute_pca_using_covariance(original_data):
         Eigenvectors obtained from the PCA decomposition.
     """
     covariance_matrix = np.cov(original_data, rowvar=False, ddof=0,) # STEP 1: Covariance Matrix
-    print(f'covariance_matrix: \n{covariance_matrix}')
+    # print(f'covariance_matrix: \n{covariance_matrix}')
     eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix) # STEP 2: Eigendecomposition of Covariance Matrix
-    print(f'eigenvalues: \n{eigenvalues}')
+    # print(f'eigenvalues: \n{eigenvalues}')
 
-    print(f'eigenvectors: \n{eigenvectors}')
+    # print(f'eigenvectors: \n{eigenvectors}')
     eigenvalues, eigenvectors = eigenvalues[::-1], eigenvectors[:, ::-1]
-    # print(f'eigenvalues: \n{eigenvalues:.16f}')
-    formatted_eigenvalues = [f"{value:.16f}" for value in eigenvalues]
-    print(f"eigenvalues: \n{(formatted_eigenvalues)}")
+    print(f'eigenvalues: \n{eigenvalues}')
     
     threshold = 1e-4
     significant_indices = np.where(abs(eigenvalues) > threshold)[0]
+    print(f'Number of significant eigenvalues: {len(significant_indices)}')
     print(f'Initial eigenvectors: \n{eigenvectors}')
 
     # Create the reduced eigenvector matrix by selecting both rows and columns
@@ -49,22 +48,29 @@ def compute_pca_using_covariance(original_data):
     
     # determinant = np.linalg.det(eigenvectors)
     determinant = np.linalg.det(reduced_eigenvectors)   # STEP 3: Impose eigenvectors' determinant to be positive
-    
-    if determinant < 0:
-        eigenvectors[:, 0] *= -1
+    print(f'Determinant: {determinant}')
+    # If the reduced eigenevectors lost their linear independence, the determinant will be 0
+    # and chirality can no longer be distinguished
+    chirality = False
+    # chirality = True
+    if abs(determinant) < 1e-1: #and len(significant_indices) < 4:
+        chirality = False
+    print(f'Determinant: {determinant}')
+    # if determinant < 0 and chirality:
+    #     eigenvectors[:, 0] *= -1
     # print(f'Determinant imposed eigenvectors: \n{eigenvectors}')
     # adjusted_eigenvectors, n_changes = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices]) # STEP 4: Adjust eigenvector signs
     adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices]) # STEP 4: Adjust eigenvector signs
     eigenvectors[:, significant_indices] = adjusted_eigenvectors
     # print(f"Sign adjusted eigenvectors: \n{eigenvectors}")
     
-    if n_changes % 2 == 1:              # STEP 5: Flip the sign of the best eigenvector of n_changes is odd (Chiral Distinction)
+    if n_changes % 2 == 1 and chirality:               # STEP 5: Flip the sign of the best eigenvector of n_changes is odd (Chiral Distinction)
         eigenvectors[:, best_eigenvector_to_flip] *= -1
         
     # Check determinant
-    print(f"Final determinant: {np.linalg.det(eigenvectors)}")
+    # print(f"Final determinant: {np.linalg.det(eigenvectors)}")
         
-    print(f"'Chiral' eigenvectors: \n{eigenvectors}")
+    # print(f"'Chiral' eigenvectors: \n{eigenvectors}")
     
     transformed_data = np.dot(original_data, eigenvectors)
     # print(f"transformed_data: \n{transformed_data}")
@@ -179,81 +185,12 @@ def extract_relevant_subspace(eigenvectors, significant_indices, tol=1e-10):
     
     row_mask = ~np.all((np.abs(eigenvectors) < tol) | (np.abs(eigenvectors - 1) < tol) | (np.abs(eigenvectors + 1) < tol), axis=1)    
     col_mask = ~np.all((np.abs(eigenvectors.T) < tol) | (np.abs(eigenvectors.T - 1) < tol) | (np.abs(eigenvectors.T + 1) < tol), axis=1)
+    
+    # row_mask[significant_indices] = True
+    # col_mask[significant_indices] = True
+    
     pruned_eigenvectors = eigenvectors[row_mask][:, col_mask]
     reduced_eigenvectors = pruned_eigenvectors[significant_indices][:, significant_indices]
     
-    # Gram-Schmidt orthogonalization
-    orthogonalized_vectors = gram_schmidt(reduced_eigenvectors)
-    normalized_vectors = orthogonalized_vectors / np.linalg.norm(orthogonalized_vectors, axis=1)[:, np.newaxis]
+    return reduced_eigenvectors
 
-    # Check orientation
-    original_vectors = pruned_eigenvectors[significant_indices]
-    original_normalized = original_vectors / np.linalg.norm(original_vectors, axis=1)[:, np.newaxis]
-    
-    dot_products = np.einsum('ij,ij->i', normalized_vectors, original_normalized)
-    for i, dp in enumerate(dot_products):
-        if dp < 0:  # If the orientation is reversed
-            normalized_vectors[i] = -normalized_vectors[i]
-
-    return normalized_vectors
-
-def gram_schmidt(A):
-    """Perform the Gram-Schmidt orthogonalization on matrix A."""
-    Q = np.zeros_like(A)
-    for i in range(A.shape[1]):
-        v = A[:, i]
-        for j in range(i):
-            v = v - np.dot(Q[:, j], A[:, i]) * Q[:, j]
-        Q[:, i] = v / np.linalg.norm(v)
-    return Q
-
-# def adjust_eigenvector_signs(original_data, eigenvectors, tolerance= 1e-4):
-#     """
-#     Adjust the sign of eigenvectors based on the data's projections.
-
-#     For each eigenvector, the function determines the sign by looking at 
-#     the direction of the data's maximum projection. If the maximum projection
-#     is negative, the sign of the eigenvector is flipped.
-
-#     Parameters
-#     ----------
-#     original_data : numpy.ndarray
-#         N-dimensional array representing a molecule, where each row is a sample/point.
-#     eigenvectors : numpy.ndarray
-#         Eigenvectors obtained from the PCA decomposition.
-#     tolerance : float, optional
-#         Tolerance used when comparing projections. Defaults to 1e-4.
-
-#     Returns
-#     -------
-#     eigenvectors : numpy.ndarray
-#         Adjusted eigenvectors with their sign possibly flipped.
-#     """
-#     sign_changes = 0
-    
-#     for i in range(eigenvectors.shape[1]):
-#         # Compute the projections of the original data onto the current eigenvector
-#         projections = original_data.dot(eigenvectors[:, i])
-
-#         remaining_indices = np.arange(original_data.shape[0])  # start considering all points
-#         max_abs_coordinate = np.max(np.abs(projections))
-
-#         while True:
-#             # find the points with maximum absolute coordinate among the remaining ones
-#             mask_max = np.isclose(np.abs(projections[remaining_indices]), max_abs_coordinate, atol=tolerance)
-#             max_indices = remaining_indices[mask_max]  # indices of points with maximum absolute coordinate
-
-#             if len(max_indices) == 1:
-#                 break
-            
-#             # if there is a tie, ignore these points and find the maximum absolute coordinate again
-#             remaining_indices = remaining_indices[~mask_max]
-#             if len(remaining_indices) == 0: # if all points have the same component, break the loop
-#                 break
-#             max_abs_coordinate = np.max(np.abs(projections[remaining_indices]))
-        
-#         if len(remaining_indices) > 0 and projections[max_indices[0]] < 0:
-#             eigenvectors[:, i] *= -1
-#             sign_changes += 1
-
-#     return eigenvectors, sign_changes 
