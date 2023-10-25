@@ -4,8 +4,30 @@ import time
 from oddt import toolkit
 from oddt import shape
 from multiprocessing import Pool
+from rdkit import Chem
+import rdkit
 
 MAX_CORES = 4
+
+
+# def save_to_sd(query_mol, target_mol, folder_name, method, base_file_name="similar_molecules"):
+#     # Convert ODDT molecules to RDKit molecules
+#     query_mol_rdkit = oddt_to_rdkit(query_mol)
+#     target_mol_rdkit = oddt_to_rdkit(target_mol)
+    
+#     # Determine the next available filename
+#     index = 1
+#     while os.path.exists(f"similar_molecules_oddt/{base_file_name}{index}.sdf"):
+#         index += 1
+#     file_path = f"similar_molecules_oddt/{base_file_name}{index}.sdf"
+
+#     w = Chem.SDWriter(file_path)
+#     for mol in [query_mol_rdkit, target_mol_rdkit]:
+#         mol.SetProp("Folder", folder_name)
+#         mol.SetProp("Method", method)
+#         mol.SetProp("Score", "1.0")  # Assuming a default score of 1.0; adjust as needed
+#         w.write(mol)
+#     w.close()
 
 def read_molecules_from_file(file_path):
     mols = []
@@ -51,7 +73,7 @@ def process_folder(args):
         # Precompute fingerprints
         actives_fps = [get_fingerprint(mol, method) for mol in actives]
         decoys_fps = [get_fingerprint(mol, method) for mol in decoys]
-
+        similarity_counter = 0
         for i, query_mol in enumerate(actives):
             query_fp = actives_fps[i]
             other_mols = list(actives) + list(decoys)
@@ -62,6 +84,13 @@ def process_folder(args):
             y_scores = [shape.usr_similarity(query_fp, mol_fp) for mol_fp in other_fps]
             y_true = [1 if mol in actives else 0 for mol in other_mols]
             
+                    # Save similar molecules
+            similarity_threshold = 0.9999  # Modify this value as needed
+            for mol, score in zip(other_mols, y_scores):
+                if score > similarity_threshold:
+                    similarity_counter += 1
+                    # save_to_sd(query_mol, mol, folder, method)
+            
             for percentage in enrichment_factors.keys():
                 ef = calculate_enrichment_factor(y_true, y_scores, percentage)
                 enrichments[percentage].append(ef)
@@ -69,7 +98,8 @@ def process_folder(args):
     avg_enrichments = {percentage: np.mean(values) for percentage, values in enrichments.items()}
 
     results[folder] = {
-        'enrichments': avg_enrichments
+        'enrichments': avg_enrichments,
+        'counter': similarity_counter
     }
 
     # Print the average enrichment factors for this folder
@@ -82,7 +112,7 @@ def process_folder(args):
 if __name__ == "__main__":
     print(f'CWD: {os.getcwd()}')
     root_directory = f"{os.getcwd()}/similarity/validation/all"
-    methods = ['electroshape']#['usr', 'usr_cat', 'electroshape']
+    methods = ['usr']#['usr', 'usr_cat', 'electroshape']
     enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
     overall_results = {}
 
@@ -92,12 +122,13 @@ if __name__ == "__main__":
         
         folders = sorted(os.listdir(root_directory))
         args_list = [(folder, root_directory, method, enrichment_factors) for folder in folders]
-        
+        total_counter = 0
         with Pool(processes=MAX_CORES) as pool:
             results_list = pool.map(process_folder, args_list)
         
         # Combine all results
         results = {k: v for res in results_list for k, v in res.items()}
+        total_counter = sum(res['counter'] for res in results.values())
         
         # Calculate average enrichments
         avg_enrichments = {percentage: np.mean([res['enrichments'][percentage] for res in results.values()]) for percentage in enrichment_factors.keys()}
@@ -105,7 +136,7 @@ if __name__ == "__main__":
         overall_results[method] = {
             'enrichments': avg_enrichments
         }
-        
+        print(f"Total molecules with score > similarity_threshold: {total_counter}")
         end_time_total = time.time()
         print(f"\nTotal processing time for {method}: {end_time_total - start_time_total:.2f} seconds")
 

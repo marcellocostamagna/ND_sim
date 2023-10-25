@@ -84,28 +84,93 @@ def rotate_points(points, angle1_deg, angle2_deg, angle3_deg):
 
     return rotated_points
 
-
-def perturb_coordinates(points, decimal_place):
+def rotation_matrix(axis, theta):
     """
-    Apply random perturbations to the input 3D points based on the specified decimal place.
+    Generate the rotation matrix for a given axis and angle (in radians).
+    """
+    axis = np.asarray(axis)
+    axis = axis/np.sqrt(np.dot(axis, axis))
+    a = np.cos(theta/2)
+    b, c, d = -axis*np.sin(theta/2)
+    return np.array([[a*a+b*b-c*c-d*d, 2*(b*c-a*d), 2*(b*d+a*c)],
+                     [2*(b*c+a*d), a*a+c*c-b*b-d*d, 2*(c*d-a*b)],
+                     [2*(b*d-a*c), 2*(c*d+a*b), a*a+d*d-b*b-c*c]])
+
+def rotate_molecule(molecule, x_angle_deg, y_angle_deg, z_angle_deg):
+    """
+    Rotate the molecule about the x, y, and z axes by the specified angles.
+    Angles should be provided in degrees.
+    """
+    # Convert angles to radians
+    x_angle_rad = np.radians(x_angle_deg)
+    y_angle_rad = np.radians(y_angle_deg)
+    z_angle_rad = np.radians(z_angle_deg)
+
+    # Get the rotation matrices
+    Rx = rotation_matrix([1,0,0], x_angle_rad)
+    Ry = rotation_matrix([0,1,0], y_angle_rad)
+    Rz = rotation_matrix([0,0,1], z_angle_rad)
+
+    # Apply rotations to all atom coordinates
+    for atom in molecule.GetAtoms():
+        pos = molecule.GetConformer().GetAtomPosition(atom.GetIdx()) 
+        new_pos = np.dot(Rx, [pos.x, pos.y, pos.z])
+        new_pos = np.dot(Ry, new_pos)
+        new_pos = np.dot(Rz, new_pos)
+        molecule.GetConformer().SetAtomPosition(atom.GetIdx(), Chem.rdGeometry.Point3D(*new_pos))
+
+    return molecule
+
+
+# def perturb_coordinates(points, decimal_place):
+#     """
+#     Apply random perturbations to the input 3D points based on the specified decimal place.
+
+#     Parameters:
+#     points (numpy.ndarray): A numpy array of shape (n, 3) representing the 3D coordinates of n points.
+#     decimal_place (int): The decimal place where the perturbation will take effect.
+
+#     Returns:
+#     numpy.ndarray: A new numpy array with the perturbed coordinates.
+#     """
+
+#     perturbed_points = np.zeros_like(points)
+#     for i, point in enumerate(points):
+#         perturbation_range = 10 ** -decimal_place
+#         perturbations = np.random.uniform(-perturbation_range * 9, perturbation_range * 9, point.shape)
+#         perturbed_points[i] = point + perturbations
+
+#     return perturbed_points
+
+def perturb_coordinates(points, decimal_place, percentage=1.0):
+    """
+    Apply random perturbations to a subset of the input 3D points based on the specified decimal place.
 
     Parameters:
     points (numpy.ndarray): A numpy array of shape (n, 3) representing the 3D coordinates of n points.
     decimal_place (int): The decimal place where the perturbation will take effect.
+    percentage (float): Percentage of points to perturb. Should be between 0 and 1.
 
     Returns:
     numpy.ndarray: A new numpy array with the perturbed coordinates.
     """
 
-    perturbed_points = np.zeros_like(points)
-    for i, point in enumerate(points):
+    # Ensure the percentage is between 0 and 1
+    percentage = max(0.0, min(1.0, percentage))
+    
+    # Number of points to perturb
+    num_perturb = int(percentage * len(points))
+
+    # Randomly select a subset of indices
+    indices_to_perturb = np.sort(np.random.choice(len(points), num_perturb, replace=False))
+        
+    perturbed_points = points.copy()
+    for i in indices_to_perturb:
         perturbation_range = 10 ** -decimal_place
-        perturbations = np.random.uniform(-perturbation_range * 9, perturbation_range * 9, point.shape)
-        perturbed_points[i] = point + perturbations
+        perturbations = np.random.uniform(-perturbation_range * 9, perturbation_range * 9, points[i].shape)
+        perturbed_points[i] += perturbations
 
     return perturbed_points
-
-
 
 def scale_coordinates(points, s):
     """
@@ -182,6 +247,7 @@ def rotate_points_and_get_rotation_matrix(points, angle1_deg, angle2_deg, angle3
 def permute_atoms(mol):
     """
     Permutes the order of atoms in a molecule without breaking bond information.
+    Preserves the 3D coordinates.
     """
     indices = list(range(mol.GetNumAtoms()))
     random.shuffle(indices)
@@ -201,6 +267,17 @@ def permute_atoms(mol):
         begin_idx = bond.GetBeginAtomIdx()
         end_idx = bond.GetEndAtomIdx()
         new_mol.AddBond(new_indices[begin_idx], new_indices[end_idx], bond.GetBondType())
+        
+    # Copy the conformer data, if available
+    if mol.GetNumConformers() > 0:
+        old_conf = mol.GetConformer()
+        new_conf = Chem.Conformer(old_conf.GetNumAtoms())
+
+        for idx in indices:
+            pos = old_conf.GetAtomPosition(idx)
+            new_conf.SetAtomPosition(new_indices[idx], pos)
+
+        new_mol.AddConformer(new_conf)
 
     # Update molecule properties from the original molecule
     new_mol.SetProp("_Name", mol.GetProp("_Name"))
@@ -223,3 +300,26 @@ def permute_sdf(input_filename, output_filename):
 
     writer.close()
 
+
+def reflect_molecule_coordinate(molecule, coordinate='x'):
+    # Create a deep copy of the molecule
+    mol_copy = Chem.Mol(molecule)
+    
+    # Ensure the molecule has conformers
+    if not mol_copy.GetNumConformers():
+        raise ValueError("The provided molecule does not have any conformers.")
+    
+    # Get the first conformer; adjust if your molecule has multiple conformers
+    conformer = mol_copy.GetConformer(0)
+    
+    # Loop through all atoms and modify the specified coordinate
+    for idx in range(conformer.GetNumAtoms()):
+        pos = conformer.GetAtomPosition(idx)
+        if coordinate == 'x':
+            conformer.SetAtomPosition(idx, (-pos.x, pos.y, pos.z))
+        elif coordinate == 'y':
+            conformer.SetAtomPosition(idx, (pos.x, -pos.y, pos.z))
+        elif coordinate == 'z':
+            conformer.SetAtomPosition(idx, (pos.x, pos.y, -pos.z))
+
+    return mol_copy

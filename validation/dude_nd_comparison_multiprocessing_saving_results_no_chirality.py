@@ -10,7 +10,19 @@ from similarity.source.similarity import *
 from similarity.source.utils import *
 from oddt import toolkit
 
-MAX_CORES = 1
+MAX_CORES = 2
+
+cwd = os.getcwd()
+
+def write_results_to_file(overall_results, filename):
+    with open(filename, 'w') as f:
+        for method, method_results in overall_results.items():
+            f.write(f"Results for {method}:\n")
+            for folder, enrichments in method_results.items():
+                f.write(f"  Folder: {folder}\n")
+                for percentage, ef in enrichments.items():
+                    f.write(f"    Enrichment Factor at {percentage*100}%: {ef}\n")
+            f.write("\n")
 
 def read_molecules_from_file(file_path):
     mols = []
@@ -39,13 +51,13 @@ def calculate_enrichment_factor(y_true, y_scores, percentage):
 def compute_fingerprints(molecules, method, actives, decoys):
     if method == "pseudo_usr":
         # return {mol: get_nd_fingerprint(mol, features=None, scaling_method='matrix') for mol in molecules}
-        return {mol: generate_nd_molecule_fingerprint(mol, features=None, scaling_method='matrix') for mol in molecules}
+        return {mol: generate_nd_molecule_fingerprint_no_chirality(mol, features=None, scaling_method='matrix') for mol in molecules}
     elif method == "pseudo_usr_cat":
         # return {mol: get_pseudo_usrcat_fingerprint(mol) for mol in molecules}
         return {mol: get_pseudo_usrcat_fingerprint(mol) for mol in molecules}
     elif method == "pseudo_electroshape":
         # return {mol: get_nd_fingerprint(mol, features=PSEUDO_ELECTROSHAPE_FEATURES, scaling_method='matrix') for mol in molecules}
-        return {mol: generate_nd_molecule_fingerprint(mol, features=PSEUDO_ELECTROSHAPE_FEATURES, scaling_method='matrix') for mol in molecules}
+        return {mol: generate_nd_molecule_fingerprint_no_chirality(mol, features=PSEUDO_ELECTROSHAPE_FEATURES, scaling_method='matrix') for mol in molecules}
 
 # PSEUDO_USRCAT PARAMETERS & FUNCTIONS
 USRCAT_SMARTS = {'hydrophobic' : "[#6+0!$(*~[#7,#8,F]),SH0+0v2,s+0,S^3,Cl+0,Br+0,I+0]",        
@@ -56,7 +68,7 @@ USRCAT_SMARTS = {'hydrophobic' : "[#6+0!$(*~[#7,#8,F]),SH0+0v2,s+0,S^3,Cl+0,Br+0
 
 def get_pseudo_usrcat_fingerprint(mol):
     mol_3d = molecule_to_ndarray(mol, features=None)
-    mol_3d_pca, _ = compute_pca_using_covariance(mol_3d)
+    mol_3d_pca, _ = compute_pca_using_covariance_no_chirality(mol_3d)
     pseudo_usrcat_fingerprint = []
     # scaling = compute_scaling_factor(mol_3d_pca)
     scaling_matrix = compute_scaling_matrix(mol_3d_pca)
@@ -142,14 +154,14 @@ def process_folder(args):
         fingerprints = compute_fingerprints(all_mols, method, actives, decoys)
 
         for query_mol in actives:
-            other_mols = list(all_mols)  # create a new list
+            other_mols = all_mols.copy()  # create a new list
             other_mols.remove(query_mol)  # remove the query molecule from the list
 
             query_fp = fingerprints[query_mol]
             if method == 'pseudo_usr_cat':
                 y_scores = [get_pseudo_usrcat_similarity(query_fp, fingerprints[mol]) for mol in other_mols]
             else:
-                y_scores = [compute_similarity_score(query_fp, fingerprints[mol]) for mol in other_mols]
+                y_scores = [compute_similarity_score_no_chirality(query_fp, fingerprints[mol]) for mol in other_mols]
 
             y_true = [1 if mol in actives else 0 for mol in other_mols]
             
@@ -166,12 +178,12 @@ def process_folder(args):
         for percentage, ef in avg_folder_enrichments.items():
             print(f"Enrichment Factor at {percentage*100}%: {ef}")
 
-    return results
+    return {folder: avg_folder_enrichments}
 
 if __name__ == "__main__":
     print(f'CWD: {os.getcwd()}')
     root_directory = f"{os.getcwd()}/similarity/validation/all"
-    methods =  ['pseudo_electroshape'] #['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
+    methods =  ['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
     enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
     
     overall_results = {}
@@ -187,19 +199,27 @@ if __name__ == "__main__":
             results_list = pool.map(process_folder, args_list)
 
         # Combine all results
-        results = {k: v for res in results_list for k, v in res.items()}
+        results = {}
+        for res in results_list:
+            folder_name = list(res.keys())[0]
+            results[folder_name] = res[folder_name]
+            
+        # # Calculate average enrichments
+        # avg_enrichments = {percentage: np.mean([res[percentage] for res in results.values()]) for percentage in enrichment_factors.keys()}
+        # overall_results[method] = avg_enrichments
         
-        # Calculate average enrichments
-        avg_enrichments = {percentage: np.mean([res[percentage] for res in results.values()]) for percentage in enrichment_factors.keys()}
-        overall_results[method] = avg_enrichments
+        overall_results[method] = results
 
         end_time_total = time.time()
         print(f"\nTotal processing time for {method}: {end_time_total - start_time_total:.2f} seconds")
 
-    # Print the overall enrichment factors for the different methods
-    print("\nOverall Enrichment Factors for Different Methods:")
-    for method, results in overall_results.items():
-        print(f"\nResults for {method}:")
-        for percentage, ef in results.items():
-            print(f"Enrichment Factor at {percentage*100}%: {ef}")
+    # # Print the overall enrichment factors for the different methods
+    # print("\nOverall Enrichment Factors for Different Methods:")
+    # for method, results in overall_results.items():
+    #     print(f"\nResults for {method}:")
+    #     for percentage, ef in results.items():
+    #         print(f"Enrichment Factor at {percentage*100}%: {ef}")
 
+    output_filename = f"{os.getcwd()}/dude_pseudo_results_no_chirality.txt"
+    write_results_to_file(overall_results, output_filename)
+    print(f"Results written to {output_filename}")

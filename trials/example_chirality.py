@@ -15,7 +15,7 @@ def print_3d_coordinates(mol):
         pos = conf.GetAtomPosition(atom.GetIdx())
         print(f"({pos.x:.2f}, {pos.y:.2f}, {pos.z:.2f})")
 
-np.set_printoptions(precision=4, suppress=True)
+# np.set_printoptions(precision=4, suppress=True)
 
 cwd = os.getcwd()
 
@@ -34,7 +34,7 @@ cwd = os.getcwd()
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/symmetric_tetrahedron_protons_neutrons.sdf', removeHs=False, sanitize=False)
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/symmetric_tetrahedron_protons_charges.sdf', removeHs=False, sanitize=False)
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/symmetric_tetrahedron_neutrons_charges.sdf', removeHs=False, sanitize=False)
-# molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/symmetric_tetrahedron_protons_neutrons_charges.sdf', removeHs=False, sanitize=False)
+molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/symmetric_tetrahedron_protons_neutrons_charges.sdf', removeHs=False, sanitize=False)
 
 ### FEATURES ISOMERISM ON OPTICAL ISOMER ###
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/isomers_protons.sdf', removeHs=False, sanitize=False)
@@ -46,7 +46,7 @@ cwd = os.getcwd()
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/isomers_protons_neutrons_charges.sdf', removeHs=False, sanitize=False)
 
 ### EFFECTS OF SYMMETRY AND ABSENCE OF FEATURES ON OPTICAL ISOMER ###
-molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/perfect_isomers.sdf', removeHs=False, sanitize=False)
+# molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/perfect_isomers.sdf', removeHs=False, sanitize=False)
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/near_perfect_isomers.sdf', removeHs=False, sanitize=False)
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/not_perfect_isomers.sdf', removeHs=False, sanitize=False)
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/imperfect_isomers.sdf', removeHs=False, sanitize=False)
@@ -72,9 +72,10 @@ molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/perfect_isomers.s
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/coordination_isomerism_3d.sdf', removeHs=False, sanitize=False)
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/linkage_isomerism.sdf', removeHs=False, sanitize=False)
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/linkage_isomerism_avo.sdf', removeHs=False, sanitize=False)
-# molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/linkage_isomerism_avo.sdf', removeHs=False, sanitize=False)
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/fac_mer_isomerism.sdf', removeHs=False, sanitize=False)
 # molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/cis_trans_isomerism.sdf', removeHs=False, sanitize=False)
+# molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/cis_trans_isomerism_planar.sdf', removeHs=False, sanitize=False)
+# molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/cis_trans_isomerisms_planar_substituted.sdf', removeHs=False, sanitize=False)
 
 
 # ## COMPUTE SIMILARITY BETWEEN FINGERPRINTS ##
@@ -139,8 +140,5 @@ fingerprints = [generate_nd_molecule_fingerprint(molecule, DEFAULT_FEATURES, sca
 n_molecules = len(fingerprints)
 for i in range(n_molecules):
     for j in range(i+1, n_molecules):
-        partial_score = calculate_mean_absolute_difference(fingerprints[i], fingerprints[j])
-        # print(f"{i+1}-{j+1}: {partial_score}")
-        # print(f'Differences: {np.array(fingerprints[i]) - np.array(fingerprints[j])}')
-        similarity = calculate_similarity_from_difference(partial_score)
-        print(f"{i+1}-{j+1}: {similarity:.4f}")
+        similarity = compute_similarity_score(fingerprints[i], fingerprints[j])
+        print(f"{i+1}-{j+1}: {similarity:.4f}")#:.4f}")

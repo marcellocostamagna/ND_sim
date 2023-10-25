@@ -10,7 +10,19 @@ from similarity.source.similarity import *
 from similarity.source.utils import *
 from oddt import toolkit
 
-MAX_CORES = 1
+MAX_CORES = 5
+
+cwd = os.getcwd()
+
+def write_results_to_file(overall_results, filename):
+    with open(filename, 'w') as f:
+        for method, method_results in overall_results.items():
+            f.write(f"Results for {method}:\n")
+            for folder, enrichments in method_results.items():
+                f.write(f"  Folder: {folder}\n")
+                for percentage, ef in enrichments.items():
+                    f.write(f"    Enrichment Factor at {percentage*100}%: {ef}\n")
+            f.write("\n")
 
 def read_molecules_from_file(file_path):
     mols = []
@@ -142,15 +154,26 @@ def process_folder(args):
         fingerprints = compute_fingerprints(all_mols, method, actives, decoys)
 
         for query_mol in actives:
-            other_mols = list(all_mols)  # create a new list
+            other_mols = all_mols.copy()  # create a new list
             other_mols.remove(query_mol)  # remove the query molecule from the list
 
             query_fp = fingerprints[query_mol]
-            if method == 'pseudo_usr_cat':
-                y_scores = [get_pseudo_usrcat_similarity(query_fp, fingerprints[mol]) for mol in other_mols]
-            else:
-                y_scores = [compute_similarity_score(query_fp, fingerprints[mol]) for mol in other_mols]
+            # if method == 'pseudo_usr_cat':
+            #     y_scores = [get_pseudo_usrcat_similarity(query_fp, fingerprints[mol]) for mol in other_mols]
+            # else:
+            #     y_scores = [compute_similarity_score(query_fp, fingerprints[mol]) for mol in other_mols]
 
+            # y_true = [1 if mol in actives else 0 for mol in other_mols]
+            
+            y_scores = []
+            for mol in other_mols:
+                if method == 'pseudo_usr_cat':
+                    score = get_pseudo_usrcat_similarity(query_fp, fingerprints[mol])
+                else:
+                    score, _ = compute_similarity_score(query_fp, fingerprints[mol])
+                        
+                y_scores.append(score)
+                
             y_true = [1 if mol in actives else 0 for mol in other_mols]
             
             for percentage in enrichment_factors.keys():
@@ -166,12 +189,12 @@ def process_folder(args):
         for percentage, ef in avg_folder_enrichments.items():
             print(f"Enrichment Factor at {percentage*100}%: {ef}")
 
-    return results
+    return {folder: avg_folder_enrichments}
 
 if __name__ == "__main__":
     print(f'CWD: {os.getcwd()}')
     root_directory = f"{os.getcwd()}/similarity/validation/all"
-    methods =  ['pseudo_electroshape'] #['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
+    methods =  [ 'pseudo_electroshape']#['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
     enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
     
     overall_results = {}
@@ -181,17 +204,24 @@ if __name__ == "__main__":
         start_time_total = time.time()
 
         folders = sorted(os.listdir(root_directory))
+        # folders = sorted(os.listdir(root_directory))[:2]
+        
         args_list = [(folder, root_directory, method, enrichment_factors) for folder in folders]
         
         with multiprocessing.Pool(processes=MAX_CORES) as pool:
             results_list = pool.map(process_folder, args_list)
 
         # Combine all results
-        results = {k: v for res in results_list for k, v in res.items()}
+        results = {}
+        for res in results_list:
+            folder_name = list(res.keys())[0]
+            results[folder_name] = res[folder_name]
+            
+        # # Calculate average enrichments
+        # avg_enrichments = {percentage: np.mean([res[percentage] for res in results.values()]) for percentage in enrichment_factors.keys()}
+        # overall_results[method] = avg_enrichments
         
-        # Calculate average enrichments
-        avg_enrichments = {percentage: np.mean([res[percentage] for res in results.values()]) for percentage in enrichment_factors.keys()}
-        overall_results[method] = avg_enrichments
+        overall_results[method] = results
 
         end_time_total = time.time()
         print(f"\nTotal processing time for {method}: {end_time_total - start_time_total:.2f} seconds")
@@ -203,3 +233,6 @@ if __name__ == "__main__":
         for percentage, ef in results.items():
             print(f"Enrichment Factor at {percentage*100}%: {ef}")
 
+    output_filename = f"{os.getcwd()}/dude_pseudo_results_manual_chirality_2.txt"
+    write_results_to_file(overall_results, output_filename)
+    print(f"Results written to {output_filename}")

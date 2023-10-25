@@ -142,7 +142,111 @@ def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scalin
     # print(f'Molecule_data: \n{molecule_data}')
     
     # PCA transformation
-    transformed_data, _ = compute_pca_using_covariance(molecule_data)
+    transformed_data, n_changes= compute_pca_using_covariance(molecule_data)
+    # print(f'Transformed_data: \n{transformed_data}')
+    # Determine scaling
+    if scaling_method == 'factor':
+        if scaling_value is None:
+            scaling_value = compute_scaling_factor(transformed_data)
+        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=scaling_value)
+    elif scaling_method == 'matrix':
+        if scaling_value is None:
+            scaling_value = compute_scaling_matrix(transformed_data)
+        # print(f'Scaling_matrix: \n{scaling_value}')
+        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_matrix=scaling_value)
+    elif scaling_method is None:
+        fingerprint = generate_molecule_fingerprint(transformed_data)
+    else:
+        raise ValueError(f"Invalid scaling method: {scaling_method}. Choose 'factor' or 'matrix'.")
+    
+    # parity of the n_changes
+    if n_changes % 2 == 0:
+        fingerprint.append(1)
+    else:
+        fingerprint.append(-1)
+    
+    return fingerprint
+
+def generate_nd_molecule_fingerprint_with_flip(molecule, features=DEFAULT_FEATURES, scaling_method='factor', scaling_value=None):
+    """
+    Generate a fingerprint for the given molecule.
+    
+    This function converts a molecule to n-dimensional data, performs PCA transformation,
+    scales the data if needed, and then computes the fingerprint based on distance statistics.
+
+    Parameters
+    ----------
+    molecule : RDKit Mol
+        RDKit molecule object.
+    features : dict, optional
+        Dictionary of features to be considered. Default is DEFAULT_FEATURES.
+    scaling_method : str, optional
+        Specifies how to scale the data. It can be 'factor', 'matrix', or None.
+    scaling_value : float or numpy.ndarray, optional
+        Value used for scaling. If method is 'factor', it should be a number.
+        If method is 'matrix', it should be an array. Default is None.
+
+    Returns
+    -------
+    list
+        A fingerprint derived from the molecule data.
+    """
+    
+    # Convert molecule to n-dimensional data
+    molecule_data = molecule_to_ndarray(molecule, features)
+    # print(f'Molecule_data: \n{molecule_data}')
+    
+    # PCA transformation
+    transformed_data, _ = compute_pca_using_covariance_with_flip(molecule_data)
+    # print(f'Transformed_data: \n{transformed_data}')
+    # Determine scaling
+    if scaling_method == 'factor':
+        if scaling_value is None:
+            scaling_value = compute_scaling_factor(transformed_data)
+        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=scaling_value)
+    elif scaling_method == 'matrix':
+        if scaling_value is None:
+            scaling_value = compute_scaling_matrix(transformed_data)
+        # print(f'Scaling_matrix: \n{scaling_value}')
+        fingerprint = generate_molecule_fingerprint(transformed_data, scaling_matrix=scaling_value)
+    elif scaling_method is None:
+        fingerprint = generate_molecule_fingerprint(transformed_data)
+    else:
+        raise ValueError(f"Invalid scaling method: {scaling_method}. Choose 'factor' or 'matrix'.")
+    
+    return fingerprint
+
+def generate_nd_molecule_fingerprint_no_chirality(molecule, features=DEFAULT_FEATURES, scaling_method='factor', scaling_value=None):
+    """
+    Generate a fingerprint for the given molecule.
+    
+    This function converts a molecule to n-dimensional data, performs PCA transformation,
+    scales the data if needed, and then computes the fingerprint based on distance statistics.
+
+    Parameters
+    ----------
+    molecule : RDKit Mol
+        RDKit molecule object.
+    features : dict, optional
+        Dictionary of features to be considered. Default is DEFAULT_FEATURES.
+    scaling_method : str, optional
+        Specifies how to scale the data. It can be 'factor', 'matrix', or None.
+    scaling_value : float or numpy.ndarray, optional
+        Value used for scaling. If method is 'factor', it should be a number.
+        If method is 'matrix', it should be an array. Default is None.
+
+    Returns
+    -------
+    list
+        A fingerprint derived from the molecule data.
+    """
+    
+    # Convert molecule to n-dimensional data
+    molecule_data = molecule_to_ndarray(molecule, features)
+    # print(f'Molecule_data: \n{molecule_data}')
+    
+    # PCA transformation
+    transformed_data, _ = compute_pca_using_covariance_no_chirality(molecule_data)
     # print(f'Transformed_data: \n{transformed_data}')
     # Determine scaling
     if scaling_method == 'factor':

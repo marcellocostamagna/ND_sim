@@ -24,7 +24,7 @@ def calculate_enrichment_factor(y_true, y_scores, percentage):
     enrichment_factor = n_top_actives / expected_actives
     return enrichment_factor
 
-root_directory = "all"
+root_directory = f"{os.getcwd()}/similarity/validation/all"
 methods = ['usr', 'usr_cat', 'electroshape']
 
 enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
@@ -53,15 +53,32 @@ for method in methods:
             decoys = read_molecules_from_file(decoys_file)
             query_mol = read_molecules_from_file(query_file)[0]
             
-            if method == 'usr':
-                query_shape = shape.usr(query_mol)
-                y_scores = [shape.usr_similarity(query_shape, shape.usr(mol)) for mol in actives + decoys]
-            elif method == 'usr_cat':
-                query_shape = shape.usr_cat(query_mol)
-                y_scores = [shape.usr_similarity(query_shape, shape.usr_cat(mol)) for mol in actives + decoys]
-            elif method == 'electroshape':
-                query_shape = shape.electroshape(query_mol)
-                y_scores = [shape.usr_similarity(query_shape, shape.electroshape(mol)) for mol in actives + decoys]
+            # if method == 'usr':
+            #     query_shape = shape.usr(query_mol)
+            #     y_scores = [shape.usr_similarity(query_shape, shape.usr(mol)) for mol in actives + decoys]
+            # elif method == 'usr_cat':
+            #     query_shape = shape.usr_cat(query_mol)
+            #     y_scores = [shape.usr_similarity(query_shape, shape.usr_cat(mol)) for mol in actives + decoys]
+            # elif method == 'electroshape':
+            #     query_shape = shape.electroshape(query_mol)
+            #     y_scores = [shape.usr_similarity(query_shape, shape.electroshape(mol)) for mol in actives + decoys]
+            
+            y_scores = []
+            for mol in actives + decoys:
+                if method == 'usr':
+                    query_shape = shape.usr(query_mol)
+                    score = shape.usr_similarity(query_shape, shape.usr(mol))
+                elif method == 'usr_cat':
+                    query_shape = shape.usr_cat(query_mol)
+                    score = shape.usr_similarity(query_shape, shape.usr_cat(mol))
+                elif method == 'electroshape':
+                    query_shape = shape.electroshape(query_mol)
+                    score = shape.usr_similarity(query_shape, shape.electroshape(mol))
+
+                y_scores.append(score)
+    
+            if score == 1.0:
+                save_to_sd(query_mol, mol, folder, method)
             
             y_true = [1]*len(actives) + [0]*len(decoys)
             
