@@ -32,7 +32,7 @@ def compute_similarity_score(fingerprint_1, fingerprint_2):
     similarity = calculate_similarity_from_difference(partial_score)
     return similarity
 
-def compute_similarity(mol1, mol2, features=DEFAULT_FEATURES, scaling_method='matrix'):
+def compute_similarity(mol1, mol2, features=DEFAULT_FEATURES, scaling_method='matrix', removeHs=False, chirality=False):
     """
     Calculate the similarity score between two molecules using their n-dimensional fingerprints.
     
@@ -53,8 +53,8 @@ def compute_similarity(mol1, mol2, features=DEFAULT_FEATURES, scaling_method='ma
         The computed similarity score between the two molecules.
     """
     # Get molecules' fingerprints
-    f1 = generate_nd_molecule_fingerprint(mol1, features=features, scaling_method=scaling_method)
-    f2 = generate_nd_molecule_fingerprint(mol2, features=features, scaling_method=scaling_method)
+    f1 = generate_nd_molecule_fingerprint(mol1, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
+    f2 = generate_nd_molecule_fingerprint(mol2, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
     # Compute similarity score
     similarity_score = compute_similarity_score(f1, f2)
     return similarity_score

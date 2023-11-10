@@ -28,7 +28,7 @@ def load_molecules_from_sdf(path, removeHs=False, sanitize=True):
     molecules = [mol for mol in suppl if mol is not None]
     return molecules
 
-def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES):
+def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES, removeHs=False):
     """
     Generate a numpy array representing the given molecule in N dimensions.
 
@@ -39,6 +39,9 @@ def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES):
     features : dict, optional
         Dictionary where keys are feature names and values are lists of functions to compute the feature.
         Defaults to DEFAULT_FEATURES.
+    removeHs : : bool, optional
+        If True, hydrogen atoms will not be included in the array representation.
+        Defaults to False.
 
     Returns
     -------
@@ -54,6 +57,9 @@ def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES):
             molecule_info[key] = []
 
     for atom in molecule.GetAtoms():
+        # Skip hydrogens if removeHs is True
+        if removeHs and atom.GetAtomicNum() == 1:
+            continue
         position = molecule.GetConformer().GetAtomPosition(atom.GetIdx())
         molecule_info['coordinates'].append([position.x, position.y, position.z])
 

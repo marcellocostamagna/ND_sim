@@ -23,7 +23,6 @@ def extract_neutron_difference(atom):
 # Difference between the number of neutrons of the current atom
 # # and the number of neutrons of the most common isotope of the element (stored)
 def extract_neutron_difference_from_common_isotope(atom):
-    pt = Chem.GetPeriodicTable()
     n_neutrons = int(round(atom.GetMass())) - atom.GetAtomicNum()
     n_neutrons_most_common = N_NEUTRONS[atom.GetSymbol()]
     return n_neutrons - n_neutrons_most_common
@@ -45,7 +44,6 @@ def taper_c(value):
         return 0
     else:
         return  (abs(value)) * np.sign(value) 
-
 
 def normalize_feature_by_coordinate_range(feature_data: np.ndarray, coordinates: np.ndarray) -> np.ndarray:
     """

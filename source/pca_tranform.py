@@ -4,7 +4,7 @@
 import numpy as np
 from scipy.stats import skew
 
-def compute_pca_using_covariance(original_data):
+def compute_pca_using_covariance(original_data, chirality=False):
     """
     Perform PCA analysis via eigendecomposition of the covariance matrix.
     
@@ -27,154 +27,34 @@ def compute_pca_using_covariance(original_data):
         Eigenvectors obtained from the PCA decomposition.
     """
     covariance_matrix = np.cov(original_data, rowvar=False, ddof=0,) # STEP 1: Covariance Matrix
-    # print(f'covariance_matrix: \n{covariance_matrix}')
+    
     eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix) # STEP 2: Eigendecomposition of Covariance Matrix
-    # print(f'eigenvalues: \n{eigenvalues}')
-
-    # print(f'eigenvectors: \n{eigenvectors}')
+    
     eigenvalues, eigenvectors = eigenvalues[::-1], eigenvectors[:, ::-1]
-    # print(f'eigenvalues: \n{eigenvalues}')
     
     threshold = 1e-4
     significant_indices = np.where(abs(eigenvalues) > threshold)[0]
-    # print(f'Number of significant eigenvalues: {len(significant_indices)}')
-    # print(f'Initial eigenvectors: \n{eigenvectors}')
-
+    
     # Create the reduced eigenvector matrix by selecting both rows and columns
-    # reduced_eigenvectors = eigenvectors[significant_indices][:, significant_indices]
     reduced_eigenvectors = extract_relevant_subspace(eigenvectors, significant_indices)
 
-    # print(f'reduced_eigenvectors: \n{reduced_eigenvectors}')
-    
-    # determinant = np.linalg.det(eigenvectors)
-    determinant = np.linalg.det(reduced_eigenvectors)   # STEP 3: Impose eigenvectors' determinant to be positive
-    # print(f'Determinant: {determinant}')
-    # If the reduced eigenevectors lost their linear independence, the determinant will be 0
-    # and chirality can no longer be distinguished
-    # if abs(determinant) < 1e-1: #and len(significant_indices) < 4:
-    #     chirality = False
-    if determinant < 0:
-        eigenvectors[:, 0] *= -1
-    # print(f'Determinant imposed eigenvectors: \n{eigenvectors}')
-    # adjusted_eigenvectors, n_changes = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices]) # STEP 4: Adjust eigenvector signs
-    adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices]) # STEP 4: Adjust eigenvector signs
-    eigenvectors[:, significant_indices] = adjusted_eigenvectors
-    # print(f"Sign adjusted eigenvectors: \n{eigenvectors}")
-    
-    # if n_changes % 2 == 1 and chirality:               # STEP 5: Flip the sign of the best eigenvector of n_changes is odd (Chiral Distinction)
-    #     eigenvectors[:, best_eigenvector_to_flip] *= -1
-        
-    # Check determinant
-    # print(f"Final determinant: {np.linalg.det(eigenvectors)}")
-        
-    # print(f"'Chiral' eigenvectors: \n{eigenvectors}")
-    
-    transformed_data = np.dot(original_data, eigenvectors)
-    # print(f"transformed_data: \n{transformed_data}")
-    
-    # visualize(original_data, np.mean(original_data, axis=0), eigenvectors)
-    
-    return  transformed_data, n_changes #, best_eigenvector_to_flip 
-
-def compute_pca_using_covariance_with_flip(original_data):
-    """
-    Perform PCA analysis via eigendecomposition of the covariance matrix.
-    
-    This function conducts PCA to produce a consistent reference system, 
-    allowing for comparison between molecules.The emphasis is on generating 
-    eigenvectors that offer deterministic outcomes and consistent orientations.
-    To enable the distinction of chiral molecules, the determinant's sign is 
-    explicitly considered and ensured to be positive.
-
-    Parameters
-    ----------
-    original_data : numpy.ndarray
-        N-dimensional array representing a molecule, where each row is a sample/point.
-
-    Returns
-    -------
-    transformed_data : numpy.ndarray
-        Data after PCA transformation.
-    eigenvectors : numpy.ndarray
-        Eigenvectors obtained from the PCA decomposition.
-    """
-    covariance_matrix = np.cov(original_data, rowvar=False, ddof=0,) # STEP 1: Covariance Matrix
-    eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix) # STEP 2: Eigendecomposition of Covariance Matrix
-
-    eigenvalues, eigenvectors = eigenvalues[::-1], eigenvectors[:, ::-1]
-    
-    threshold = 1e-4
-    significant_indices = np.where(abs(eigenvalues) > threshold)[0]
-
-    reduced_eigenvectors = extract_relevant_subspace(eigenvectors, significant_indices)
-
-    
-    determinant = np.linalg.det(reduced_eigenvectors)   # STEP 3: Impose eigenvectors' determinant to be positive
-    # if abs(determinant) < 1e-1: #and len(significant_indices) < 4:
-    #     chirality = False
-    if determinant < 0:
-        eigenvectors[:, 0] *= -1
-    adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices]) # STEP 4: Adjust eigenvector signs
-    eigenvectors[:, significant_indices] = adjusted_eigenvectors
-    # print(f"Sign adjusted eigenvectors: \n{eigenvectors}")
-    
-    if n_changes % 2 == 1:               # STEP 5: Flip the sign of the best eigenvector of n_changes is odd (Chiral Distinction)
-        eigenvectors[:, best_eigenvector_to_flip] *= -1
-        # eigenvectors[0] *= -1
-    transformed_data = np.dot(original_data, eigenvectors)
+    if chirality:
+        determinant = np.linalg.det(reduced_eigenvectors) 
+        if determinant < 0:
+            eigenvectors[:, 0] *= -1
    
-    return  transformed_data, n_changes #, best_eigenvector_to_flip  
-
-def compute_pca_using_covariance_no_chirality(original_data):
-    """
-    Perform PCA analysis via eigendecomposition of the covariance matrix.
-    
-    This function conducts PCA to produce a consistent reference system, 
-    allowing for comparison between molecules.The emphasis is on generating 
-    eigenvectors that offer deterministic outcomes and consistent orientations.
-    To enable the distinction of chiral molecules, the determinant's sign is 
-    explicitly considered and ensured to be positive.
-
-    Parameters
-    ----------
-    original_data : numpy.ndarray
-        N-dimensional array representing a molecule, where each row is a sample/point.
-
-    Returns
-    -------
-    transformed_data : numpy.ndarray
-        Data after PCA transformation.
-    eigenvectors : numpy.ndarray
-        Eigenvectors obtained from the PCA decomposition.
-    """
-    covariance_matrix = np.cov(original_data, rowvar=False, ddof=0,) # STEP 1: Covariance Matrix
-    eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix) # STEP 2: Eigendecomposition of Covariance Matrix
-
-    eigenvalues, eigenvectors = eigenvalues[::-1], eigenvectors[:, ::-1]
-    
-    threshold = 1e-4
-    significant_indices = np.where(abs(eigenvalues) > threshold)[0]
-
-    reduced_eigenvectors = extract_relevant_subspace(eigenvectors, significant_indices)
-
-    
-    # determinant = np.linalg.det(reduced_eigenvectors)   # STEP 3: Impose eigenvectors' determinant to be positive
-    # # if abs(determinant) < 1e-1: #and len(significant_indices) < 4:
-    # #     chirality = False
-    # if determinant < 0:
-    #     eigenvectors[:, 0] *= -1
-    adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices]) # STEP 4: Adjust eigenvector signs
+    adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices], chirality) # STEP 4: Adjust eigenvector signs
     eigenvectors[:, significant_indices] = adjusted_eigenvectors
-    # print(f"Sign adjusted eigenvectors: \n{eigenvectors}")
     
-    # if n_changes % 2 == 1:               # STEP 5: Flip the sign of the best eigenvector of n_changes is odd (Chiral Distinction)
-    #     # eigenvectors[:, best_eigenvector_to_flip] *= -1
-    #     eigenvectors[0] *= -1
+    if chirality:
+        if n_changes % 2 == 1 and chirality:            
+            eigenvectors[:, best_eigenvector_to_flip] *= -1
+    
     transformed_data = np.dot(original_data, eigenvectors)
-   
-    return  transformed_data, n_changes #, best_eigenvector_to_flip   
+    
+    return  transformed_data
 
-def adjust_eigenvector_signs(original_data, eigenvectors, tolerance= 1e-4):
+def adjust_eigenvector_signs(original_data, eigenvectors, chirality=False, tolerance= 1e-4):
     """
     Adjust the sign of eigenvectors based on the data's projections.
 
@@ -199,14 +79,16 @@ def adjust_eigenvector_signs(original_data, eigenvectors, tolerance= 1e-4):
     sign_changes = 0
     symmetric_eigenvectors = []
     skewness_values = []
+    best_eigenvector_to_flip = 0
     
     for i in range(eigenvectors.shape[1]):
         # Compute the projections of the original data onto the current eigenvector
         projections = original_data.dot(eigenvectors[:, i])
         
         # Compute skewness for current projections
-        current_skewness = skew(projections)
-        skewness_values.append(abs(current_skewness))
+        if chirality:
+            current_skewness = skew(projections)
+            skewness_values.append(abs(current_skewness))
 
         remaining_indices = np.arange(original_data.shape[0])  # start considering all points
         max_abs_coordinate = np.max(np.abs(projections))
@@ -235,20 +117,13 @@ def adjust_eigenvector_signs(original_data, eigenvectors, tolerance= 1e-4):
             eigenvectors[:, i] *= -1
             sign_changes += 1
             
-    # Check determinant of the resulting eigenvectors
-    # if np.linalg.det(eigenvectors) < 0 and symmetric_eigenvectors:
-    #     # Flip the sign of one of the symmetric eigenvectors
-    #     eigenvectors[:, symmetric_eigenvectors[0]] *= -1
-    #     sign_changes = 0
     if symmetric_eigenvectors:
-        # sign_changes = 0
-        # if np.linalg.det(eigenvectors) < 0:
-        #     eigenvectors[:, symmetric_eigenvectors[0]] *= -1
         if sign_changes % 2 == 1:
             eigenvectors[:, symmetric_eigenvectors[0]] *= -1
             sign_changes = 0
-    
-    best_eigenvector_to_flip = np.argmax(skewness_values)   
+            
+    if chirality:
+        best_eigenvector_to_flip = np.argmax(skewness_values)   
          
     return eigenvectors, sign_changes, best_eigenvector_to_flip 
 
