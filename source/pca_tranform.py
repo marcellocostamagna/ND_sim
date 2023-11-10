@@ -45,7 +45,7 @@ def compute_pca_using_covariance(original_data, chirality=False):
    
     adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices], chirality) # STEP 4: Adjust eigenvector signs
     eigenvectors[:, significant_indices] = adjusted_eigenvectors
-    
+
     if chirality:
         if n_changes % 2 == 1 and chirality:            
             eigenvectors[:, best_eigenvector_to_flip] *= -1

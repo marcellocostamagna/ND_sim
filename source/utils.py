@@ -114,7 +114,6 @@ def compute_scaling_matrix(molecule_data):
     max_values[np.isclose(max_values, 0, atol=tolerance)] = 1.0
     return np.diag(max_values)
 
-
 #### DEFAULTS #####
 
 DEFAULT_FEATURES = {

@@ -22,7 +22,3 @@ def test_pca(n_dim):
         relative_error = np.abs(variance - variances[i]) / variances[i]
         assert relative_error < 0.01
     
-    # # Test eigenvectors
-    # for i in range(n_dim):
-    #     matches = [np.isclose(np.abs(np.dot(eigenvectors[:, i], basis_vector)), 1 , atol=0.1) for basis_vector in np.eye(n_dim)]
-    #     assert any(matches)
