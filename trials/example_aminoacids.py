@@ -1,3 +1,5 @@
+# Scripts for generating similarity tables for the aminoacids (L and D) datasets
+
 import numpy as np
 import os
 from similarity.source.pre_processing import load_molecules_from_sdf
@@ -69,12 +71,9 @@ def get_max_column_widths(names, table):
     return max_widths
 
 def generate_similarity_table(molecules_1, molecules_2):
-    # fingerprints_1 = [generate_nd_molecule_fingerprint(molecule, DEFAULT_FEATURES, scaling_method='matrix') for molecule in molecules_1]
-    # fingerprints_2 = [generate_nd_molecule_fingerprint(molecule, DEFAULT_FEATURES, scaling_method='matrix') for molecule in molecules_2]
-    fingerprints_1 = [generate_nd_molecule_fingerprint_with_flip(molecule, DEFAULT_FEATURES, scaling_method='matrix') for molecule in molecules_1]
-    fingerprints_2 = [generate_nd_molecule_fingerprint_with_flip(molecule, DEFAULT_FEATURES, scaling_method='matrix') for molecule in molecules_2]
+    fingerprints_1 = [generate_nd_molecule_fingerprint(molecule, DEFAULT_FEATURES, scaling_method='matrix', chirality=True) for molecule in molecules_1]
+    fingerprints_2 = [generate_nd_molecule_fingerprint(molecule, DEFAULT_FEATURES, scaling_method='matrix', chirality=True) for molecule in molecules_2]
     
-
     n_molecules_1 = len(fingerprints_1)
     n_molecules_2 = len(fingerprints_2)
     
@@ -83,7 +82,7 @@ def generate_similarity_table(molecules_1, molecules_2):
     for i in range(n_molecules_1):
         for j in range(n_molecules_2):
             # similarity = compute_similarity_score(fingerprints_1[i], fingerprints_2[j])
-            similarity = compute_similarity_score_with_flip(fingerprints_1[i], fingerprints_2[j])
+            similarity = compute_similarity_score(fingerprints_1[i], fingerprints_2[j])
             table[i][j] = similarity
     
     return table
@@ -142,5 +141,4 @@ visualize_subsection(L_vs_L, L_names, L_names, "L vs L Similarities (First 5 Ami
 visualize_subsection(D_vs_D, D_names, D_names, "D vs D Similarities (First 5 Aminoacids)", save_path=folder_name)
 visualize_subsection(L_vs_D, L_names, D_names, "L vs D Similarities (First 5 Aminoacids)", save_path=folder_name)
      
-
 plt.show()

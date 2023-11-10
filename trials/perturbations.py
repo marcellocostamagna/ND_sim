@@ -121,7 +121,6 @@ def rotate_molecule(molecule, x_angle_deg, y_angle_deg, z_angle_deg):
 
     return molecule
 
-
 # def perturb_coordinates(points, decimal_place):
 #     """
 #     Apply random perturbations to the input 3D points based on the specified decimal place.
