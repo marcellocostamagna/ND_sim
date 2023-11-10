@@ -53,16 +53,6 @@ for method in methods:
             decoys = read_molecules_from_file(decoys_file)
             query_mol = read_molecules_from_file(query_file)[0]
             
-            # if method == 'usr':
-            #     query_shape = shape.usr(query_mol)
-            #     y_scores = [shape.usr_similarity(query_shape, shape.usr(mol)) for mol in actives + decoys]
-            # elif method == 'usr_cat':
-            #     query_shape = shape.usr_cat(query_mol)
-            #     y_scores = [shape.usr_similarity(query_shape, shape.usr_cat(mol)) for mol in actives + decoys]
-            # elif method == 'electroshape':
-            #     query_shape = shape.electroshape(query_mol)
-            #     y_scores = [shape.usr_similarity(query_shape, shape.electroshape(mol)) for mol in actives + decoys]
-            
             y_scores = []
             for mol in actives + decoys:
                 if method == 'usr':
@@ -76,9 +66,6 @@ for method in methods:
                     score = shape.usr_similarity(query_shape, shape.electroshape(mol))
 
                 y_scores.append(score)
-    
-            if score == 1.0:
-                save_to_sd(query_mol, mol, folder, method)
             
             y_true = [1]*len(actives) + [0]*len(decoys)
             

@@ -84,11 +84,11 @@ def process_folder(args):
             y_scores = [shape.usr_similarity(query_fp, mol_fp) for mol_fp in other_fps]
             y_true = [1 if mol in actives else 0 for mol in other_mols]
             
-                    # Save similar molecules
-            similarity_threshold = 0.9999  # Modify this value as needed
-            for mol, score in zip(other_mols, y_scores):
-                if score > similarity_threshold:
-                    similarity_counter += 1
+            #         # Save similar molecules
+            # similarity_threshold = 0.9999  # Modify this value as needed
+            # for mol, score in zip(other_mols, y_scores):
+            #     if score > similarity_threshold:
+            #         similarity_counter += 1
                     # save_to_sd(query_mol, mol, folder, method)
             
             for percentage in enrichment_factors.keys():

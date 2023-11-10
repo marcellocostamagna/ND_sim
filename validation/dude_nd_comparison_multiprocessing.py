@@ -10,7 +10,7 @@ from similarity.source.similarity import *
 from similarity.source.utils import *
 from oddt import toolkit
 
-MAX_CORES = 1
+MAX_CORES = 4
 
 def read_molecules_from_file(file_path):
     mols = []
@@ -39,13 +39,12 @@ def calculate_enrichment_factor(y_true, y_scores, percentage):
 def compute_fingerprints(molecules, method, actives, decoys):
     if method == "pseudo_usr":
         # return {mol: get_nd_fingerprint(mol, features=None, scaling_method='matrix') for mol in molecules}
-        return {mol: generate_nd_molecule_fingerprint(mol, features=None, scaling_method='matrix') for mol in molecules}
+        return {mol: generate_nd_molecule_fingerprint(mol, features=None, scaling_method='matrix', removeHs=True) for mol in molecules}
     elif method == "pseudo_usr_cat":
-        # return {mol: get_pseudo_usrcat_fingerprint(mol) for mol in molecules}
         return {mol: get_pseudo_usrcat_fingerprint(mol) for mol in molecules}
     elif method == "pseudo_electroshape":
         # return {mol: get_nd_fingerprint(mol, features=PSEUDO_ELECTROSHAPE_FEATURES, scaling_method='matrix') for mol in molecules}
-        return {mol: generate_nd_molecule_fingerprint(mol, features=PSEUDO_ELECTROSHAPE_FEATURES, scaling_method='matrix') for mol in molecules}
+        return {mol: generate_nd_molecule_fingerprint(mol, features=PSEUDO_ELECTROSHAPE_FEATURES, scaling_method='matrix', removeHs=True) for mol in molecules}
 
 # PSEUDO_USRCAT PARAMETERS & FUNCTIONS
 USRCAT_SMARTS = {'hydrophobic' : "[#6+0!$(*~[#7,#8,F]),SH0+0v2,s+0,S^3,Cl+0,Br+0,I+0]",        
@@ -55,23 +54,19 @@ USRCAT_SMARTS = {'hydrophobic' : "[#6+0!$(*~[#7,#8,F]),SH0+0v2,s+0,S^3,Cl+0,Br+0
                 }
 
 def get_pseudo_usrcat_fingerprint(mol):
-    mol_3d = molecule_to_ndarray(mol, features=None)
-    mol_3d_pca, _ = compute_pca_using_covariance(mol_3d)
+    mol_3d = molecule_to_ndarray(mol, features=None, removeHs=False)
+    mol_3d_pca = compute_pca_using_covariance(mol_3d)
     pseudo_usrcat_fingerprint = []
-    # scaling = compute_scaling_factor(mol_3d_pca)
     scaling_matrix = compute_scaling_matrix(mol_3d_pca)
-    pseudo_usrcat_fingerprint.append(generate_molecule_fingerprint(mol_3d_pca, scaling_factor=None, scaling_matrix=scaling_matrix)) # Standard USR fingerprint
+    pseudo_usrcat_fingerprint.append(generate_molecule_fingerprint(mol_3d_pca, scaling_factor=None, scaling_matrix=scaling_matrix))
     for smarts in USRCAT_SMARTS.values():
-        # Collect the atoms indexes that match the SMARTS pattern in the query molecule
+        # Collect the atoms indexes that match the SMARTS pattern in the query molecule removing the hydrogens
         query_atoms_matches = mol.GetSubstructMatches(Chem.MolFromSmarts(smarts))
         if not query_atoms_matches:
             pseudo_usrcat_fingerprint.append(np.zeros(12))
             continue
         query_atoms = [idx for match in query_atoms_matches for idx in match]
-        # Construct a 'sub-molecule_3d' by getting from the query_3d_pca only the rows corresponding to the atoms in query_atoms
         sub_molecule_3d = mol_3d_pca[query_atoms]
-        # Compute the fingerprint of the sub-molecule_3d
-        # scaling = compute_scaling_factor(sub_molecule_3d)
         scaling_matrix = compute_scaling_matrix(sub_molecule_3d)
         pseudo_usrcat_fingerprint.append(generate_molecule_fingerprint(sub_molecule_3d, scaling_factor=None, scaling_matrix=scaling_matrix))
     return pseudo_usrcat_fingerprint
@@ -171,7 +166,7 @@ def process_folder(args):
 if __name__ == "__main__":
     print(f'CWD: {os.getcwd()}')
     root_directory = f"{os.getcwd()}/similarity/validation/all"
-    methods =  ['pseudo_electroshape'] #['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
+    methods =  ['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape']
     enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
     
     overall_results = {}

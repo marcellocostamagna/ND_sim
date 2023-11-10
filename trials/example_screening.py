@@ -16,7 +16,7 @@ molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/guac_sample_20.sd
 # into a features dictionary
 
 # QUERY FINGERPRINT
-query_fp = generate_nd_molecule_fingerprint(molecules[0], DEFAULT_FEATURES, scaling_method= None)
+query_fp = generate_nd_molecule_fingerprint(molecules[0], DEFAULT_FEATURES, scaling_method='matrix')
 
 # ALL FINGERPRINTS
 all_fp = [generate_nd_molecule_fingerprint(mol) for mol in  molecules]

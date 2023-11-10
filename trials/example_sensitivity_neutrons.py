@@ -53,7 +53,7 @@ for file_num in range(1, N+1):
         mol = rotate_molecule(molecule, angle1, angle2, angle3)
         rotated_molecules.append(mol)
         
-    fingerprints = [generate_nd_molecule_fingerprint_no_chirality(molecule, DEFAULT_FEATURES, scaling_method='matrix') for molecule in rotated_molecules]
+    fingerprints = [generate_nd_molecule_fingerprint(molecule, DEFAULT_FEATURES, scaling_method='matrix') for molecule in rotated_molecules]
 
     # COMPARE ALL PAIRS OF MOLECULES
     n_molecules = len(fingerprints)
@@ -62,7 +62,7 @@ for file_num in range(1, N+1):
         for j in range(i+1, n_molecules):
             # partial_score = calculate_mean_absolute_difference(fingerprints[i], fingerprints[j])
             # similarity = calculate_similarity_from_difference(partial_score)
-            similarity = compute_similarity_score_no_chirality(fingerprints[i], fingerprints[j])
+            similarity = compute_similarity_score(fingerprints[i], fingerprints[j])
             trial_similarities.append(similarity)
     
     avg_similarity = sum(trial_similarities) / len(trial_similarities)
