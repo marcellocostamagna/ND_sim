@@ -15,7 +15,7 @@ class TestUtilsFunctions(unittest.TestCase):
 
     def test_extract_neutron_differencce(self):
         # Carbon usually has 6 neutrons for 12C isotope. Difference = 12 - 6 = 6
-        self.assertEqual(utils.extract_neutron_differencce(self.atom), 6)
+        self.assertEqual(utils.extract_neutron_difference(self.atom), 6)
 
     def test_extract_neutron_difference_from_common_isotope(self):
         # Carbon's most common isotope is 12C, which has 6 neutrons.
@@ -27,10 +27,10 @@ class TestUtilsFunctions(unittest.TestCase):
         self.assertEqual(utils.extract_formal_charge(self.atom), 0)
 
     def test_taper_functions(self):
-        self.assertEqual(utils.taper_p(10), np.log(10))
-        self.assertEqual(utils.taper_n(10), np.log(11))
+        self.assertEqual(utils.taper_p(10), np.sqrt(10))
+        self.assertEqual(utils.taper_n(10), np.sign(10) * np.sqrt(10))
         self.assertEqual(utils.taper_c(0), 0)
-        self.assertEqual(utils.taper_c(-5), np.log(6) * -1)
+        self.assertEqual(utils.taper_c(-5), -5)
 
     def test_normalize_feature_by_coordinate_range(self):
         feature_data = np.array([1, 2, 3])

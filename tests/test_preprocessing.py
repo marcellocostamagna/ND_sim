@@ -67,6 +67,17 @@ def test_molecule_to_ndarray(benzene_molecule):
 
     # Ensure no NaN values
     assert not np.any(np.isnan(ndarray_representation))
+    
+def test_molecule_to_ndarray(benzene_molecule):
+    ndarray_representation = pre_processing.molecule_to_ndarray(benzene_molecule, removeHs=True)
+    assert isinstance(ndarray_representation, np.ndarray)
+    assert ndarray_representation.shape[0] == benzene_molecule.GetNumAtoms() - 6
+
+    # Assuming there are 3 features: 'protons', 'neutrons', 'charges'
+    assert ndarray_representation.shape[1] == 6  # 3 for coordinates + 3 for features
+
+    # Ensure no NaN values
+    assert not np.any(np.isnan(ndarray_representation))
 
 
 
