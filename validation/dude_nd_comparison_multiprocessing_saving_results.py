@@ -10,7 +10,7 @@ from similarity.source.similarity import *
 from similarity.source.utils import *
 from oddt import toolkit
 
-MAX_CORES = 5
+MAX_CORES = 1
 
 cwd = os.getcwd()
 
@@ -35,7 +35,7 @@ def read_molecules_from_sdf(sdf_file):
     mols = [mol for mol in supplier if mol]
     return mols
 
-def calculate_enrichment_factor(y_true, y_scores, percentage):
+def calculate_enrichment_factor(y_true, y_scores, percentage, other_mols):
     n_molecules = len(y_true)
     n_actives = sum(y_true)
     f_actives = n_actives / n_molecules
@@ -44,6 +44,13 @@ def calculate_enrichment_factor(y_true, y_scores, percentage):
     top_indices = np.argsort(y_scores)[-n_top_molecules:]
     n_top_actives = sum(y_true[i] for i in top_indices)
     
+    # best_mols = [other_mols[i] for i in top_indices]
+    
+    # # Save best_mols on sdf file
+    # with Chem.SDWriter(f"{cwd}/best_mols.sdf") as writer:
+    #     for mol in best_mols:
+    #         writer.write(mol)
+        
     expected_actives = percentage * n_molecules * f_actives
     enrichment_factor = n_top_actives / expected_actives
     return enrichment_factor
@@ -139,6 +146,7 @@ def process_folder(args):
         decoys_file = os.path.join(folder_path, "decoys_final.sdf")
         
         actives = read_molecules_from_sdf(actives_file)
+        # actives = actives[:-1]
         decoys = read_molecules_from_sdf(decoys_file)
         
         # Set partial charges as in the oddt implementation (Pybel molecules)
@@ -170,14 +178,24 @@ def process_folder(args):
                 if method == 'pseudo_usr_cat':
                     score = get_pseudo_usrcat_similarity(query_fp, fingerprints[mol])
                 else:
-                    score, _ = compute_similarity_score(query_fp, fingerprints[mol])
+                    score = compute_similarity_score(query_fp, fingerprints[mol])
+                    mol.SetProp('score', str(score))
                         
                 y_scores.append(score)
                 
             y_true = [1 if mol in actives else 0 for mol in other_mols]
             
+            # # Save best_mols on sdf file
+            # with Chem.SDWriter(f"{cwd}/all_mols_with_flip.sdf") as writer:
+            #     for mol in other_mols:
+            #         writer.write(mol)
+            
+            # # # Save query_mol on sdf file
+            # with Chem.SDWriter(f"{cwd}/query_mol.sdf") as writer:
+            #     writer.write(query_mol)
+                    
             for percentage in enrichment_factors.keys():
-                ef = calculate_enrichment_factor(y_true, y_scores, percentage)
+                ef = calculate_enrichment_factor(y_true, y_scores, percentage, other_mols)
                 folder_enrichments[percentage].append(ef)
 
         # Return the enrichment factors for this folder
@@ -194,9 +212,9 @@ def process_folder(args):
 if __name__ == "__main__":
     print(f'CWD: {os.getcwd()}')
     root_directory = f"{os.getcwd()}/similarity/validation/all"
-    methods =  [ 'pseudo_electroshape']#['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
-    enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
-    
+    methods =  ['pseudo_usr']#['pseudo_usr', 'pseudo_usr_cat', 'pseudo_electroshape'] 
+    # enrichment_factors = {0.0025: [], 0.005: [], 0.01: [], 0.02: [], 0.03: [], 0.05: []}
+    enrichment_factors =  {0.005: []}
     overall_results = {}
 
     for method in methods:
@@ -204,13 +222,13 @@ if __name__ == "__main__":
         start_time_total = time.time()
 
         folders = sorted(os.listdir(root_directory))
-        # folders = sorted(os.listdir(root_directory))[:2]
         
-        args_list = [(folder, root_directory, method, enrichment_factors) for folder in folders]
+        # args_list = [(folder, root_directory, method, enrichment_factors) for folder in folders]
+        args_list = [folder, root_directory, method, enrichment_factors]
         
-        with multiprocessing.Pool(processes=MAX_CORES) as pool:
-            results_list = pool.map(process_folder, args_list)
-
+        # with multiprocessing.Pool(processes=MAX_CORES) as pool:
+            # results_list = pool.map(process_folder, args_list)
+        results_list = process_folder(args_list)
         # Combine all results
         results = {}
         for res in results_list:
@@ -233,6 +251,6 @@ if __name__ == "__main__":
         for percentage, ef in results.items():
             print(f"Enrichment Factor at {percentage*100}%: {ef}")
 
-    output_filename = f"{os.getcwd()}/dude_pseudo_results_manual_chirality_2.txt"
+    output_filename = f"{os.getcwd()}/dude_pseudo_results_debugging.txt"
     write_results_to_file(overall_results, output_filename)
     print(f"Results written to {output_filename}")
