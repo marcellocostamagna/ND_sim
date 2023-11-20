@@ -1,3 +1,8 @@
+# ND_sim
+# This file is part of ND_sim, which is licensed under the
+# GNU Lesser General Public License v3.0 (or any later version).
+# See the LICENSE file for more details.
+
 # Script that provides the fingerprints of the molecules represented as a ND array
 
 import numpy as np

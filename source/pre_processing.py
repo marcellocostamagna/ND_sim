@@ -1,3 +1,8 @@
+# ND_sim
+# This file is part of ND_sim, which is licensed under the
+# GNU Lesser General Public License v3.0 (or any later version).
+# See the LICENSE file for more details.
+
 # Script to collect and pre-process molecules from SDF files and 
 # convert them in datastructures to compute their similarity based on 
 # a PCA method considering coordinates, protons, neutrons and charges of every atom.
