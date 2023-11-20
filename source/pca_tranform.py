@@ -5,31 +5,36 @@ import numpy as np
 from scipy.stats import skew
 
 def compute_pca_using_covariance(original_data, chirality=False):
-    """
-    Perform PCA analysis via eigendecomposition of the covariance matrix.
-    
-    This function conducts PCA to produce a consistent reference system, 
-    allowing for comparison between molecules.The emphasis is on generating 
-    eigenvectors that offer deterministic outcomes and consistent orientations.
-    To enable the distinction of chiral molecules, the determinant's sign is 
-    explicitly considered and ensured to be positive.
+    """    
+    Perform Principal Component Analysis (PCA) using eigendecomposition of the covariance matrix.
+
+    This function conducts PCA on a given dataset to produce a consistent reference system,
+    facilitating comparison between different molecules. 
+    It emphasizes generating eigenvectors that provide deterministic outcomes and consistent orientations. 
+    The function also includes an option to handle chiral molecules by ensuring a positive determinant 
+    for the transformation matrix.
 
     Parameters
     ----------
     original_data : numpy.ndarray
-        N-dimensional array representing a molecule, where each row is a sample/point.
+        An N-dimensional array representing a molecule, where each row is a sample/point. 
+        The array should have a shape (n_samples, n_features), where n_samples is the number 
+        of samples and n_features is the number of features.
+
+    chirality : bool, optional
+        If set to True, the function ensures that the determinant of the transformation 
+        matrix is positive, allowing for the distinction of chiral molecules. 
+        Default is False.
 
     Returns
     -------
     transformed_data : numpy.ndarray
-        Data after PCA transformation.
-    eigenvectors : numpy.ndarray
-        Eigenvectors obtained from the PCA decomposition.
+        The dataset after PCA transformation. This data is aligned to the principal components 
+        and is of the same shape as the original data.
     """
-    covariance_matrix = np.cov(original_data, rowvar=False, ddof=0,) # STEP 1: Covariance Matrix
+    covariance_matrix = np.cov(original_data, rowvar=False, ddof=0,) 
     
-    eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix) # STEP 2: Eigendecomposition of Covariance Matrix
-    
+    eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
     eigenvalues, eigenvectors = eigenvalues[::-1], eigenvectors[:, ::-1]
     
     threshold = 1e-4
@@ -58,16 +63,22 @@ def adjust_eigenvector_signs(original_data, eigenvectors, chirality=False, toler
     """
     Adjust the sign of eigenvectors based on the data's projections.
 
-    For each eigenvector, the function determines the sign by looking at 
-    the direction of the data's maximum projection. If the maximum projection
-    is negative, the sign of the eigenvector is flipped.
-
+    This function iterates through each eigenvector and determines its sign by examining 
+    the direction of the data's maximum projection along that eigenvector. If the maximum 
+    projection is negative, the sign of the eigenvector is flipped. The function also 
+    handles special cases such as symmetric distributions of projections and can adjust 
+    eigenvectors based on chirality considerations.
+    
     Parameters
     ----------
     original_data : numpy.ndarray
         N-dimensional array representing a molecule, where each row is a sample/point.
     eigenvectors : numpy.ndarray
         Eigenvectors obtained from the PCA decomposition.
+    chirality : bool, optional
+        If True, the function also considers the skewness of the projections to decide 
+        on flipping the eigenvector. This is necessary for distinguishing 
+        chiral molecules. Defaults to False.
     tolerance : float, optional
         Tolerance used when comparing projections. Defaults to 1e-4.
 
@@ -75,6 +86,12 @@ def adjust_eigenvector_signs(original_data, eigenvectors, chirality=False, toler
     -------
     eigenvectors : numpy.ndarray
         Adjusted eigenvectors with their sign possibly flipped.
+    sign_changes : int
+        The number of eigenvectors that had their signs changed.
+    best_eigenvector_to_flip : int
+        Index of the eigenvector with the highest skewness, relevant when chirality 
+        is considered. This is the eigenvector most likely to be flipped to preserve 
+        chirality.
     """
     sign_changes = 0
     symmetric_eigenvectors = []
@@ -90,11 +107,11 @@ def adjust_eigenvector_signs(original_data, eigenvectors, chirality=False, toler
             current_skewness = skew(projections)
             skewness_values.append(abs(current_skewness))
 
-        remaining_indices = np.arange(original_data.shape[0])  # start considering all points
+        remaining_indices = np.arange(original_data.shape[0]) 
         max_abs_coordinate = np.max(np.abs(projections))
 
         while True:
-            # find the points with maximum absolute coordinate among the remaining ones
+            # Find the points with maximum absolute coordinate among the remaining ones
             mask_max = np.isclose(np.abs(projections[remaining_indices]), max_abs_coordinate, atol=tolerance)
             max_indices = remaining_indices[mask_max]  # indices of points with maximum absolute coordinate
             
@@ -106,7 +123,7 @@ def adjust_eigenvector_signs(original_data, eigenvectors, chirality=False, toler
             if len(max_indices) == 1:
                 break
             
-            # if there is a tie, ignore these points and find the maximum absolute coordinate again
+            # If there is a tie, ignore these points and find the maximum absolute coordinate again
             remaining_indices = remaining_indices[~mask_max]
             if len(remaining_indices) == 0: # if all points have the same component, break the loop
                 symmetric_eigenvectors.append(i)
@@ -155,9 +172,6 @@ def extract_relevant_subspace(eigenvectors, significant_indices, tol=1e-10):
     
     row_mask = ~np.all((np.abs(eigenvectors) < tol) | (np.abs(eigenvectors - 1) < tol) | (np.abs(eigenvectors + 1) < tol), axis=1)    
     col_mask = ~np.all((np.abs(eigenvectors.T) < tol) | (np.abs(eigenvectors.T - 1) < tol) | (np.abs(eigenvectors.T + 1) < tol), axis=1)
-    
-    # row_mask[significant_indices] = True
-    # col_mask[significant_indices] = True
     
     pruned_eigenvectors = eigenvectors[row_mask][:, col_mask]
     reduced_eigenvectors = pruned_eigenvectors[significant_indices][:, significant_indices]

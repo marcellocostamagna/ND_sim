@@ -1,6 +1,6 @@
+# Script collecting all utility functions used in the similarity package.
+
 import numpy as np
-from rdkit import Chem
-from rdkit import Chem
 
 ###### PRE-PROCESSING #######
 
@@ -12,16 +12,8 @@ def extract_proton_number(atom):
 def extract_neutron_difference(atom):
     return int(round(atom.GetMass())) - atom.GetAtomicNum()
 
-# # Difference between the number of neutrons of the current atom
-# # and the number of neutrons of the most common isotope of the element
-# def extract_neutron_difference_from_common_isotope(atom):
-#     pt = Chem.GetPeriodicTable()
-#     n_neutrons = int(round(atom.GetMass())) - atom.GetAtomicNum()
-#     n_neutrons_most_common = pt.GetMostCommonIsotope(atom.GetAtomicNum()) - atom.GetAtomicNum()
-#     return n_neutrons - n_neutrons_most_common
-
 # Difference between the number of neutrons of the current atom
-# # and the number of neutrons of the most common isotope of the element (stored)
+# and the number of neutrons of the most common isotope of the element (stored)
 def extract_neutron_difference_from_common_isotope(atom):
     n_neutrons = int(round(atom.GetMass())) - atom.GetAtomicNum()
     n_neutrons_most_common = N_NEUTRONS[atom.GetSymbol()]
@@ -122,37 +114,12 @@ DEFAULT_FEATURES = {
     'formal_charges' : [extract_formal_charge, taper_c]
     }
 
-PROTONS_FEATURES = {
-    'protons' : [extract_proton_number, taper_p]
-    }
-
-NEUTRONS_FEATURES = {
-    'delta_neutrons' : [extract_neutron_difference_from_common_isotope, taper_n]
-    }
-
-CHARGES_FEATURES = {
-    'formal_charges' : [extract_formal_charge, taper_c]
-    }
-
-PROTONS_NEUTRONS_FEATURES = {
-    'protons' : [extract_proton_number, taper_p],
-    'delta_neutrons' : [extract_neutron_difference_from_common_isotope, taper_n]
-    }
-PROTONS_CHARGES_FEATURES = {
-    'protons' : [extract_proton_number, taper_p],
-    'formal_charges' : [extract_formal_charge, taper_c]
-    }
-
-NEUTRONS_CHARGES_FEATURES = {
-    'delta_neutrons' : [extract_neutron_difference_from_common_isotope, taper_n],
-    'formal_charges' : [extract_formal_charge, taper_c]
-    }
-    
 EXAMPLE_FEATURES = {
     'protons' : [extract_proton_number,],
     'neutrons' : [extract_neutron_difference_from_common_isotope,],
     'charge' : [extract_formal_charge,]
     }
+
 ### CONSTANTS ### 
     
 N_NEUTRONS = {'H': 0, 'He': 2, 'Li': 4, 'Be': 5, 'B': 6, 'C': 6, 'N': 7, 'O': 8,

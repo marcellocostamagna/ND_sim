@@ -6,7 +6,7 @@ import numpy as np
 from rdkit import Chem
 from similarity.source.utils import DEFAULT_FEATURES
 
-def load_molecules_from_sdf(path, removeHs=False, sanitize=True):
+def load_molecules_from_sdf(path, removeHs=False, sanitize=False):
     """
     Load molecules from an SDF file.
     
@@ -17,7 +17,7 @@ def load_molecules_from_sdf(path, removeHs=False, sanitize=True):
     removeHs : bool, optional
         Whether to remove hydrogens. Defaults to False.
     sanitize : bool, optional
-        Whether to sanitize the molecules. Defaults to True.
+        Whether to sanitize the molecules. Defaults to False.
 
     Returns
     -------

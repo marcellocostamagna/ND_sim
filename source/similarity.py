@@ -4,12 +4,47 @@ from similarity.source.utils import *
 from similarity.source.fingerprint import *
 
 def calculate_mean_absolute_difference(moments1: list, moments2:list):
+    """
+    Calculate the mean absolute difference between two lists.
+
+    This function computes the mean of the absolute differences between 
+    corresponding elements of two lists.
+
+    Parameters
+    ----------
+    moments1 : list
+        The first list of numerical values.
+    moments2 : list
+        The second list of numerical values, must be of the same length as moments1.
+
+    Returns
+    -------
+    float
+        The mean absolute difference between the two lists.
+    """
     partial_score = 0
     for i in range(len(moments1)):
         partial_score += abs(moments1[i] - moments2[i])
     return partial_score / len(moments1)
 
 def calculate_similarity_from_difference(partial_score):
+    """
+    Calculate similarity score from a difference score.
+
+    This function converts a difference score into a similarity score using 
+    a reciprocal function. The similarity score approaches 1 as the difference 
+    score approaches 0, and it approaches 0 as the difference score increases.
+
+    Parameters
+    ----------
+    partial_score : float
+        The difference score, a non-negative number.
+
+    Returns
+    -------
+    float
+        The similarity score derived from the difference score.
+    """
     return 1/(1 + partial_score)
 
 def compute_similarity_score(fingerprint_1, fingerprint_2):
