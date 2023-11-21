@@ -42,7 +42,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">nd_sim</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../detailed_overview.html">Detailed Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed_overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../CONTRIBUTING.html">Contributing to ND_sim</a></li>
 </ul>
 
@@ -177,10 +177,19 @@
 <span class="sd">        The computed similarity score between the two molecules.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get molecules&#39; fingerprints</span>
-    <span class="n">f1</span> <span class="o">=</span> <span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span> <span class="n">scaling_method</span><span class="o">=</span><span class="n">scaling_method</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="n">removeHs</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
-    <span class="n">f2</span> <span class="o">=</span> <span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">mol2</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span> <span class="n">scaling_method</span><span class="o">=</span><span class="n">scaling_method</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="n">removeHs</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
-    <span class="c1"># Compute similarity score</span>
-    <span class="n">similarity_score</span> <span class="o">=</span> <span class="n">compute_similarity_score</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
+        <span class="n">f1</span><span class="p">,</span> <span class="n">dimensionality1</span> <span class="o">=</span> <span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span> <span class="n">scaling_method</span><span class="o">=</span><span class="n">scaling_method</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="n">removeHs</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
+        <span class="n">f2</span><span class="p">,</span> <span class="n">dimensionality2</span> <span class="o">=</span> <span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">mol2</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span> <span class="n">scaling_method</span><span class="o">=</span><span class="n">scaling_method</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="n">removeHs</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
+        
+        <span class="c1"># Compute similarity score</span>
+        <span class="k">if</span> <span class="n">dimensionality1</span> <span class="o">!=</span> <span class="n">dimensionality2</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: Comparison between molecules of different dimensionality: </span><span class="si">{</span><span class="n">dimensionality1</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">dimensionality2</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                   <span class="s2">&quot;The similarity score may not be accurate!&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f1</span> <span class="o">=</span> <span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span> <span class="n">scaling_method</span><span class="o">=</span><span class="n">scaling_method</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="n">removeHs</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
+        <span class="n">f2</span> <span class="o">=</span> <span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">mol2</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span> <span class="n">scaling_method</span><span class="o">=</span><span class="n">scaling_method</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="n">removeHs</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
+   
+    <span class="n">similarity_score</span> <span class="o">=</span> <span class="n">compute_similarity_score</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)</span>             
     <span class="k">return</span> <span class="n">similarity_score</span></div>
 
 

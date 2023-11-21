@@ -42,7 +42,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">nd_sim</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../detailed_overview.html">Detailed Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed_overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../CONTRIBUTING.html">Contributing to ND_sim</a></li>
 </ul>
 
@@ -123,20 +123,27 @@
     <span class="c1"># Create the reduced eigenvector matrix by selecting both rows and columns</span>
     <span class="n">reduced_eigenvectors</span> <span class="o">=</span> <span class="n">extract_relevant_subspace</span><span class="p">(</span><span class="n">eigenvectors</span><span class="p">,</span> <span class="n">significant_indices</span><span class="p">)</span>
 
+    <span class="c1"># Handle chirality</span>
     <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
         <span class="n">determinant</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">reduced_eigenvectors</span><span class="p">)</span> 
         <span class="k">if</span> <span class="n">determinant</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
    
-    <span class="n">adjusted_eigenvectors</span><span class="p">,</span> <span class="n">n_changes</span><span class="p">,</span> <span class="n">best_eigenvector_to_flip</span>  <span class="o">=</span> <span class="n">adjust_eigenvector_signs</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">],</span> <span class="n">chirality</span><span class="p">)</span> <span class="c1"># STEP 4: Adjust eigenvector signs</span>
-    <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">adjusted_eigenvectors</span>
+        <span class="n">adjusted_eigenvectors</span><span class="p">,</span> <span class="n">n_changes</span><span class="p">,</span> <span class="n">best_eigenvector_to_flip</span>  <span class="o">=</span> <span class="n">adjust_eigenvector_signs</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">],</span> <span class="n">chirality</span><span class="p">)</span> 
+        <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">adjusted_eigenvectors</span>
 
-    <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">n_changes</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">chirality</span><span class="p">:</span>            
+        <span class="k">if</span> <span class="n">n_changes</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>            
             <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">best_eigenvector_to_flip</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
     
-    <span class="n">transformed_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">)</span>
+        <span class="n">transformed_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">transformed_data</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">significant_indices</span><span class="p">)</span>
+
+    <span class="n">adjusted_eigenvectors</span><span class="p">,</span> <span class="n">n_changes</span><span class="p">,</span> <span class="n">best_eigenvector_to_flip</span>  <span class="o">=</span> <span class="n">adjust_eigenvector_signs</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">],</span> <span class="n">chirality</span><span class="p">)</span> 
+    <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">adjusted_eigenvectors</span>
     
+    <span class="n">transformed_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">)</span>
+
     <span class="k">return</span>  <span class="n">transformed_data</span></div>
 
 
@@ -226,7 +233,6 @@
         <span class="n">best_eigenvector_to_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">skewness_values</span><span class="p">)</span>   
          
     <span class="k">return</span> <span class="n">eigenvectors</span><span class="p">,</span> <span class="n">sign_changes</span><span class="p">,</span> <span class="n">best_eigenvector_to_flip</span> </div>
-
 
 
 <div class="viewcode-block" id="extract_relevant_subspace">

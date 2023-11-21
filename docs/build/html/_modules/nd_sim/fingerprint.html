@@ -42,7 +42,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">nd_sim</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../detailed_overview.html">Detailed Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed_overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../CONTRIBUTING.html">Contributing to ND_sim</a></li>
 </ul>
 
@@ -236,7 +236,10 @@
     <span class="c1"># Convert molecule to n-dimensional data</span>
     <span class="n">molecule_data</span> <span class="o">=</span> <span class="n">molecule_to_ndarray</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="n">removeHs</span><span class="p">)</span>
     <span class="c1"># PCA transformation</span>
-    <span class="n">transformed_data</span> <span class="o">=</span> <span class="n">compute_pca_using_covariance</span><span class="p">(</span><span class="n">molecule_data</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
+        <span class="n">transformed_data</span><span class="p">,</span> <span class="n">dimensionality</span> <span class="o">=</span> <span class="n">compute_pca_using_covariance</span><span class="p">(</span><span class="n">molecule_data</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">transformed_data</span> <span class="o">=</span> <span class="n">compute_pca_using_covariance</span><span class="p">(</span><span class="n">molecule_data</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
     <span class="c1"># Determine scaling</span>
     <span class="k">if</span> <span class="n">scaling_method</span> <span class="o">==</span> <span class="s1">&#39;factor&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">scaling_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -250,8 +253,11 @@
         <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">generate_molecule_fingerprint</span><span class="p">(</span><span class="n">transformed_data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid scaling method: </span><span class="si">{</span><span class="n">scaling_method</span><span class="si">}</span><span class="s2">. Choose &#39;factor&#39; or &#39;matrix&#39;.&quot;</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">fingerprint</span></div>
+   
+    <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fingerprint</span><span class="p">,</span> <span class="n">dimensionality</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fingerprint</span></div>
 
 </pre></div>
 

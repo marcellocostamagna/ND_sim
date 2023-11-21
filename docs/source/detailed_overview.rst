@@ -149,4 +149,20 @@ Introducing chirality into the similarity measurement process can make the metho
 
 We recommend enabling chirality detection only in scenarios where molecules are unlikely to be described by different numbers of dimensions. However, it's important to note that this probability can never be completely eliminated, as some molecules might be planar, leading to dimensionality reduction after PCA. Therefore, if chirality is set to `True` and the dimensionality of the two molecules being compared differs, the method will issue a warning as follows:
 
-(TODO: Add specific warning message)
+.. code-block:: python
+
+    "WARNING: Comparison between molecules of different dimensionality: {dimensionality1} and {dimensionality2}.\n"
+                   "The similarity score may not be accurate!"
+
+
+**IMPORTANT NOTE:**
+
+   When the `chirality` parameter is set to `True`, both the :func:`compute_pca_using_covariance` and :func:`generate_nd_molecule_fingerprint` functions return an additional value – the dimensionality of the molecule. This change in return values is crucial to note, especially when these methods are used in a step-wise manner.
+
+   The :func:`compute_similarity` function is designed to handle these additional return values correctly. It will process the dimensionality information and issue a warning if there is a mismatch in dimensionality between the two molecules being compared. This is particularly important because a difference in dimensionality can significantly impact the accuracy of the similarity score.
+
+   If you are using :func:`compute_pca_using_covariance` or :func:`generate_nd_molecule_fingerprint` directly in your code, be prepared to handle an additional return value (the dimensionality) when `chirality` is `True`. This is especially relevant if you are integrating these functions into a larger workflow or using them in conjunction with other methods.
+
+   For example, if you are performing PCA transformation step-by-step, you should modify your code to accommodate the additional dimensionality information. Similarly, when generating fingerprints, ensure that your code can handle the extra return value without errors.
+
+   This change in the return structure is a direct consequence of enabling chirality detection, which adds a layer of complexity to the analysis but can provide more nuanced insights, especially for chiral molecules.

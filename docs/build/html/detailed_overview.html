@@ -215,7 +215,18 @@ The method is grounded in a robust and deterministic process, ensuring precision
 <h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Link to this heading"></a></h2>
 <p>Introducing chirality into the similarity measurement process can make the method less reliable, particularly when comparing molecules with differing dimensionality, such as a different number of principal components. An example of this might be comparing similar 3-D molecules where one has charges and the other is neutral. In such cases, the addition of chirality detection may further reduce the similarity score. For detailed explanations, please refer to our publication (TODO: add reference).</p>
 <p>We recommend enabling chirality detection only in scenarios where molecules are unlikely to be described by different numbers of dimensions. However, it’s important to note that this probability can never be completely eliminated, as some molecules might be planar, leading to dimensionality reduction after PCA. Therefore, if chirality is set to <cite>True</cite> and the dimensionality of the two molecules being compared differs, the method will issue a warning as follows:</p>
-<p>(TODO: Add specific warning message)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;WARNING: Comparison between molecules of different dimensionality: </span><span class="si">{dimensionality1}</span><span class="s2"> and </span><span class="si">{dimensionality2}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;The similarity score may not be accurate!&quot;</span>
+</pre></div>
+</div>
+<p><strong>IMPORTANT NOTE:</strong></p>
+<blockquote>
+<div><p>When the <cite>chirality</cite> parameter is set to <cite>True</cite>, both the <code class="xref py py-func docutils literal notranslate"><span class="pre">compute_pca_using_covariance()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">generate_nd_molecule_fingerprint()</span></code> functions return an additional value – the dimensionality of the molecule. This change in return values is crucial to note, especially when these methods are used in a step-wise manner.</p>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">compute_similarity()</span></code> function is designed to handle these additional return values correctly. It will process the dimensionality information and issue a warning if there is a mismatch in dimensionality between the two molecules being compared. This is particularly important because a difference in dimensionality can significantly impact the accuracy of the similarity score.</p>
+<p>If you are using <code class="xref py py-func docutils literal notranslate"><span class="pre">compute_pca_using_covariance()</span></code> or <code class="xref py py-func docutils literal notranslate"><span class="pre">generate_nd_molecule_fingerprint()</span></code> directly in your code, be prepared to handle an additional return value (the dimensionality) when <cite>chirality</cite> is <cite>True</cite>. This is especially relevant if you are integrating these functions into a larger workflow or using them in conjunction with other methods.</p>
+<p>For example, if you are performing PCA transformation step-by-step, you should modify your code to accommodate the additional dimensionality information. Similarly, when generating fingerprints, ensure that your code can handle the extra return value without errors.</p>
+<p>This change in the return structure is a direct consequence of enabling chirality detection, which adds a layer of complexity to the analysis but can provide more nuanced insights, especially for chiral molecules.</p>
+</div></blockquote>
 </section>
 </section>
 
