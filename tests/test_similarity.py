@@ -1,7 +1,7 @@
 import pytest
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from similarity.source import similarity
+from nd_sim import similarity
 
 # Helper function to generate 3D conformer for a molecule
 def generate_3d_coords(mol):
@@ -13,6 +13,12 @@ def generate_3d_coords(mol):
 @pytest.fixture
 def ethanol_3d():
     mol = Chem.MolFromSmiles('CCO')
+    return generate_3d_coords(mol)
+
+@pytest.fixture
+def charged_ethanol_3d():
+    mol = Chem.MolFromSmiles('CCO')
+    mol.GetAtomWithIdx(0).SetFormalCharge(1)
     return generate_3d_coords(mol)
 
 @pytest.fixture
@@ -56,3 +62,14 @@ def test_compute_similarity_3d_mols(ethanol_3d, ethane_3d):
     similarity_diff_1 = similarity.compute_similarity(ethanol_3d, ethane_3d)
 
     assert similarity_diff_1 < 1
+
+def test_compute_similarity_charged_vs_neutral(ethanol_3d, charged_ethanol_3d, capsys):
+    similarity_score = similarity.compute_similarity(ethanol_3d, charged_ethanol_3d, chirality=True)
+    assert similarity_score < 1
+
+    captured = capsys.readouterr()
+    expected_warning = ("WARNING: Comparison between molecules of different dimensionality: "
+                        "4 and 5.\n"
+                        "The similarity score may not be accurate!")
+    
+    assert expected_warning in captured.out    

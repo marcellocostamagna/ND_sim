@@ -1,9 +1,9 @@
 # Script to test the functions in the preprocessing.py file
-
+import os
 import numpy as np
 import tempfile
 from rdkit import Chem
-from similarity.source import *
+from nd_sim import *
 import pytest
 
 # Create fixture for benzene molecule

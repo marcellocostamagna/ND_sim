@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
-from similarity.source import fingerprint
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from nd_sim import fingerprint
 
 def test_generate_reference_points():
     dimensionality = 6
@@ -58,3 +60,29 @@ def test_generate_molecule_fingerprint():
 
     assert isinstance(fingerprint_data, list)
     assert len(fingerprint_data) == (molecule_data.shape[1] + 1) * 3  # For each row, we have 3 statistics
+
+# Helper function to generate 3D conformer for a molecule
+def generate_3d_coords(mol):
+    mol = Chem.AddHs(mol)
+    AllChem.EmbedMolecule(mol, AllChem.ETKDG())
+    return mol
+
+# Fixtures for RDKit Mol objects
+@pytest.fixture
+def ethanol_3d():
+    mol = Chem.MolFromSmiles('CCO')
+    return generate_3d_coords(mol)
+
+@pytest.mark.parametrize("chirality", [False, True])
+def test_generate_nd_molecule_fingerprint(chirality, ethanol_3d):
+    result = fingerprint.generate_nd_molecule_fingerprint(ethanol_3d, chirality=chirality)
+
+    if chirality:
+        fingerprint_data, dimensionality = result
+        assert len(result) == 2  # Check if two objects are returned
+        assert isinstance(dimensionality, int)
+    else:
+        fingerprint_data = result
+
+    assert isinstance(fingerprint_data, list)
+ 
