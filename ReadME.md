@@ -30,7 +30,7 @@ mol2 = load_molecules_from_sdf('mol2.sdf')
 similarity = compute_similarity(mol1, mol2)
 
 ```
-For a detailed overview of ND_sim's methodology check our [documentation](file:///Users/marcellocostamagna/ND_sim/docs/build/html/index.html).
+For a detailed overview of ND_sim's methodology check our [documentation](https://marcellocostamagna.github.io/ND_sim/).
 
 
 ### Licensing
@@ -45,6 +45,6 @@ If you use ND_sim in your research, please cite it as follows:
 
 ### Contributing
 
-Contributions to ND_sim are welcome! Please read our [Contributing Guidelines]() for information on how to get started.
+Contributions to ND_sim are welcome! Please read our [Contributing Guidelines](https://marcellocostamagna.github.io/ND_sim/CONTRIBUTING.html) for information on how to get started.
 
 
