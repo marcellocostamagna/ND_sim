@@ -1,1 +1,0 @@
-from nd_sim import *
