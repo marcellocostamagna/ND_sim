@@ -35,7 +35,7 @@ For a detailed overview of ND_sim's methodology check our [documentation](https:
 
 ### Licensing
 
-ND_sim is licensed under the GNU Affero General Public License Version 3. For more details, see the LICENSE file.
+ND_sim is licensed under the [GNU Affero General Public License Version 3](https://www.gnu.org/licenses/agpl-3.0.html). For more details, see the LICENSE file.
 
 ### Citing ND_sim
 
