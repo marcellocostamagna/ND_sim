@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview &mdash; ND_sim  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Contributing to ND_sim" href="CONTRIBUTING.html" />
+    <link rel="prev" title="nd_sim package" href="nd_sim.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ND_sim
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">nd_sim</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#initial-data-representation">Initial Data Representation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#principal-component-analysis-pca">Principal Component Analysis (PCA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fingerprint-construction">Fingerprint Construction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#similarity-measurement">Similarity Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-new-features">Adding New Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#chirality">Chirality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTING.html">Contributing to ND_sim</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ND_sim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/detailed_overview.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h1>
+<p>ND_sim represents an approach to molecular similarity assessment,
+leveraging a multidimensional array to encapsulate both spatial and feature-based characteristics of molecules.
+The method is grounded in a robust and deterministic process, ensuring precision and consistency in similarity measurements.</p>
+<section id="initial-data-representation">
+<h2>Initial Data Representation<a class="headerlink" href="#initial-data-representation" title="Link to this heading"></a></h2>
+<ul>
+<li><p>Molecules are represented in an N-dimensional array, where the first three dimensions correspond to 3-D spatial coordinates (<a class="reference internal" href="nd_sim.html#nd_sim.pre_processing.molecule_to_ndarray" title="nd_sim.pre_processing.molecule_to_ndarray"><code class="xref py py-func docutils literal notranslate"><span class="pre">molecule_to_ndarray</span></code></a>).</p></li>
+<li><p>Additional features are integrated, enhancing the molecular description. In the default setting (<a class="reference internal" href="nd_sim.html#module-nd_sim.utils" title="nd_sim.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Utils</span></code></a>), these include:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Proton count, adjusted using a square root tapering function.</p></li>
+<li><p>Neutron count difference from the most common isotope, also tapered by a square root function (with sign adjustment).</p></li>
+<li><p>Formal charge, incorporated without tapering.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</section>
+<section id="principal-component-analysis-pca">
+<h2>Principal Component Analysis (PCA)<a class="headerlink" href="#principal-component-analysis-pca" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>The method applies PCA to the N-dimensional (6-D in default mode) molecular representation, extracting principal components of the molecule in the N-D space (<a class="reference internal" href="nd_sim.html#nd_sim.pca_transform.compute_pca_using_covariance" title="nd_sim.pca_transform.compute_pca_using_covariance"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_pca_using_covariance</span></code></a>).</p></li>
+<li><p>Orientation of eigenvectors is determined rigorously. The sign of each eigenvector is set based on the maximum projection of the data onto that eigenvector. This ensures a deterministic and unambiguous assignment of orientation (<a class="reference internal" href="nd_sim.html#nd_sim.pca_transform.adjust_eigenvector_signs" title="nd_sim.pca_transform.adjust_eigenvector_signs"><code class="xref py py-func docutils literal notranslate"><span class="pre">adjust_eigenvector_signs</span></code></a>).</p></li>
+</ul>
+</section>
+<section id="fingerprint-construction">
+<h2>Fingerprint Construction<a class="headerlink" href="#fingerprint-construction" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Post-PCA, the method constructs a molecular fingerprint (<a class="reference internal" href="nd_sim.html#module-nd_sim.fingerprint" title="nd_sim.fingerprint"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Fingerprint</span></code></a>). This involves selecting reference points corresponding to each principal component and the geometric center of the molecule.</p></li>
+<li><p>The distance of each reference point from the center can be adjusted. By default, it is set to the maximum coordinate value in that dimension.</p></li>
+<li><p>For each reference point, distances to all atoms are calculated, resulting in a set of distance distributions.</p></li>
+<li><p>From each distribution, three statistical moments are computed: mean, standard deviation, and skewness. These values are compiled into a list, forming the comprehensive fingerprint of the molecule.</p></li>
+</ul>
+</section>
+<section id="similarity-measurement">
+<h2>Similarity Measurement<a class="headerlink" href="#similarity-measurement" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Molecular similarity is quantified using the inverse Manhattan distance between the fingerprints of two molecules (<a class="reference internal" href="nd_sim.html#module-nd_sim.similarity" title="nd_sim.similarity"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Similarity</span></code></a>). This metric provides a straightforward yet effective measure of similarity, capturing both spatial and feature-based nuances.</p></li>
+</ul>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<p>The ND_sim method can be directly used to compute the similarity between two RDKit molecules:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">nd_sim</span>
+
+<span class="n">mol1</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">load_molecules_from_sdf</span><span class="p">(</span><span class="s1">&#39;mol1.sdf&#39;</span><span class="p">)</span>
+<span class="n">mol2</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">load_molecules_from_sdf</span><span class="p">(</span><span class="s1">&#39;mol2.sdf&#39;</span><span class="p">)</span>
+
+<span class="n">similarity</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">compute_similarity</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span> <span class="n">mol2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example, <code class="xref py py-func docutils literal notranslate"><span class="pre">compute_similarity()</span></code> is used with its default values:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">compute_similarity</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span> <span class="n">mol2</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">DEFAULT_FEATURES</span><span class="p">,</span> <span class="n">scaling_method</span><span class="o">=</span><span class="s1">&#39;matrix&#39;</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>But, if desired, the method can be “deconstructed” into its more elementary steps. Here, we first compute the fingerprint and then the similarity score:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">nd_sim</span>
+
+<span class="n">mol1</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">load_molecules_from_sdf</span><span class="p">(</span><span class="s1">&#39;mol1.sdf&#39;</span><span class="p">)</span>
+<span class="n">mol2</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">load_molecules_from_sdf</span><span class="p">(</span><span class="s1">&#39;mol2.sdf&#39;</span><span class="p">)</span>
+
+<span class="n">fingerprint1</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">mol1</span><span class="p">)</span>
+<span class="n">fingerprint2</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">mol2</span><span class="p">)</span>
+
+<span class="n">similarity</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">compute_similarity_score</span><span class="p">(</span><span class="n">fingerprint1</span><span class="p">,</span> <span class="n">fingerprint2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this case, the function <code class="xref py py-func docutils literal notranslate"><span class="pre">generate_nd_molecule_fingerprint()</span></code> is used with its default values:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">DEFAULT_FEATURES</span><span class="p">,</span> <span class="n">scaling_method</span><span class="o">=</span><span class="s1">&#39;matrix&#39;</span><span class="p">,</span> <span class="n">scaling_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>An even more “exploded” example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">nd_sim</span>
+
+<span class="c1"># Molecules from file</span>
+<span class="n">mol1</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">load_molecules_from_sdf</span><span class="p">(</span><span class="s1">&#39;mol1.sdf&#39;</span><span class="p">)</span>
+<span class="n">mol2</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">load_molecules_from_sdf</span><span class="p">(</span><span class="s1">&#39;mol2.sdf&#39;</span><span class="p">)</span>
+
+<span class="c1"># PCA</span>
+<span class="n">mol1_transform</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">compute_pca_using_covariance</span><span class="p">(</span><span class="n">mol1</span><span class="p">)</span>
+<span class="n">mol2_transform</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">compute_pca_using_covariance</span><span class="p">(</span><span class="n">mol2</span><span class="p">)</span>
+
+<span class="c1"># (Optional) Possibility to define personalized scaling for reference points&#39; positions</span>
+<span class="c1"># to insert in the calculation of the fingerprint</span>
+
+<span class="c1"># Fingerprints</span>
+<span class="n">fp1</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">generate_molecule_fingerprint</span><span class="p">(</span><span class="n">mol1_transform</span><span class="p">)</span>
+<span class="n">fp2</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">generate_molecule_fingerprint</span><span class="p">(</span><span class="n">mol2_transform</span><span class="p">)</span>
+
+<span class="c1"># Similarity</span>
+<span class="n">similarity</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">compute_similarity_score</span><span class="p">(</span><span class="n">fp1</span><span class="p">,</span> <span class="n">fp2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This detailed step-by-step approach provides a deeper insight into the workings of the ND_sim method. By deconstructing the process, users can gain a better understanding of how each step contributes to the final similarity measurement. This can be particularly useful for debugging, optimizing, or simply gaining a more thorough understanding of the method’s behavior with specific molecules. It allows for a granular inspection of the output at each stage, offering an opportunity to identify and analyze the characteristics of the molecules that are most influential in the similarity assessment.</p>
+</section>
+<section id="adding-new-features">
+<h2>Adding New Features<a class="headerlink" href="#adding-new-features" title="Link to this heading"></a></h2>
+<p>The ND_sim tool comes with its default features, but users have the flexibility to define new ones for their specific needs. New features must be capable of extracting or adding a property to each atom, and optionally, the value of this property can be scaled as desired. The function for obtaining the raw value of the property and the optional scaling function should be collected in a dictionary, as shown in the following example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;new_feature&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">extract_new_feature</span><span class="p">,</span> <span class="n">scale_new_feature</span><span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>For comparison, here is the dictionary of the default features:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DEFAULT_FEATURES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;protons&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">extract_proton_number</span><span class="p">,</span> <span class="n">taper_p</span><span class="p">],</span>
+    <span class="s1">&#39;delta_neutrons&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">extract_neutron_difference_from_common_isotope</span><span class="p">,</span> <span class="n">taper_n</span><span class="p">],</span>
+    <span class="s1">&#39;formal_charges&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">extract_formal_charge</span><span class="p">,</span> <span class="n">taper_c</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>For detailed insights into the implementation and management of these features within ND_sim, refer to the <a class="reference internal" href="nd_sim.html#module-nd_sim.utils" title="nd_sim.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Utils</span></code></a> module.</p>
+</section>
+<section id="chirality">
+<h2>Chirality<a class="headerlink" href="#chirality" title="Link to this heading"></a></h2>
+<p>ND_sim is capable of handling and distinguishing chiral molecules. However, this feature is not enabled by default, as it introduces additional complexity and potential reliability issues. For more detailed information on this aspect, please refer to our publication (TODO: add reference).</p>
+<p>To consider chirality in your analysis, simply set the <cite>chirality</cite> flag to <cite>True</cite>. This can be done in either of the following ways:</p>
+<p>When generating a fingerprint:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fingerprint</span> <span class="o">=</span> <span class="n">nd_sim</span><span class="o">.</span><span class="n">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or when computing similarity:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">compute_similarity</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span> <span class="n">mol2</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Link to this heading"></a></h2>
+<p>Introducing chirality into the similarity measurement process can make the method less reliable, particularly when comparing molecules with differing dimensionality, such as a different number of principal components. An example of this might be comparing similar 3-D molecules where one has charges and the other is neutral. In such cases, the addition of chirality detection may further reduce the similarity score. For detailed explanations, please refer to our publication (TODO: add reference).</p>
+<p>We recommend enabling chirality detection only in scenarios where molecules are unlikely to be described by different numbers of dimensions. However, it’s important to note that this probability can never be completely eliminated, as some molecules might be planar, leading to dimensionality reduction after PCA. Therefore, if chirality is set to <cite>True</cite> and the dimensionality of the two molecules being compared differs, the method will issue a warning as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;WARNING: Comparison between molecules of different dimensionality: </span><span class="si">{dimensionality1}</span><span class="s2"> and </span><span class="si">{dimensionality2}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;The similarity score may not be accurate!&quot;</span>
+</pre></div>
+</div>
+<p><strong>IMPORTANT NOTE:</strong></p>
+<blockquote>
+<div><p>When the <cite>chirality</cite> parameter is set to <cite>True</cite>, both the <code class="xref py py-func docutils literal notranslate"><span class="pre">compute_pca_using_covariance()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">generate_nd_molecule_fingerprint()</span></code> functions return an additional value – the dimensionality of the molecule. This change in return values is crucial to note, especially when these methods are used in a step-wise manner.</p>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">compute_similarity()</span></code> function is designed to handle these additional return values correctly. It will process the dimensionality information and issue a warning if there is a mismatch in dimensionality between the two molecules being compared. This is particularly important because a difference in dimensionality can significantly impact the accuracy of the similarity score.</p>
+<p>If you are using <code class="xref py py-func docutils literal notranslate"><span class="pre">compute_pca_using_covariance()</span></code> or <code class="xref py py-func docutils literal notranslate"><span class="pre">generate_nd_molecule_fingerprint()</span></code> directly in your code, be prepared to handle an additional return value (the dimensionality) when <cite>chirality</cite> is <cite>True</cite>. This is especially relevant if you are integrating these functions into a larger workflow or using them in conjunction with other methods.</p>
+<p>For example, if you are performing PCA transformation step-by-step, you should modify your code to accommodate the additional dimensionality information. Similarly, when generating fingerprints, ensure that your code can handle the extra return value without errors.</p>
+<p>This change in the return structure is a direct consequence of enabling chirality detection, which adds a layer of complexity to the analysis but can provide more nuanced insights, especially for chiral molecules.</p>
+</div></blockquote>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="nd_sim.html" class="btn btn-neutral float-left" title="nd_sim package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="CONTRIBUTING.html" class="btn btn-neutral float-right" title="Contributing to ND_sim" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Marcello Costamagna.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

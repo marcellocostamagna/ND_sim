@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from rdkit import Chem
-from similarity.source import utils
+from nd_sim import utils
 
 class TestUtilsFunctions(unittest.TestCase):
     

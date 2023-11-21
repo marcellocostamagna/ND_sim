@@ -9,7 +9,7 @@
 
 import numpy as np
 from rdkit import Chem
-from similarity.source.utils import DEFAULT_FEATURES
+from nd_sim.utils import DEFAULT_FEATURES
 
 def load_molecules_from_sdf(path, removeHs=False, sanitize=False):
     """

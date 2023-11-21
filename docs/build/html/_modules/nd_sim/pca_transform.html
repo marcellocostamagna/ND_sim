@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nd_sim.pca_transform &mdash; ND_sim  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ND_sim
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">nd_sim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed_overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../CONTRIBUTING.html">Contributing to ND_sim</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ND_sim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nd_sim.pca_transform</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nd_sim.pca_transform</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ND_sim</span>
+<span class="c1"># This file is part of ND_sim, which is licensed under the</span>
+<span class="c1"># GNU Lesser General Public License v3.0 (or any later version).</span>
+<span class="c1"># See the LICENSE file for more details.</span>
+
+<span class="c1"># Script to perform Principal Component Analysis (PCA) analysis on n-dimensional molecular data </span>
+<span class="c1"># and return the transformed data for fingerprint calculation</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">skew</span>
+
+<div class="viewcode-block" id="compute_pca_using_covariance">
+<a class="viewcode-back" href="../../nd_sim.html#nd_sim.pca_transform.compute_pca_using_covariance">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_pca_using_covariance</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;    </span>
+<span class="sd">    Perform Principal Component Analysis (PCA) using eigendecomposition of the covariance matrix.</span>
+
+<span class="sd">    This function conducts PCA on a given dataset to produce a consistent reference system,</span>
+<span class="sd">    facilitating comparison between different molecules. </span>
+<span class="sd">    It emphasizes generating eigenvectors that provide deterministic outcomes and consistent orientations. </span>
+<span class="sd">    The function also includes an option to handle chiral molecules by ensuring a positive determinant </span>
+<span class="sd">    for the transformation matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    original_data : numpy.ndarray</span>
+<span class="sd">        An N-dimensional array representing a molecule, where each row is a sample/point. </span>
+<span class="sd">        The array should have a shape (n_samples, n_features), where n_samples is the number </span>
+<span class="sd">        of samples and n_features is the number of features.</span>
+
+<span class="sd">    chirality : bool, optional</span>
+<span class="sd">        If set to True, the function ensures that the determinant of the transformation </span>
+<span class="sd">        matrix is positive, allowing for the distinction of chiral molecules. </span>
+<span class="sd">        Default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    transformed_data : numpy.ndarray</span>
+<span class="sd">        The dataset after PCA transformation. This data is aligned to the principal components </span>
+<span class="sd">        and is of the same shape as the original data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">covariance_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">,)</span> 
+    
+    <span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">covariance_matrix</span><span class="p">)</span>
+    <span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">eigenvalues</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="n">threshold</span> <span class="o">=</span> <span class="mf">1e-4</span>
+    <span class="n">significant_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="c1"># Create the reduced eigenvector matrix by selecting both rows and columns</span>
+    <span class="n">reduced_eigenvectors</span> <span class="o">=</span> <span class="n">extract_relevant_subspace</span><span class="p">(</span><span class="n">eigenvectors</span><span class="p">,</span> <span class="n">significant_indices</span><span class="p">)</span>
+
+    <span class="c1"># Handle chirality</span>
+    <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
+        <span class="n">determinant</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">reduced_eigenvectors</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="n">determinant</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+   
+        <span class="n">adjusted_eigenvectors</span><span class="p">,</span> <span class="n">n_changes</span><span class="p">,</span> <span class="n">best_eigenvector_to_flip</span>  <span class="o">=</span> <span class="n">adjust_eigenvector_signs</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">],</span> <span class="n">chirality</span><span class="p">)</span> 
+        <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">adjusted_eigenvectors</span>
+
+        <span class="k">if</span> <span class="n">n_changes</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>            
+            <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">best_eigenvector_to_flip</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+    
+        <span class="n">transformed_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">transformed_data</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">significant_indices</span><span class="p">)</span>
+
+    <span class="n">adjusted_eigenvectors</span><span class="p">,</span> <span class="n">n_changes</span><span class="p">,</span> <span class="n">best_eigenvector_to_flip</span>  <span class="o">=</span> <span class="n">adjust_eigenvector_signs</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">],</span> <span class="n">chirality</span><span class="p">)</span> 
+    <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">significant_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">adjusted_eigenvectors</span>
+    
+    <span class="n">transformed_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">)</span>
+
+    <span class="k">return</span>  <span class="n">transformed_data</span></div>
+
+
+<div class="viewcode-block" id="adjust_eigenvector_signs">
+<a class="viewcode-back" href="../../nd_sim.html#nd_sim.pca_transform.adjust_eigenvector_signs">[docs]</a>
+<span class="k">def</span> <span class="nf">adjust_eigenvector_signs</span><span class="p">(</span><span class="n">original_data</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span> <span class="mf">1e-4</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adjust the sign of eigenvectors based on the data&#39;s projections.</span>
+
+<span class="sd">    This function iterates through each eigenvector and determines its sign by examining </span>
+<span class="sd">    the direction of the data&#39;s maximum projection along that eigenvector. If the maximum </span>
+<span class="sd">    projection is negative, the sign of the eigenvector is flipped. The function also </span>
+<span class="sd">    handles special cases such as symmetric distributions of projections and can adjust </span>
+<span class="sd">    eigenvectors based on chirality considerations.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    original_data : numpy.ndarray</span>
+<span class="sd">        N-dimensional array representing a molecule, where each row is a sample/point.</span>
+<span class="sd">    eigenvectors : numpy.ndarray</span>
+<span class="sd">        Eigenvectors obtained from the PCA decomposition.</span>
+<span class="sd">    chirality : bool, optional</span>
+<span class="sd">        If True, the function also considers the skewness of the projections to decide </span>
+<span class="sd">        on flipping the eigenvector. This is necessary for distinguishing </span>
+<span class="sd">        chiral molecules. Defaults to False.</span>
+<span class="sd">    tolerance : float, optional</span>
+<span class="sd">        Tolerance used when comparing projections. Defaults to 1e-4.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eigenvectors : numpy.ndarray</span>
+<span class="sd">        Adjusted eigenvectors with their sign possibly flipped.</span>
+<span class="sd">    sign_changes : int</span>
+<span class="sd">        The number of eigenvectors that had their signs changed.</span>
+<span class="sd">    best_eigenvector_to_flip : int</span>
+<span class="sd">        Index of the eigenvector with the highest skewness, relevant when chirality </span>
+<span class="sd">        is considered. This is the eigenvector most likely to be flipped to preserve </span>
+<span class="sd">        chirality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sign_changes</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">symmetric_eigenvectors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">skewness_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">best_eigenvector_to_flip</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">eigenvectors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="c1"># Compute the projections of the original data onto the current eigenvector</span>
+        <span class="n">projections</span> <span class="o">=</span> <span class="n">original_data</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+        
+        <span class="c1"># Compute skewness for current projections</span>
+        <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
+            <span class="n">current_skewness</span> <span class="o">=</span> <span class="n">skew</span><span class="p">(</span><span class="n">projections</span><span class="p">)</span>
+            <span class="n">skewness_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">current_skewness</span><span class="p">))</span>
+
+        <span class="n">remaining_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">original_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+        <span class="n">max_abs_coordinate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">projections</span><span class="p">))</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># Find the points with maximum absolute coordinate among the remaining ones</span>
+            <span class="n">mask_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">projections</span><span class="p">[</span><span class="n">remaining_indices</span><span class="p">]),</span> <span class="n">max_abs_coordinate</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">tolerance</span><span class="p">)</span>
+            <span class="n">max_indices</span> <span class="o">=</span> <span class="n">remaining_indices</span><span class="p">[</span><span class="n">mask_max</span><span class="p">]</span>  <span class="c1"># indices of points with maximum absolute coordinate</span>
+            
+            <span class="c1"># If all points with the maximum absolute coordinate have the same sign, use them for a decision</span>
+            <span class="n">unique_signs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">projections</span><span class="p">[</span><span class="n">max_indices</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">unique_signs</span> <span class="o">==</span> <span class="n">unique_signs</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">max_indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">break</span>
+            
+            <span class="c1"># If there is a tie, ignore these points and find the maximum absolute coordinate again</span>
+            <span class="n">remaining_indices</span> <span class="o">=</span> <span class="n">remaining_indices</span><span class="p">[</span><span class="o">~</span><span class="n">mask_max</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining_indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># if all points have the same component, break the loop</span>
+                <span class="n">symmetric_eigenvectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="n">max_abs_coordinate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">projections</span><span class="p">[</span><span class="n">remaining_indices</span><span class="p">]))</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining_indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">projections</span><span class="p">[</span><span class="n">max_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">sign_changes</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+    <span class="k">if</span> <span class="n">symmetric_eigenvectors</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sign_changes</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">symmetric_eigenvectors</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">sign_changes</span> <span class="o">=</span> <span class="mi">0</span>
+            
+    <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
+        <span class="n">best_eigenvector_to_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">skewness_values</span><span class="p">)</span>   
+         
+    <span class="k">return</span> <span class="n">eigenvectors</span><span class="p">,</span> <span class="n">sign_changes</span><span class="p">,</span> <span class="n">best_eigenvector_to_flip</span> </div>
+
+
+<div class="viewcode-block" id="extract_relevant_subspace">
+<a class="viewcode-back" href="../../nd_sim.html#nd_sim.pca_transform.extract_relevant_subspace">[docs]</a>
+<span class="k">def</span> <span class="nf">extract_relevant_subspace</span><span class="p">(</span><span class="n">eigenvectors</span><span class="p">,</span> <span class="n">significant_indices</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts the subset of eigenvectors that&#39;s relevant for the determinant calculation.</span>
+<span class="sd">    </span>
+<span class="sd">    This function prunes eigenvectors by removing rows and columns that have all zeros </span>
+<span class="sd">    except for a single entry close to 1 or -1 within a given tolerance (eigenvectors with</span>
+<span class="sd">    an eigenvalue equal to 0, and relative components). Then, it further </span>
+<span class="sd">    reduces the matrix using the provided significant indices to give a relevant </span>
+<span class="sd">    subset of eigenvectors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    eigenvectors : numpy.ndarray</span>
+<span class="sd">        The eigenvectors matrix to prune and reduce.</span>
+<span class="sd">    significant_indices : numpy.ndarray</span>
+<span class="sd">        Indices of significant eigenvectors.</span>
+<span class="sd">    tol : float, optional (default = 1e-10)</span>
+<span class="sd">        Tolerance for determining whether a value is close to 0, 1, or -1.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        The determinant-relevant subset of eigenvectors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">row_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">eigenvectors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">eigenvectors</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">eigenvectors</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>    
+    <span class="n">col_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">eigenvectors</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">eigenvectors</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">eigenvectors</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="n">pruned_eigenvectors</span> <span class="o">=</span> <span class="n">eigenvectors</span><span class="p">[</span><span class="n">row_mask</span><span class="p">][:,</span> <span class="n">col_mask</span><span class="p">]</span>
+    <span class="n">reduced_eigenvectors</span> <span class="o">=</span> <span class="n">pruned_eigenvectors</span><span class="p">[</span><span class="n">significant_indices</span><span class="p">][:,</span> <span class="n">significant_indices</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">reduced_eigenvectors</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Marcello Costamagna.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

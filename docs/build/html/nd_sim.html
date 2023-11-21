@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nd_sim package &mdash; ND_sim  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Overview" href="detailed_overview.html" />
+    <link rel="prev" title="nd_sim" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ND_sim
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">nd_sim</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">nd_sim package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-nd_sim.fingerprint">nd_sim.fingerprint module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.fingerprint.compute_distances"><code class="docutils literal notranslate"><span class="pre">compute_distances()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.fingerprint.compute_statistics"><code class="docutils literal notranslate"><span class="pre">compute_statistics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.fingerprint.generate_molecule_fingerprint"><code class="docutils literal notranslate"><span class="pre">generate_molecule_fingerprint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.fingerprint.generate_nd_molecule_fingerprint"><code class="docutils literal notranslate"><span class="pre">generate_nd_molecule_fingerprint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.fingerprint.generate_reference_points"><code class="docutils literal notranslate"><span class="pre">generate_reference_points()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-nd_sim.pca_transform">nd_sim.pca_transform module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.pca_transform.adjust_eigenvector_signs"><code class="docutils literal notranslate"><span class="pre">adjust_eigenvector_signs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.pca_transform.compute_pca_using_covariance"><code class="docutils literal notranslate"><span class="pre">compute_pca_using_covariance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.pca_transform.extract_relevant_subspace"><code class="docutils literal notranslate"><span class="pre">extract_relevant_subspace()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-nd_sim.pre_processing">nd_sim.pre_processing module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.pre_processing.load_molecules_from_sdf"><code class="docutils literal notranslate"><span class="pre">load_molecules_from_sdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.pre_processing.molecule_to_ndarray"><code class="docutils literal notranslate"><span class="pre">molecule_to_ndarray()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-nd_sim.similarity">nd_sim.similarity module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.similarity.calculate_mean_absolute_difference"><code class="docutils literal notranslate"><span class="pre">calculate_mean_absolute_difference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.similarity.calculate_similarity_from_difference"><code class="docutils literal notranslate"><span class="pre">calculate_similarity_from_difference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.similarity.compute_similarity"><code class="docutils literal notranslate"><span class="pre">compute_similarity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.similarity.compute_similarity_score"><code class="docutils literal notranslate"><span class="pre">compute_similarity_score()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-nd_sim.utils">nd_sim.utils module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.compute_scaling_factor"><code class="docutils literal notranslate"><span class="pre">compute_scaling_factor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.compute_scaling_matrix"><code class="docutils literal notranslate"><span class="pre">compute_scaling_matrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.extract_formal_charge"><code class="docutils literal notranslate"><span class="pre">extract_formal_charge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.extract_neutron_difference"><code class="docutils literal notranslate"><span class="pre">extract_neutron_difference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.extract_neutron_difference_from_common_isotope"><code class="docutils literal notranslate"><span class="pre">extract_neutron_difference_from_common_isotope()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.extract_proton_number"><code class="docutils literal notranslate"><span class="pre">extract_proton_number()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.normalize_feature_by_coordinate_range"><code class="docutils literal notranslate"><span class="pre">normalize_feature_by_coordinate_range()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.normalize_feature_by_selected_axis"><code class="docutils literal notranslate"><span class="pre">normalize_feature_by_selected_axis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.taper_c"><code class="docutils literal notranslate"><span class="pre">taper_c()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.taper_n"><code class="docutils literal notranslate"><span class="pre">taper_n()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nd_sim.utils.taper_p"><code class="docutils literal notranslate"><span class="pre">taper_p()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-nd_sim">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detailed_overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTING.html">Contributing to ND_sim</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ND_sim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">nd_sim</a></li>
+      <li class="breadcrumb-item active">nd_sim package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/nd_sim.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="nd-sim-package">
+<h1>nd_sim package<a class="headerlink" href="#nd-sim-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-nd_sim.fingerprint">
+<span id="nd-sim-fingerprint-module"></span><h2>nd_sim.fingerprint module<a class="headerlink" href="#module-nd_sim.fingerprint" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.fingerprint.compute_distances">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.fingerprint.</span></span><span class="sig-name descname"><span class="pre">compute_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/fingerprint.html#compute_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.fingerprint.compute_distances" title="Link to this definition"></a></dt>
+<dd><p>Calculate the Euclidean distance between each point in molecule_data and reference points.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>molecule_data<span class="classifier">np.ndarray</span></dt><dd><p>Data of the molecule with each row representing a point.</p>
+</dd>
+<dt>scaling_factor<span class="classifier">float, optional</span></dt><dd><p>Factor by which reference points are scaled.</p>
+</dd>
+<dt>scaling_matrix<span class="classifier">np.ndarray, optional</span></dt><dd><p>Matrix by which reference points are scaled.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>Matrix with distances between each point and each reference point.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.fingerprint.compute_statistics">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.fingerprint.</span></span><span class="sig-name descname"><span class="pre">compute_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distances</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/fingerprint.html#compute_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.fingerprint.compute_statistics" title="Link to this definition"></a></dt>
+<dd><p>Calculate statistical moments (mean, standard deviation, skewness) for the given distances.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>distances<span class="classifier">np.ndarray</span></dt><dd><p>Matrix with distances between each point and each reference point.</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h3>Returns<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>list</dt><dd><p>A list of computed statistics.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.fingerprint.generate_molecule_fingerprint">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.fingerprint.</span></span><span class="sig-name descname"><span class="pre">generate_molecule_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/fingerprint.html#generate_molecule_fingerprint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.fingerprint.generate_molecule_fingerprint" title="Link to this definition"></a></dt>
+<dd><p>Compute a fingerprint for the provided molecular data based on distance statistics.</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>molecule_data<span class="classifier">np.ndarray</span></dt><dd><p>Data of the molecule with each row representing a point.</p>
+</dd>
+<dt>scaling_factor<span class="classifier">float, optional</span></dt><dd><p>Factor by which reference points may be scaled.</p>
+</dd>
+<dt>scaling_matrix<span class="classifier">np.ndarray, optional</span></dt><dd><p>Matrix by which reference points may be scaled.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>list</dt><dd><p>A fingerprint derived from the molecule data.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.fingerprint.generate_nd_molecule_fingerprint">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.fingerprint.</span></span><span class="sig-name descname"><span class="pre">generate_nd_molecule_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">molecule,</span> <span class="pre">features={'delta_neutrons':</span> <span class="pre">[&lt;function</span> <span class="pre">extract_neutron_difference_from_common_isotope&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">taper_n&gt;],</span> <span class="pre">'formal_charges':</span> <span class="pre">[&lt;function</span> <span class="pre">extract_formal_charge&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">taper_c&gt;],</span> <span class="pre">'protons':</span> <span class="pre">[&lt;function</span> <span class="pre">extract_proton_number&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">taper_p&gt;]},</span> <span class="pre">scaling_method='matrix',</span> <span class="pre">scaling_value=None,</span> <span class="pre">chirality=False,</span> <span class="pre">removeHs=False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/fingerprint.html#generate_nd_molecule_fingerprint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.fingerprint.generate_nd_molecule_fingerprint" title="Link to this definition"></a></dt>
+<dd><p>Generate a fingerprint for the given molecule.</p>
+<p>This function converts a molecule to n-dimensional data, performs PCA transformation,
+scales the data if needed, and then computes the fingerprint based on distance statistics.</p>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>molecule<span class="classifier">RDKit Mol</span></dt><dd><p>RDKit molecule object.</p>
+</dd>
+<dt>features<span class="classifier">dict, optional</span></dt><dd><p>Dictionary of features to be considered. Default is DEFAULT_FEATURES.</p>
+</dd>
+<dt>scaling_method<span class="classifier">str, optional</span></dt><dd><p>Specifies how to scale the data. It can be ‘factor’, ‘matrix’, or None.
+Default is ‘matrix’.</p>
+</dd>
+<dt>scaling_value<span class="classifier">float or numpy.ndarray, optional</span></dt><dd><p>Value used for scaling. If method is ‘factor’, it should be a number.
+If method is ‘matrix’, it should be an array. Default is None.</p>
+</dd>
+<dt>chirality<span class="classifier">bool, optional</span></dt><dd><p>If True, the PCA transformation takes into account the chirality of the molecule, 
+which can be important for distinguishing chiral molecules. Default is False.</p>
+</dd>
+<dt>removeHs<span class="classifier">bool, optional</span></dt><dd><p>If True, hydrogen atoms are removed from the molecule before processing. This can 
+be useful for focusing on the heavier atoms in the molecule. Default is False.</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h3>Returns<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>list</dt><dd><p>A list representing the fingerprint of the molecule.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.fingerprint.generate_reference_points">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.fingerprint.</span></span><span class="sig-name descname"><span class="pre">generate_reference_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensionality</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/fingerprint.html#generate_reference_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.fingerprint.generate_reference_points" title="Link to this definition"></a></dt>
+<dd><p>Generate reference points in the n-dimensional space.</p>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dimensionality<span class="classifier">int</span></dt><dd><p>The number of dimensions.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>An array of reference points including the centroid and the points on each axis.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-nd_sim.pca_transform">
+<span id="nd-sim-pca-transform-module"></span><h2>nd_sim.pca_transform module<a class="headerlink" href="#module-nd_sim.pca_transform" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.pca_transform.adjust_eigenvector_signs">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.pca_transform.</span></span><span class="sig-name descname"><span class="pre">adjust_eigenvector_signs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eigenvectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chirality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/pca_transform.html#adjust_eigenvector_signs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.pca_transform.adjust_eigenvector_signs" title="Link to this definition"></a></dt>
+<dd><p>Adjust the sign of eigenvectors based on the data’s projections.</p>
+<p>This function iterates through each eigenvector and determines its sign by examining 
+the direction of the data’s maximum projection along that eigenvector. If the maximum 
+projection is negative, the sign of the eigenvector is flipped. The function also 
+handles special cases such as symmetric distributions of projections and can adjust 
+eigenvectors based on chirality considerations.</p>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>original_data<span class="classifier">numpy.ndarray</span></dt><dd><p>N-dimensional array representing a molecule, where each row is a sample/point.</p>
+</dd>
+<dt>eigenvectors<span class="classifier">numpy.ndarray</span></dt><dd><p>Eigenvectors obtained from the PCA decomposition.</p>
+</dd>
+<dt>chirality<span class="classifier">bool, optional</span></dt><dd><p>If True, the function also considers the skewness of the projections to decide 
+on flipping the eigenvector. This is necessary for distinguishing 
+chiral molecules. Defaults to False.</p>
+</dd>
+<dt>tolerance<span class="classifier">float, optional</span></dt><dd><p>Tolerance used when comparing projections. Defaults to 1e-4.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>eigenvectors<span class="classifier">numpy.ndarray</span></dt><dd><p>Adjusted eigenvectors with their sign possibly flipped.</p>
+</dd>
+<dt>sign_changes<span class="classifier">int</span></dt><dd><p>The number of eigenvectors that had their signs changed.</p>
+</dd>
+<dt>best_eigenvector_to_flip<span class="classifier">int</span></dt><dd><p>Index of the eigenvector with the highest skewness, relevant when chirality 
+is considered. This is the eigenvector most likely to be flipped to preserve 
+chirality.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.pca_transform.compute_pca_using_covariance">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.pca_transform.</span></span><span class="sig-name descname"><span class="pre">compute_pca_using_covariance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chirality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/pca_transform.html#compute_pca_using_covariance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.pca_transform.compute_pca_using_covariance" title="Link to this definition"></a></dt>
+<dd><p>Perform Principal Component Analysis (PCA) using eigendecomposition of the covariance matrix.</p>
+<p>This function conducts PCA on a given dataset to produce a consistent reference system,
+facilitating comparison between different molecules. 
+It emphasizes generating eigenvectors that provide deterministic outcomes and consistent orientations. 
+The function also includes an option to handle chiral molecules by ensuring a positive determinant 
+for the transformation matrix.</p>
+<section id="id11">
+<h3>Parameters<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>original_data<span class="classifier">numpy.ndarray</span></dt><dd><p>An N-dimensional array representing a molecule, where each row is a sample/point. 
+The array should have a shape (n_samples, n_features), where n_samples is the number 
+of samples and n_features is the number of features.</p>
+</dd>
+<dt>chirality<span class="classifier">bool, optional</span></dt><dd><p>If set to True, the function ensures that the determinant of the transformation 
+matrix is positive, allowing for the distinction of chiral molecules. 
+Default is False.</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h3>Returns<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>transformed_data<span class="classifier">numpy.ndarray</span></dt><dd><p>The dataset after PCA transformation. This data is aligned to the principal components 
+and is of the same shape as the original data.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.pca_transform.extract_relevant_subspace">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.pca_transform.</span></span><span class="sig-name descname"><span class="pre">extract_relevant_subspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eigenvectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">significant_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/pca_transform.html#extract_relevant_subspace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.pca_transform.extract_relevant_subspace" title="Link to this definition"></a></dt>
+<dd><p>Extracts the subset of eigenvectors that’s relevant for the determinant calculation.</p>
+<p>This function prunes eigenvectors by removing rows and columns that have all zeros 
+except for a single entry close to 1 or -1 within a given tolerance (eigenvectors with
+an eigenvalue equal to 0, and relative components). Then, it further 
+reduces the matrix using the provided significant indices to give a relevant 
+subset of eigenvectors.</p>
+<section id="id13">
+<h3>Parameters<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>eigenvectors<span class="classifier">numpy.ndarray</span></dt><dd><p>The eigenvectors matrix to prune and reduce.</p>
+</dd>
+<dt>significant_indices<span class="classifier">numpy.ndarray</span></dt><dd><p>Indices of significant eigenvectors.</p>
+</dd>
+<dt>tol<span class="classifier">float, optional (default = 1e-10)</span></dt><dd><p>Tolerance for determining whether a value is close to 0, 1, or -1.</p>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h3>Returns<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>The determinant-relevant subset of eigenvectors.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-nd_sim.pre_processing">
+<span id="nd-sim-pre-processing-module"></span><h2>nd_sim.pre_processing module<a class="headerlink" href="#module-nd_sim.pre_processing" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.pre_processing.load_molecules_from_sdf">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.pre_processing.</span></span><span class="sig-name descname"><span class="pre">load_molecules_from_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">removeHs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/pre_processing.html#load_molecules_from_sdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.pre_processing.load_molecules_from_sdf" title="Link to this definition"></a></dt>
+<dd><p>Load molecules from an SDF file.</p>
+<section id="id15">
+<h3>Parameters<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>path<span class="classifier">str</span></dt><dd><p>Path to the SDF file.</p>
+</dd>
+<dt>removeHs<span class="classifier">bool, optional</span></dt><dd><p>Whether to remove hydrogens. Defaults to False.</p>
+</dd>
+<dt>sanitize<span class="classifier">bool, optional</span></dt><dd><p>Whether to sanitize the molecules. Defaults to False.</p>
+</dd>
+</dl>
+</section>
+<section id="id16">
+<h3>Returns<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>list of rdkit.Chem.rdchem.Mol</dt><dd><p>A list of RDKit molecule objects.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.pre_processing.molecule_to_ndarray">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.pre_processing.</span></span><span class="sig-name descname"><span class="pre">molecule_to_ndarray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">molecule,</span> <span class="pre">features={'delta_neutrons':</span> <span class="pre">[&lt;function</span> <span class="pre">extract_neutron_difference_from_common_isotope&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">taper_n&gt;],</span> <span class="pre">'formal_charges':</span> <span class="pre">[&lt;function</span> <span class="pre">extract_formal_charge&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">taper_c&gt;],</span> <span class="pre">'protons':</span> <span class="pre">[&lt;function</span> <span class="pre">extract_proton_number&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">taper_p&gt;]},</span> <span class="pre">removeHs=False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/pre_processing.html#molecule_to_ndarray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.pre_processing.molecule_to_ndarray" title="Link to this definition"></a></dt>
+<dd><p>Generate a numpy array representing the given molecule in N dimensions.</p>
+<section id="id17">
+<h3>Parameters<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>molecule<span class="classifier">rdkit.Chem.rdchem.Mol</span></dt><dd><p>The input RDKit molecule object.</p>
+</dd>
+<dt>features<span class="classifier">dict, optional</span></dt><dd><p>Dictionary where keys are feature names and values are lists of functions to compute the feature.
+Defaults to DEFAULT_FEATURES.</p>
+</dd>
+<dt>removeHs<span class="classifier">: bool, optional</span></dt><dd><p>If True, hydrogen atoms will not be included in the array representation.
+Defaults to False.</p>
+</dd>
+</dl>
+</section>
+<section id="id18">
+<h3>Returns<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>Array with shape (number of atoms, 3 spatial coordinates + number of features),
+representing the molecule.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-nd_sim.similarity">
+<span id="nd-sim-similarity-module"></span><h2>nd_sim.similarity module<a class="headerlink" href="#module-nd_sim.similarity" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.similarity.calculate_mean_absolute_difference">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.similarity.</span></span><span class="sig-name descname"><span class="pre">calculate_mean_absolute_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">moments1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moments2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/similarity.html#calculate_mean_absolute_difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.similarity.calculate_mean_absolute_difference" title="Link to this definition"></a></dt>
+<dd><p>Calculate the mean absolute difference between two lists.</p>
+<p>This function computes the mean of the absolute differences between 
+corresponding elements of two lists.</p>
+<section id="id19">
+<h3>Parameters<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>moments1<span class="classifier">list</span></dt><dd><p>The first list of numerical values.</p>
+</dd>
+<dt>moments2<span class="classifier">list</span></dt><dd><p>The second list of numerical values, must be of the same length as moments1.</p>
+</dd>
+</dl>
+</section>
+<section id="id20">
+<h3>Returns<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>float</dt><dd><p>The mean absolute difference between the two lists.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.similarity.calculate_similarity_from_difference">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.similarity.</span></span><span class="sig-name descname"><span class="pre">calculate_similarity_from_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partial_score</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/similarity.html#calculate_similarity_from_difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.similarity.calculate_similarity_from_difference" title="Link to this definition"></a></dt>
+<dd><p>Calculate similarity score from a difference score.</p>
+<p>This function converts a difference score into a similarity score using 
+a reciprocal function. The similarity score approaches 1 as the difference 
+score approaches 0, and it approaches 0 as the difference score increases.</p>
+<section id="id21">
+<h3>Parameters<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>partial_score<span class="classifier">float</span></dt><dd><p>The difference score, a non-negative number.</p>
+</dd>
+</dl>
+</section>
+<section id="id22">
+<h3>Returns<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>float</dt><dd><p>The similarity score derived from the difference score.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.similarity.compute_similarity">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.similarity.</span></span><span class="sig-name descname"><span class="pre">compute_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mol1,</span> <span class="pre">mol2,</span> <span class="pre">features={'delta_neutrons':</span> <span class="pre">[&lt;function</span> <span class="pre">extract_neutron_difference_from_common_isotope&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">taper_n&gt;],</span> <span class="pre">'formal_charges':</span> <span class="pre">[&lt;function</span> <span class="pre">extract_formal_charge&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">taper_c&gt;],</span> <span class="pre">'protons':</span> <span class="pre">[&lt;function</span> <span class="pre">extract_proton_number&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">taper_p&gt;]},</span> <span class="pre">scaling_method='matrix',</span> <span class="pre">removeHs=False,</span> <span class="pre">chirality=False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/similarity.html#compute_similarity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.similarity.compute_similarity" title="Link to this definition"></a></dt>
+<dd><p>Calculate the similarity score between two molecules using their n-dimensional fingerprints.</p>
+<section id="id23">
+<h3>Parameters<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>mol1<span class="classifier">RDKit Mol</span></dt><dd><p>The first RDKit molecule object.</p>
+</dd>
+<dt>mol2<span class="classifier">RDKit Mol</span></dt><dd><p>The second RDKit molecule object.</p>
+</dd>
+<dt>features<span class="classifier">dict, optional</span></dt><dd><p>Dictionary of features to be considered. Default is DEFAULT_FEATURES.</p>
+</dd>
+<dt>scaling_method<span class="classifier">str, optional</span></dt><dd><p>Specifies how to scale the data. It can be ‘factor’, ‘matrix’, or None.</p>
+</dd>
+</dl>
+</section>
+<section id="id24">
+<h3>Returns<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>float</dt><dd><p>The computed similarity score between the two molecules.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.similarity.compute_similarity_score">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.similarity.</span></span><span class="sig-name descname"><span class="pre">compute_similarity_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fingerprint_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fingerprint_2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/similarity.html#compute_similarity_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.similarity.compute_similarity_score" title="Link to this definition"></a></dt>
+<dd><p>Calculate the similarity score between two fingerprints.</p>
+<section id="id25">
+<h3>Parameters<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>fingerprint_1<span class="classifier">list</span></dt><dd><p>The fingerprint of the first molecule.</p>
+</dd>
+<dt>fingerprint_2<span class="classifier">list</span></dt><dd><p>The fingerprint of the second molecule.</p>
+</dd>
+</dl>
+</section>
+<section id="id26">
+<h3>Returns<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>float</dt><dd><p>The computed similarity score.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-nd_sim.utils">
+<span id="nd-sim-utils-module"></span><h2>nd_sim.utils module<a class="headerlink" href="#module-nd_sim.utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.compute_scaling_factor">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">compute_scaling_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/utils.html#compute_scaling_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.compute_scaling_factor" title="Link to this definition"></a></dt>
+<dd><p>Computes the largest distance between the centroid and the molecule data points</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.compute_scaling_matrix">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">compute_scaling_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/utils.html#compute_scaling_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.compute_scaling_matrix" title="Link to this definition"></a></dt>
+<dd><p>Computes a diagonal scaling matrix with the maximum absolute values 
+for each dimension of the molecule data as its diagonal entries</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.extract_formal_charge">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">extract_formal_charge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/utils.html#extract_formal_charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.extract_formal_charge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.extract_neutron_difference">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">extract_neutron_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/utils.html#extract_neutron_difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.extract_neutron_difference" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.extract_neutron_difference_from_common_isotope">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">extract_neutron_difference_from_common_isotope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/utils.html#extract_neutron_difference_from_common_isotope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.extract_neutron_difference_from_common_isotope" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.extract_proton_number">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">extract_proton_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/utils.html#extract_proton_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.extract_proton_number" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.normalize_feature_by_coordinate_range">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">normalize_feature_by_coordinate_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/nd_sim/utils.html#normalize_feature_by_coordinate_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.normalize_feature_by_coordinate_range" title="Link to this definition"></a></dt>
+<dd><p>Normalizes the given feature using the range of the coordinates.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.normalize_feature_by_selected_axis">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">normalize_feature_by_selected_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_choice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'smallest'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/nd_sim/utils.html#normalize_feature_by_selected_axis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.normalize_feature_by_selected_axis" title="Link to this definition"></a></dt>
+<dd><p>Normalizes the given feature using the range of a specific axis (largest, smallest, or intermediate) of the coordinates.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.taper_c">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">taper_c</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/utils.html#taper_c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.taper_c" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.taper_n">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">taper_n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/utils.html#taper_n"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.taper_n" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nd_sim.utils.taper_p">
+<span class="sig-prename descclassname"><span class="pre">nd_sim.utils.</span></span><span class="sig-name descname"><span class="pre">taper_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nd_sim/utils.html#taper_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nd_sim.utils.taper_p" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-nd_sim">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-nd_sim" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="nd_sim" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="detailed_overview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Marcello Costamagna.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

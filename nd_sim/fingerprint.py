@@ -9,9 +9,9 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.stats import skew
 
-from similarity.source.pre_processing import *
-from similarity.source.pca_tranform import *
-from similarity.source.utils import *
+from nd_sim.pre_processing import *
+from nd_sim.pca_transform import *
+from nd_sim.utils import *
 
 
 def generate_reference_points(dimensionality):
@@ -133,7 +133,7 @@ def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scalin
     scaling_value : float or numpy.ndarray, optional
         Value used for scaling. If method is 'factor', it should be a number.
         If method is 'matrix', it should be an array. Default is None.
-     chirality : bool, optional
+    chirality : bool, optional
         If True, the PCA transformation takes into account the chirality of the molecule, 
         which can be important for distinguishing chiral molecules. Default is False.
     removeHs : bool, optional
@@ -149,7 +149,10 @@ def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scalin
     # Convert molecule to n-dimensional data
     molecule_data = molecule_to_ndarray(molecule, features, removeHs=removeHs)
     # PCA transformation
-    transformed_data = compute_pca_using_covariance(molecule_data, chirality=chirality)
+    if chirality:
+        transformed_data, dimensionality = compute_pca_using_covariance(molecule_data, chirality=chirality)
+    else:
+        transformed_data = compute_pca_using_covariance(molecule_data, chirality=chirality)
     # Determine scaling
     if scaling_method == 'factor':
         if scaling_value is None:
@@ -163,5 +166,8 @@ def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scalin
         fingerprint = generate_molecule_fingerprint(transformed_data)
     else:
         raise ValueError(f"Invalid scaling method: {scaling_method}. Choose 'factor' or 'matrix'.")
-    
-    return fingerprint
+   
+    if chirality:
+        return fingerprint, dimensionality
+    else:
+        return fingerprint

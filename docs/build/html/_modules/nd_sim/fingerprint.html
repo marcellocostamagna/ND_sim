@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nd_sim.fingerprint &mdash; ND_sim  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ND_sim
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">nd_sim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed_overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../CONTRIBUTING.html">Contributing to ND_sim</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ND_sim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nd_sim.fingerprint</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nd_sim.fingerprint</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ND_sim</span>
+<span class="c1"># This file is part of ND_sim, which is licensed under the</span>
+<span class="c1"># GNU Lesser General Public License v3.0 (or any later version).</span>
+<span class="c1"># See the LICENSE file for more details.</span>
+
+<span class="c1"># Script that provides the fingerprints of the molecules represented as a ND array</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">skew</span>
+
+<span class="kn">from</span> <span class="nn">nd_sim.pre_processing</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">nd_sim.pca_transform</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">nd_sim.utils</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="generate_reference_points">
+<a class="viewcode-back" href="../../nd_sim.html#nd_sim.fingerprint.generate_reference_points">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_reference_points</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate reference points in the n-dimensional space.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dimensionality : int</span>
+<span class="sd">        The number of dimensions.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        An array of reference points including the centroid and the points on each axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">centroid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">)</span>
+    <span class="n">axis_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">)</span>
+    <span class="n">reference_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">centroid</span><span class="p">,</span> <span class="n">axis_points</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">reference_points</span></div>
+
+
+<div class="viewcode-block" id="compute_distances">
+<a class="viewcode-back" href="../../nd_sim.html#nd_sim.fingerprint.compute_distances">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_distances</span><span class="p">(</span><span class="n">molecule_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scaling_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the Euclidean distance between each point in molecule_data and reference points.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    molecule_data : np.ndarray</span>
+<span class="sd">        Data of the molecule with each row representing a point.</span>
+<span class="sd">    scaling_factor : float, optional</span>
+<span class="sd">        Factor by which reference points are scaled.</span>
+<span class="sd">    scaling_matrix : np.ndarray, optional</span>
+<span class="sd">        Matrix by which reference points are scaled.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        Matrix with distances between each point and each reference point.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reference_points</span> <span class="o">=</span> <span class="n">generate_reference_points</span><span class="p">(</span><span class="n">molecule_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c1"># Scale the reference points based on provided scaling factor or matrix</span>
+    <span class="k">if</span> <span class="n">scaling_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reference_points</span> <span class="o">*=</span> <span class="n">scaling_factor</span>
+    <span class="k">elif</span> <span class="n">scaling_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reference_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">reference_points</span><span class="p">,</span> <span class="n">scaling_matrix</span><span class="p">)</span>
+
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">molecule_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference_points</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">molecule_data</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">ref_point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reference_points</span><span class="p">):</span>
+            <span class="n">distances</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">euclidean</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">ref_point</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">distances</span></div>
+
+
+<div class="viewcode-block" id="compute_statistics">
+<a class="viewcode-back" href="../../nd_sim.html#nd_sim.fingerprint.compute_statistics">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_statistics</span><span class="p">(</span><span class="n">distances</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate statistical moments (mean, standard deviation, skewness) for the given distances.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    distances : np.ndarray</span>
+<span class="sd">        Matrix with distances between each point and each reference point.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">        A list of computed statistics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">std_devs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">skewness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">skew</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">statistics_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">means</span><span class="p">,</span> <span class="n">std_devs</span><span class="p">,</span> <span class="n">skewness</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>   
+    <span class="n">statistics_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">element</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">statistics_matrix</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">statistics_list</span>  </div>
+
+
+<div class="viewcode-block" id="generate_molecule_fingerprint">
+<a class="viewcode-back" href="../../nd_sim.html#nd_sim.fingerprint.generate_molecule_fingerprint">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_molecule_fingerprint</span><span class="p">(</span><span class="n">molecule_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scaling_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a fingerprint for the provided molecular data based on distance statistics.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    molecule_data : np.ndarray</span>
+<span class="sd">        Data of the molecule with each row representing a point.</span>
+<span class="sd">    scaling_factor : float, optional</span>
+<span class="sd">        Factor by which reference points may be scaled.</span>
+<span class="sd">    scaling_matrix : np.ndarray, optional</span>
+<span class="sd">        Matrix by which reference points may be scaled.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">        A fingerprint derived from the molecule data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">scaling_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">scaling_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Both scaling_factor and scaling_matrix provided. Please provide only one.&quot;</span><span class="p">)</span>
+
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">compute_distances</span><span class="p">(</span><span class="n">molecule_data</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="p">,</span> <span class="n">scaling_matrix</span><span class="p">)</span>
+    <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">compute_statistics</span><span class="p">(</span><span class="n">distances</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">fingerprint</span></div>
+
+
+<div class="viewcode-block" id="generate_nd_molecule_fingerprint">
+<a class="viewcode-back" href="../../nd_sim.html#nd_sim.fingerprint.generate_nd_molecule_fingerprint">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_nd_molecule_fingerprint</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">DEFAULT_FEATURES</span><span class="p">,</span> <span class="n">scaling_method</span><span class="o">=</span><span class="s1">&#39;matrix&#39;</span><span class="p">,</span> <span class="n">scaling_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a fingerprint for the given molecule.</span>
+<span class="sd">    </span>
+<span class="sd">    This function converts a molecule to n-dimensional data, performs PCA transformation,</span>
+<span class="sd">    scales the data if needed, and then computes the fingerprint based on distance statistics.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    molecule : RDKit Mol</span>
+<span class="sd">        RDKit molecule object.</span>
+<span class="sd">    features : dict, optional</span>
+<span class="sd">        Dictionary of features to be considered. Default is DEFAULT_FEATURES.</span>
+<span class="sd">    scaling_method : str, optional</span>
+<span class="sd">        Specifies how to scale the data. It can be &#39;factor&#39;, &#39;matrix&#39;, or None.</span>
+<span class="sd">        Default is &#39;matrix&#39;.</span>
+<span class="sd">    scaling_value : float or numpy.ndarray, optional</span>
+<span class="sd">        Value used for scaling. If method is &#39;factor&#39;, it should be a number.</span>
+<span class="sd">        If method is &#39;matrix&#39;, it should be an array. Default is None.</span>
+<span class="sd">    chirality : bool, optional</span>
+<span class="sd">        If True, the PCA transformation takes into account the chirality of the molecule, </span>
+<span class="sd">        which can be important for distinguishing chiral molecules. Default is False.</span>
+<span class="sd">    removeHs : bool, optional</span>
+<span class="sd">        If True, hydrogen atoms are removed from the molecule before processing. This can </span>
+<span class="sd">        be useful for focusing on the heavier atoms in the molecule. Default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">        A list representing the fingerprint of the molecule.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Convert molecule to n-dimensional data</span>
+    <span class="n">molecule_data</span> <span class="o">=</span> <span class="n">molecule_to_ndarray</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="n">removeHs</span><span class="p">)</span>
+    <span class="c1"># PCA transformation</span>
+    <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
+        <span class="n">transformed_data</span><span class="p">,</span> <span class="n">dimensionality</span> <span class="o">=</span> <span class="n">compute_pca_using_covariance</span><span class="p">(</span><span class="n">molecule_data</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">transformed_data</span> <span class="o">=</span> <span class="n">compute_pca_using_covariance</span><span class="p">(</span><span class="n">molecule_data</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">)</span>
+    <span class="c1"># Determine scaling</span>
+    <span class="k">if</span> <span class="n">scaling_method</span> <span class="o">==</span> <span class="s1">&#39;factor&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scaling_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scaling_value</span> <span class="o">=</span> <span class="n">compute_scaling_factor</span><span class="p">(</span><span class="n">transformed_data</span><span class="p">)</span>
+        <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">generate_molecule_fingerprint</span><span class="p">(</span><span class="n">transformed_data</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="o">=</span><span class="n">scaling_value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">scaling_method</span> <span class="o">==</span> <span class="s1">&#39;matrix&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scaling_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scaling_value</span> <span class="o">=</span> <span class="n">compute_scaling_matrix</span><span class="p">(</span><span class="n">transformed_data</span><span class="p">)</span>
+        <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">generate_molecule_fingerprint</span><span class="p">(</span><span class="n">transformed_data</span><span class="p">,</span> <span class="n">scaling_matrix</span><span class="o">=</span><span class="n">scaling_value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">scaling_method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">generate_molecule_fingerprint</span><span class="p">(</span><span class="n">transformed_data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid scaling method: </span><span class="si">{</span><span class="n">scaling_method</span><span class="si">}</span><span class="s2">. Choose &#39;factor&#39; or &#39;matrix&#39;.&quot;</span><span class="p">)</span>
+   
+    <span class="k">if</span> <span class="n">chirality</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fingerprint</span><span class="p">,</span> <span class="n">dimensionality</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fingerprint</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Marcello Costamagna.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

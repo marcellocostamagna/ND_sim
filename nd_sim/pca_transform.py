@@ -48,20 +48,27 @@ def compute_pca_using_covariance(original_data, chirality=False):
     # Create the reduced eigenvector matrix by selecting both rows and columns
     reduced_eigenvectors = extract_relevant_subspace(eigenvectors, significant_indices)
 
+    # Handle chirality
     if chirality:
         determinant = np.linalg.det(reduced_eigenvectors) 
         if determinant < 0:
             eigenvectors[:, 0] *= -1
    
-    adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices], chirality) # STEP 4: Adjust eigenvector signs
-    eigenvectors[:, significant_indices] = adjusted_eigenvectors
+        adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices], chirality) 
+        eigenvectors[:, significant_indices] = adjusted_eigenvectors
 
-    if chirality:
-        if n_changes % 2 == 1 and chirality:            
+        if n_changes % 2 == 1:            
             eigenvectors[:, best_eigenvector_to_flip] *= -1
     
-    transformed_data = np.dot(original_data, eigenvectors)
+        transformed_data = np.dot(original_data, eigenvectors)
+        
+        return transformed_data, len(significant_indices)
+
+    adjusted_eigenvectors, n_changes, best_eigenvector_to_flip  = adjust_eigenvector_signs(original_data, eigenvectors[:, significant_indices], chirality) 
+    eigenvectors[:, significant_indices] = adjusted_eigenvectors
     
+    transformed_data = np.dot(original_data, eigenvectors)
+
     return  transformed_data
 
 def adjust_eigenvector_signs(original_data, eigenvectors, chirality=False, tolerance= 1e-4):
@@ -148,7 +155,6 @@ def adjust_eigenvector_signs(original_data, eigenvectors, chirality=False, toler
         best_eigenvector_to_flip = np.argmax(skewness_values)   
          
     return eigenvectors, sign_changes, best_eigenvector_to_flip 
-
 
 def extract_relevant_subspace(eigenvectors, significant_indices, tol=1e-10):
     """
