@@ -149,7 +149,10 @@ def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scalin
     # Convert molecule to n-dimensional data
     molecule_data = molecule_to_ndarray(molecule, features, removeHs=removeHs)
     # PCA transformation
-    transformed_data = compute_pca_using_covariance(molecule_data, chirality=chirality)
+    if chirality:
+        transformed_data, dimensionality = compute_pca_using_covariance(molecule_data, chirality=chirality)
+    else:
+        transformed_data = compute_pca_using_covariance(molecule_data, chirality=chirality)
     # Determine scaling
     if scaling_method == 'factor':
         if scaling_value is None:
@@ -163,5 +166,8 @@ def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scalin
         fingerprint = generate_molecule_fingerprint(transformed_data)
     else:
         raise ValueError(f"Invalid scaling method: {scaling_method}. Choose 'factor' or 'matrix'.")
-    
-    return fingerprint
+   
+    if chirality:
+        return fingerprint, dimensionality
+    else:
+        return fingerprint

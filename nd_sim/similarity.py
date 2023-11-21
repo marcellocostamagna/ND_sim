@@ -93,9 +93,18 @@ def compute_similarity(mol1, mol2, features=DEFAULT_FEATURES, scaling_method='ma
         The computed similarity score between the two molecules.
     """
     # Get molecules' fingerprints
-    f1 = generate_nd_molecule_fingerprint(mol1, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
-    f2 = generate_nd_molecule_fingerprint(mol2, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
-    # Compute similarity score
-    similarity_score = compute_similarity_score(f1, f2)
+    if chirality:
+        f1, dimensionality1 = generate_nd_molecule_fingerprint(mol1, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
+        f2, dimensionality2 = generate_nd_molecule_fingerprint(mol2, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
+        
+        # Compute similarity score
+        if dimensionality1 != dimensionality2:
+            print(f"WARNING: Comparison between molecules of different dimensionality: {dimensionality1} and {dimensionality2}.\n"
+                   "The similarity score may not be accurate!")
+    else:
+        f1 = generate_nd_molecule_fingerprint(mol1, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
+        f2 = generate_nd_molecule_fingerprint(mol2, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
+   
+    similarity_score = compute_similarity_score(f1, f2)             
     return similarity_score
 
