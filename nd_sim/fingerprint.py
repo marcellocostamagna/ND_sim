@@ -9,9 +9,9 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.stats import skew
 
-from similarity.source.pre_processing import *
-from similarity.source.pca_tranform import *
-from similarity.source.utils import *
+from nd_sim.pre_processing import *
+from nd_sim.pca_transform import *
+from nd_sim.utils import *
 
 
 def generate_reference_points(dimensionality):
@@ -133,7 +133,7 @@ def generate_nd_molecule_fingerprint(molecule, features=DEFAULT_FEATURES, scalin
     scaling_value : float or numpy.ndarray, optional
         Value used for scaling. If method is 'factor', it should be a number.
         If method is 'matrix', it should be an array. Default is None.
-     chirality : bool, optional
+    chirality : bool, optional
         If True, the PCA transformation takes into account the chirality of the molecule, 
         which can be important for distinguishing chiral molecules. Default is False.
     removeHs : bool, optional

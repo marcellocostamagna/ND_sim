@@ -5,8 +5,8 @@
 
 # Script to calculate similarity scores between molecules and/or their fingerprints
 
-from similarity.source.utils import * 
-from similarity.source.fingerprint import *
+from nd_sim.utils import * 
+from nd_sim.fingerprint import *
 
 def calculate_mean_absolute_difference(moments1: list, moments2:list):
     """
