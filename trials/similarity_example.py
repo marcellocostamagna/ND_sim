@@ -14,7 +14,7 @@ np.set_printoptions(precision=4, suppress=True)
 cwd = os.getcwd()
 # PRE-PROCESSING
 # List of molecules from SDF file
-molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/optoiso_test/rocs_problematic_mols.sdf', removeHs=True, sanitize=True)
+molecules = load_molecules_from_sdf(f'{cwd}/sd_data/optoiso_test/rocs_problematic_mols.sdf', removeHs=True, sanitize=True)
 
 ### ROTATE MOLECULES ###
 rotated_molecules = []

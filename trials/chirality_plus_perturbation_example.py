@@ -1,12 +1,12 @@
 # Script for testing chirality and isomerism with perturbations
 
 import numpy as np  
-from similarity.source.pre_processing import *
-from similarity.source.pca_tranform import * 
-from similarity.source.fingerprint import *
-from similarity.source.similarity import *
-from similarity.source.utils import *
-from similarity.trials.perturbations import *
+from nd_sim.pre_processing import *
+from nd_sim.pca_transform import * 
+from nd_sim.fingerprint import *
+from nd_sim.similarity import *
+from nd_sim.utils import *
+from trials.perturbations import *
 import os 
 
 # np.set_printoptions(precision=4, suppress=True)

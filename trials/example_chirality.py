@@ -1,14 +1,13 @@
 # Scrpits collectiing examples of chirality and isomerism
 
 import numpy as np  
-from similarity.source.pre_processing import *
-from similarity.source.pca_tranform import * 
-from similarity.source.fingerprint import *
-from similarity.source.similarity import *
-from similarity.source.utils import *
-from similarity.trials.perturbations import *
+from nd_sim.pre_processing import *
+from nd_sim.pca_transform import * 
+from nd_sim.fingerprint import *
+from nd_sim.similarity import *
+from nd_sim.utils import *
+from trials.perturbations import *
 import os 
-from rdkit import Chem
 
 def print_3d_coordinates(mol):
     print(f"3D coordinates \n")

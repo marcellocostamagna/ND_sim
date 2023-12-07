@@ -2,9 +2,9 @@
 
 import numpy as np
 import os
-from similarity.source.pre_processing import load_molecules_from_sdf
-from similarity.source.fingerprint import generate_nd_molecule_fingerprint
-from similarity.source.similarity import *
+from nd_sim.pre_processing import load_molecules_from_sdf
+from nd_sim.fingerprint import generate_nd_molecule_fingerprint
+from nd_sim.similarity import *
 import pandas as pd
 import matplotlib.pyplot as plt
 
