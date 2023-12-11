@@ -56,7 +56,7 @@ def test_compute_statistics():
 def test_generate_molecule_fingerprint():
     molecule_data = np.array([[1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12]])
 
-    fingerprint_data = fingerprint.generate_molecule_fingerprint(molecule_data)
+    fingerprint_data = fingerprint.generate_fingerprint_from_data(molecule_data)
 
     assert isinstance(fingerprint_data, list)
     assert len(fingerprint_data) == (molecule_data.shape[1] + 1) * 3  # For each row, we have 3 statistics
@@ -75,7 +75,7 @@ def ethanol_3d():
 
 @pytest.mark.parametrize("chirality", [False, True])
 def test_generate_nd_molecule_fingerprint(chirality, ethanol_3d):
-    result = fingerprint.generate_nd_molecule_fingerprint(ethanol_3d, chirality=chirality)
+    result = fingerprint.generate_fingerprint_from_molecule(ethanol_3d, chirality=chirality)
 
     if chirality:
         fingerprint_data, dimensionality = result

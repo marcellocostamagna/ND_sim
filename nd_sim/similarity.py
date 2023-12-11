@@ -52,7 +52,7 @@ def calculate_similarity_from_difference(partial_score):
     """
     return 1/(1 + partial_score)
 
-def compute_similarity_score(fingerprint_1, fingerprint_2):
+def compute_similarity_score(fingerprint_1: list, fingerprint_2: list):
     """
     Calculate the similarity score between two fingerprints.
     
@@ -72,9 +72,53 @@ def compute_similarity_score(fingerprint_1, fingerprint_2):
     similarity = calculate_similarity_from_difference(partial_score)
     return similarity
 
-def compute_similarity(mol1, mol2, features=DEFAULT_FEATURES, scaling_method='matrix', removeHs=False, chirality=False):
+def compute_similarity_from_ndarray(mol1_nd: np.array, mol2_nd: np.array, scaling='matrix', chirality=False):
+    """
+    Calculate the similarity score between two molecules represented as N-dimensional arrays.
+
+    This function computes fingerprints for two molecules based on their N-dimensional array 
+    representations and then calculates a similarity score between these fingerprints.
+    
+    Parameters
+    ----------
+    mol1_nd : numpy.ndarray
+        The N-dimensional array representing the first molecule.
+    mol2_nd : numpy.ndarray 
+        The N-dimensional array representing the second molecule.
+    scaling : str, float, or np.ndarray
+        Specifies the scaling applied to reference points. If set to 'matrix' (default), 
+        a scaling matrix is automatically computed based on the PCA-transformed data. 
+        If a float is provided, it's used as a scaling factor. If a numpy.ndarray is provided, 
+        it's used as a scaling matrix.
+    chirality : bool, optional
+        Consider chirality in the generation of fingerprints if set to True.
+
+    Returns
+    -------
+    float
+        The computed similarity score between the two molecules.
+    """
+
+    if chirality:
+        f1, dimensionality1 = generate_fingerprint_from_data(mol1_nd, scaling=scaling, chirality=chirality)
+        f2, dimensionality2 = generate_fingerprint_from_data(mol2_nd, scaling=scaling, chirality=chirality)
+        
+        if dimensionality1 != dimensionality2:
+            print(f"WARNING: Comparison between molecules of different dimensionality: {dimensionality1} and {dimensionality2}.\n"
+                   "The similarity score may not be accurate!")
+    else:
+        f1 = generate_fingerprint_from_data(mol1_nd, scaling=scaling, chirality=chirality)
+        f2 = generate_fingerprint_from_data(mol2_nd, scaling=scaling, chirality=chirality)
+        
+    similarity_score = compute_similarity_score(f1, f2)
+    return similarity_score
+
+def compute_similarity(mol1, mol2, features=DEFAULT_FEATURES, scaling='matrix', removeHs=False, chirality=False):
     """
     Calculate the similarity score between two molecules using their n-dimensional fingerprints.
+    
+    This function generates fingerprints for two molecules based on their structures and a set of features, 
+    and then computes a similarity score between these fingerprints.
     
     Parameters
     ----------
@@ -84,8 +128,15 @@ def compute_similarity(mol1, mol2, features=DEFAULT_FEATURES, scaling_method='ma
         The second RDKit molecule object.
     features : dict, optional
         Dictionary of features to be considered. Default is DEFAULT_FEATURES.
-    scaling_method : str, optional
-        Specifies how to scale the data. It can be 'factor', 'matrix', or None.
+    scaling : str, float, or np.ndarray
+        Specifies the scaling applied to reference points. If set to 'matrix' (default), 
+        a scaling matrix is automatically computed based on the PCA-transformed data. 
+        If a float is provided, it's used as a scaling factor. If a numpy.ndarray is provided, 
+        it's used as a scaling matrix.
+    removeHs : bool, optional
+        If True, hydrogen atoms are removed from the molecule before generating the fingerprint.
+    chirality : bool, optional
+        Consider chirality in the generation of fingerprints if set to True.
 
     Returns
     -------
@@ -94,16 +145,16 @@ def compute_similarity(mol1, mol2, features=DEFAULT_FEATURES, scaling_method='ma
     """
     # Get molecules' fingerprints
     if chirality:
-        f1, dimensionality1 = generate_nd_molecule_fingerprint(mol1, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
-        f2, dimensionality2 = generate_nd_molecule_fingerprint(mol2, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
+        f1, dimensionality1 = generate_fingerprint_from_molecule(mol1, features=features, scaling=scaling, removeHs=removeHs, chirality=chirality)
+        f2, dimensionality2 = generate_fingerprint_from_molecule(mol2, features=features, scaling=scaling, removeHs=removeHs, chirality=chirality)
         
         # Compute similarity score
         if dimensionality1 != dimensionality2:
             print(f"WARNING: Comparison between molecules of different dimensionality: {dimensionality1} and {dimensionality2}.\n"
                    "The similarity score may not be accurate!")
     else:
-        f1 = generate_nd_molecule_fingerprint(mol1, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
-        f2 = generate_nd_molecule_fingerprint(mol2, features=features, scaling_method=scaling_method, removeHs=removeHs, chirality=chirality)
+        f1 = generate_fingerprint_from_molecule(mol1, features=features, scaling=scaling, removeHs=removeHs, chirality=chirality)
+        f2 = generate_fingerprint_from_molecule(mol2, features=features, scaling=scaling, removeHs=removeHs, chirality=chirality)
    
     similarity_score = compute_similarity_score(f1, f2)             
     return similarity_score

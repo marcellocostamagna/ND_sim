@@ -11,87 +11,20 @@ import numpy as np
 
 ### Fetaures functions ###
 def extract_proton_number(atom):
-    return atom.GetAtomicNum()
-
-# Difference between the mass of the atom and the number of protons (aka, number of neutrons)
-def extract_neutron_difference(atom):
-    return int(round(atom.GetMass())) - atom.GetAtomicNum()
+    return np.sqrt(atom.GetAtomicNum())
 
 # Difference between the number of neutrons of the current atom
 # and the number of neutrons of the most common isotope of the element (stored)
 def extract_neutron_difference_from_common_isotope(atom):
     n_neutrons = int(round(atom.GetMass())) - atom.GetAtomicNum()
     n_neutrons_most_common = N_NEUTRONS[atom.GetSymbol()]
-    return n_neutrons - n_neutrons_most_common
+    raw_value= n_neutrons - n_neutrons_most_common
+    return np.sign(raw_value) * np.sqrt(abs(raw_value))
 
 def extract_formal_charge(atom):
     return atom.GetFormalCharge()
 
-### Re-scaling functions ###
-
-## Tapering functions
-def taper_p(value):
-    return np.sqrt(value)
-
-def taper_n(value):
-    return np.sign(value) * np.sqrt(abs(value))
-
-def taper_c(value):
-    if value == 0:
-        return 0
-    else:
-        return  (abs(value)) * np.sign(value) 
-
-def normalize_feature_by_coordinate_range(feature_data: np.ndarray, coordinates: np.ndarray) -> np.ndarray:
-    """
-    Normalizes the given feature using the range of the coordinates.
-    """
-    if coordinates is None or len(coordinates) == 0:
-        raise ValueError("Coordinates must be provided and should not be empty!")
-    
-    max_coord = np.amax(coordinates)
-    min_coord = np.amin(coordinates)
-    
-    feature_min = np.amin(feature_data)
-    feature_max = np.amax(feature_data)
-    
-    if feature_min != feature_max:
-        normalized_feature = (feature_data - feature_min) / (feature_max - feature_min) * (max_coord - min_coord) + min_coord
-    else:
-        normalized_feature = feature_data
-    return normalized_feature
-
-def normalize_feature_by_selected_axis(feature_data: np.ndarray, coordinates: np.ndarray, axis_choice: str = "smallest") -> np.ndarray:
-    """
-    Normalizes the given feature using the range of a specific axis (largest, smallest, or intermediate) of the coordinates.
-    """
-    if coordinates is None or len(coordinates) == 0:
-        raise ValueError("Coordinates must be provided and should not be empty!")
-    
-    ranges = np.ptp(coordinates, axis=0)
-    axis = None
-    if axis_choice == "smallest":
-        axis = np.argmin(ranges)
-    elif axis_choice == "largest":
-        axis = np.argmax(ranges)
-    elif axis_choice == "intermediate":
-        axis = np.argsort(ranges)[1]
-    else:
-        raise ValueError("Invalid axis_choice. Choose from 'smallest', 'largest', or 'intermediate'.")
-
-    max_coord = np.max(coordinates[:, axis])
-    min_coord = np.min(coordinates[:, axis])
-
-    feature_min = np.amin(feature_data)
-    feature_max = np.amax(feature_data)
-
-    if feature_min != feature_max:
-        normalized_feature = (feature_data - feature_min) / (feature_max - feature_min) * (max_coord - min_coord) + min_coord
-    else:
-        normalized_feature = feature_data
-    return normalized_feature
-
-###### FINGERPRINT ########
+###### FINGERPRINT utils ########
 
 def compute_scaling_factor(molecule_data):
     """
@@ -114,15 +47,28 @@ def compute_scaling_matrix(molecule_data):
 #### DEFAULTS #####
 
 DEFAULT_FEATURES = {
-    'protons' : [extract_proton_number, taper_p],
-    'delta_neutrons' : [extract_neutron_difference_from_common_isotope, taper_n],
-    'formal_charges' : [extract_formal_charge, taper_c]
+    'protons' : extract_proton_number,
+    'delta_neutrons' : extract_neutron_difference_from_common_isotope,
+    'formal_charges' : extract_formal_charge
     }
 
+### EXAMPLE FEATURES ###
+
+def proton_number(atom):
+    return atom.GetAtomicNum()
+
+def neutron_difference(atom):
+    n_neutrons = int(round(atom.GetMass())) - atom.GetAtomicNum()
+    n_neutrons_most_common = N_NEUTRONS[atom.GetSymbol()]
+    return n_neutrons - n_neutrons_most_common
+
+def formal_charge(atom):
+    return atom.GetFormalCharge()
+
 EXAMPLE_FEATURES = {
-    'protons' : [extract_proton_number,],
-    'neutrons' : [extract_neutron_difference_from_common_isotope,],
-    'charge' : [extract_formal_charge,]
+    'protons' : proton_number,
+    'neutrons' : neutron_difference,
+    'charge' : formal_charge
     }
 
 ### CONSTANTS ### 

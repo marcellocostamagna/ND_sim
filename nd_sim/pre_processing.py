@@ -36,13 +36,18 @@ def load_molecules_from_sdf(path, removeHs=False, sanitize=False):
 def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES, removeHs=False):
     """
     Generate a numpy array representing the given molecule in N dimensions.
+    
+    This function converts a molecule into an N-dimensional numpy array based on specified features. 
+    Each feature is computed using a function defined in the 'features' dictionary.
 
     Parameters
     ----------
     molecule : rdkit.Chem.rdchem.Mol
         The input RDKit molecule object.
-    features : dict, optional
-        Dictionary where keys are feature names and values are lists of functions to compute the feature.
+    features : dict[str, callable], optional
+        A dictionary where each key is a feature name (str) and the value is a callable 
+        function to compute that feature. The function takes an RDKit atom object as input 
+        and returns a feature value (typically a numeric type).
         Defaults to DEFAULT_FEATURES.
     removeHs : : bool, optional
         If True, hydrogen atoms will not be included in the array representation.
@@ -69,9 +74,8 @@ def molecule_to_ndarray(molecule, features=DEFAULT_FEATURES, removeHs=False):
         molecule_info['coordinates'].append([position.x, position.y, position.z])
 
         if features:
-            for key, funcs in features.items():
-                raw_value = funcs[0](atom)
-                value = funcs[1](raw_value) if len(funcs) > 1 else raw_value
+            for key, func in features.items():
+                value = func(atom)
                 molecule_info[key].append(value)
 
     arrays = []
