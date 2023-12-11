@@ -2,12 +2,12 @@
 # All steps of the similarity method are comptued sequentially 
 
 import numpy as np  
-from similarity.source.pre_processing import *
-from similarity.source.pca_tranform import * 
-from similarity.source.fingerprint import *
-from similarity.source.similarity import *
-from similarity.source.utils import *
-from similarity.trials.perturbations import *
+from nd_sim.pre_processing import *
+from nd_sim.pca_transform import * 
+from nd_sim.fingerprint import *
+from nd_sim.similarity import *
+from nd_sim.utils import *
+from trials.perturbations import *
 import os 
 
 np.set_printoptions(precision=4, suppress=True)
@@ -15,7 +15,7 @@ np.set_printoptions(precision=4, suppress=True)
 cwd = os.getcwd()
 # PRE-PROCESSING
 # List of molecules from SDF file
-molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/swapping_sim_2d.sdf', removeHs=False, sanitize=True)
+molecules = load_molecules_from_sdf(f'{cwd}/sd_data/swapping_sim_2d.sdf', removeHs=False, sanitize=True)
 
 ### ROTATE MOLECULES ###
 rotated_molecules = []
@@ -41,7 +41,7 @@ for j, molecule_data in enumerate(molecules_data):
     scaling_matrix = compute_scaling_matrix(transformed_data) 
 
     # Get the fingerprint from the tranformed data
-    fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=None, scaling_matrix=scaling_matrix)
+    fingerprint = generate_fingerprint_from_transformed_data(transformed_data, scaling_matrix)
 
     fingerprints.append(fingerprint)
 

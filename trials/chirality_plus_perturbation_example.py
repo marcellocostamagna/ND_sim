@@ -126,7 +126,7 @@ for j, molecule_data in enumerate(perturbed_molecules_data):
     # scaling_factor = 1
 
     # Get the fingerprint from the tranformed data
-    fingerprint = generate_molecule_fingerprint(transformed_data, scaling_factor=None, scaling_matrix=scaling_matrix)
+    fingerprint = generate_fingerprint_from_molecule(transformed_data, scaling_factor=None, scaling_matrix=scaling_matrix)
   
 
     fingerprints.append(fingerprint)

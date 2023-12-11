@@ -31,7 +31,7 @@ for molecule in molecules:
     mol = rotate_molecule(molecule, angle1, angle2, angle3)
     rotated_molecules.append(mol)
     
-fingerprints = [generate_nd_molecule_fingerprint(molecule, DEFAULT_FEATURES, scaling_method='matrix', chirality=False) for molecule in rotated_molecules]
+fingerprints = [generate_fingerprint_from_molecule(molecule, DEFAULT_FEATURES, scaling='matrix', chirality=False) for molecule in rotated_molecules]
 
 
 # COMPARE ALL PAIRS OF MOLECULES

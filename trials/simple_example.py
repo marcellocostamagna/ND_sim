@@ -1,10 +1,10 @@
 import numpy as np  
-from similarity.source.pre_processing import *
-from similarity.source.pca_tranform import * 
-from similarity.source.fingerprint import *
-from similarity.source.similarity import *
-from similarity.source.utils import *
-from similarity.trials.perturbations import *
+from nd_sim.pre_processing import *
+from nd_sim.pca_transform import * 
+from nd_sim.fingerprint import *
+from nd_sim.similarity import *
+from nd_sim.utils import *
+from trials.perturbations import *
 import os 
 
 np.set_printoptions(precision=4, suppress=True)
@@ -12,9 +12,9 @@ np.set_printoptions(precision=4, suppress=True)
 cwd = os.getcwd()
 # PRE-PROCESSING
 # List of molecules from SDF file
-molecules = load_molecules_from_sdf(f'{cwd}/similarity/sd_data/simple_case.sdf', removeHs=False, sanitize=False)
+molecules = load_molecules_from_sdf(f'{cwd}/sd_data/simple_case.sdf', removeHs=False, sanitize=False)
 
-fingerprints = [generate_nd_molecule_fingerprint(molecule, EXAMPLE_FEATURES, scaling_method='matrix') for molecule in molecules]
+fingerprints = [generate_fingerprint_from_molecule(molecule, EXAMPLE_FEATURES, scaling='matrix') for molecule in molecules]
 
 n_molecules = len(fingerprints)
 for i in range(n_molecules):

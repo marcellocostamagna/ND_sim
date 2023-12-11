@@ -25,7 +25,7 @@ for molecule in molecules:
     mol = rotate_molecule(molecule, angle1, angle2, angle3)
     rotated_molecules.append(mol)
 
-similarity = compute_similarity(molecules[0], molecules[1], DEFAULT_FEATURES, scaling_method='matrix', chirality=True)
+similarity = compute_similarity(molecules[0], molecules[1], DEFAULT_FEATURES, scaling='matrix', chirality=True)
 
 print(f'Similarity: {similarity}')
         

@@ -95,14 +95,9 @@ for molecule in molecules:
     mol = rotate_molecule(molecule, angle1, angle2, angle3)
     rotated_molecules.append(mol)
     
-fingerprints = [generate_nd_molecule_fingerprint(molecule, DEFAULT_FEATURES, scaling_method='matrix', chirality=True) for molecule in rotated_molecules]
-# fingerprints = [generate_nd_molecule_fingerprint(molecule, features=PROTONS_FEATURES, scaling_method='matrix') for molecule in rotated_molecules]
-# fingerprints = [generate_nd_molecule_fingerprint(molecule, features=NEUTRONS_FEATURES, scaling_method='matrix') for molecule in rotated_molecules]
-# fingerprints = [generate_nd_molecule_fingerprint(molecule, features=CHARGES_FEATURES, scaling_method='matrix') for molecule in rotated_molecules]
-# fingerprints = [generate_nd_molecule_fingerprint(molecule, features=PROTONS_NEUTRONS_FEATURES, scaling_method='matrix') for molecule in rotated_molecules]
-# fingerprints = [generate_nd_molecule_fingerprint(molecule, features=PROTONS_CHARGES_FEATURES, scaling_method='matrix') for molecule in rotated_molecules]
-# fingerprints = [generate_nd_molecule_fingerprint(molecule, features=NEUTRONS_CHARGES_FEATURES, scaling_method='matrix') for molecule in rotated_molecules]
-# fingerprints = [generate_nd_molecule_fingerprint(molecule, features=None, scaling_method='matrix') for molecule in rotated_molecules]
+fingerprints = [generate_fingerprint_from_molecule(molecule, DEFAULT_FEATURES, scaling='matrix', chirality=True) for molecule in rotated_molecules]
+
+# fingerprints = [generate_fingerprint_from_molecule(molecule, features=None, scaling='matrix') for molecule in rotated_molecules]
 
 # COMPARE ALL PAIRS OF MOLECULES
 # Compute similarity between all pairs of fingerprints

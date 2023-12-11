@@ -37,5 +37,5 @@ modified_molecules = generate_all_single_deuterium_variants(original_molecule)
 
 # Print the similarities between the original molecule and its perturbed versions
 for i,modified_molecule in enumerate(modified_molecules):
-    similarity = compute_similarity(original_molecule, modified_molecule, DEFAULT_FEATURES, scaling_method='matrix', chirality=False)
+    similarity = compute_similarity(original_molecule, modified_molecule, DEFAULT_FEATURES, scaling='matrix', chirality=False)
     print(f'Hydrogen {i+1}: {similarity:.4f}') 
